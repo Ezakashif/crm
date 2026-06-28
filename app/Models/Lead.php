@@ -18,6 +18,7 @@ class Lead extends Model
         'company',
         'source',
         'status',
+        'sort_order',
         'estimated_value',
         'notes',
         'follow_up_date',

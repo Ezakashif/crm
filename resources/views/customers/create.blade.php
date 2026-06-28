@@ -1,34 +1,54 @@
 <x-app-layout>
-    <div class="py-6 max-w-3xl mx-auto">
+    <x-slot name="header">
+        <h1 class="m-0">Create Customer</h1>
+    </x-slot>
 
-        <h2 class="text-xl font-bold mb-6">Create Customer</h2>
-
-        <form method="POST" action="{{ route('customers.store') }}"
-              class="bg-white p-6 rounded-lg shadow space-y-4">
+    <div class="card card-primary">
+        <form method="POST" action="{{ route('customers.store') }}">
             @csrf
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="name">Customer Name <span class="text-danger">*</span></label>
+                    <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror"
+                           value="{{ old('name') }}" required>
+                    @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
 
-            <input name="name" placeholder="Customer Name"
-                   class="w-full border p-2 rounded">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" class="form-control @error('email') is-invalid @enderror"
+                           value="{{ old('email') }}">
+                    @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
 
-            <input name="email" placeholder="Email"
-                   class="w-full border p-2 rounded">
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input id="phone" name="phone" type="text" class="form-control" value="{{ old('phone') }}">
+                </div>
 
-            <input name="phone" placeholder="Phone"
-                   class="w-full border p-2 rounded">
+                <div class="form-group">
+                    <label for="company_name">Company Name</label>
+                    <input id="company_name" name="company_name" type="text" class="form-control"
+                           value="{{ old('company_name') }}">
+                </div>
 
-            <input name="company_name" placeholder="Company Name"
-                   class="w-full border p-2 rounded">
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" class="form-control" rows="3">{{ old('address') }}</textarea>
+                </div>
 
-            <textarea name="address" placeholder="Address"
-                      class="w-full border p-2 rounded"></textarea>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" class="form-control" rows="3">{{ old('notes') }}</textarea>
+                </div>
+            </div>
 
-            <textarea name="notes" placeholder="Notes"
-                      class="w-full border p-2 rounded"></textarea>
-
-            <button class="bg-indigo-600 text-white px-4 py-2 rounded">
-                Save Customer
-            </button>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Customer
+                </button>
+                <a href="{{ route('customers.index') }}" class="btn btn-default">Cancel</a>
+            </div>
         </form>
-
     </div>
 </x-app-layout>

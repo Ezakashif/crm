@@ -1,62 +1,71 @@
 <x-app-layout>
-    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800">Customers</h2>
-
-            <a href="{{ route('customers.create') }}"
-               class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
-                + Add Customer
+    <x-slot name="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="m-0">Customers</h1>
+            <a href="{{ route('customers.create') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Add Customer
             </a>
         </div>
+    </x-slot>
 
-        @if(session('success'))
-            <div class="mb-4 p-3 bg-green-100 text-green-700 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ session('success') }}
+        </div>
+    @endif
 
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-100 text-left">
+    <div class="card">
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover text-nowrap">
+                <thead>
                     <tr>
-                        <th class="p-3">Name</th>
-                        <th class="p-3">Email</th>
-                        <th class="p-3">Phone</th>
-                        <th class="p-3">Company</th>
-                        <th class="p-3">Actions</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Company</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @foreach($customers as $customer)
-                        <tr class="border-b">
-                            <td class="p-3 font-medium">{{ $customer->name }}</td>
-                            <td class="p-3">{{ $customer->email }}</td>
-                            <td class="p-3">{{ $customer->phone }}</td>
-                            <td class="p-3">{{ $customer->company_name }}</td>
-
-                            <td class="p-3 flex gap-2">
-                                <a href="{{ route('customers.edit', $customer) }}"
-                                   class="text-blue-600 hover:underline">Edit</a>
-
-                                <form method="POST" action="{{ route('customers.destroy', $customer) }}">
+                    @forelse($customers as $customer)
+                        <tr>
+                            <td>{{ $customer->name }}</td>
+                            <td>{{ $customer->email ?? '—' }}</td>
+                            <td>{{ $customer->phone ?? '—' }}</td>
+                            <td>{{ $customer->company_name ?? '—' }}</td>
+                            <td>
+                                <span class="badge badge-{{ $customer->status === 'active' ? 'success' : 'secondary' }}">
+                                    {{ ucfirst($customer->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-info">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form method="POST" action="{{ route('customers.destroy', $customer) }}" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="text-red-600 hover:underline">
-                                        Delete
+                                    <button type="submit" class="btn btn-xs btn-danger"
+                                            onclick="return confirm('Delete this customer?')">
+                                        <i class="fas fa-trash"></i> Delete
                                     </button>
                                 </form>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No customers yet.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
-
-        <div class="mt-4">
-            {{ $customers->links() }}
-        </div>
-
+        @if($customers->hasPages())
+            <div class="card-footer clearfix">
+                {{ $customers->links() }}
+            </div>
+        @endif
     </div>
 </x-app-layout>

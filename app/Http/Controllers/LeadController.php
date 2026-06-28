@@ -29,7 +29,8 @@ return view('leads.index', compact('leads', 'statuses'));
 
     public function create()
     {
-        return view('leads.create');
+        $users = \App\Models\User::active()->orderBy('name')->get();
+        return view('leads.create', compact('users'));
     }
 
     public function store(Request $request)
@@ -61,7 +62,8 @@ return view('leads.index', compact('leads', 'statuses'));
 
     public function edit(Lead $lead)
     {
-        return view('leads.edit', compact('lead'));
+        $users = \App\Models\User::active()->orderBy('name')->get();
+        return view('leads.edit', compact('lead', 'users'));
     }
 
     public function update(Request $request, Lead $lead)

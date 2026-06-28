@@ -2,51 +2,61 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Http\Request;
+
 class TaskController extends Controller
 {
     public function index()
     {
-       $tasks = Task::with(['assignee', 'customer', 'lead'])
-    ->orderBy('status')
-    ->orderBy('sort_order')
-    ->get();
+        $this->authorize('viewAny', Task::class);
 
-    $statuses = [
-        'pending' => 'Pending',
-        'in_progress' => 'In Progress',
-        'completed' => 'Completed',
-        'cancelled' => 'Cancelled',
-    ];
+        $tasks = Task::visibleTo(auth()->user())
+            ->with(['assignee', 'customer', 'lead'])
+            ->orderBy('status')
+            ->orderBy('sort_order')
+            ->get();
 
-return view('tasks.index', compact('tasks', 'statuses'));
+        $statuses = [
+            'pending' => 'Pending',
+            'in_progress' => 'In Progress',
+            'completed' => 'Completed',
+            'cancelled' => 'Cancelled',
+        ];
+
+        return view('tasks.index', compact('tasks', 'statuses'));
     }
 
     public function create()
     {
-        $users = User::all();
-         return view('tasks.create', compact('users'));
+        $this->authorize('create', Task::class);
+
+        $users = User::active()->orderBy('name')->get();
+
+        return view('tasks.create', compact('users'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $this->authorize('create', Task::class);
+
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'priority' => 'required',
+            'description' => 'nullable|string',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'due_date' => 'nullable|date',
+            'assigned_to' => 'required|exists:users,id',
         ]);
 
         Task::create([
             'created_by' => auth()->id(),
-            'assigned_to' => $request->assigned_to,
-            'customer_id' => $request->customer_id,
-            'lead_id' => $request->lead_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'priority' => $request->priority,
+            'assigned_to' => $validated['assigned_to'],
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'priority' => $validated['priority'],
             'status' => 'pending',
-            'due_date' => $request->due_date,
+            'due_date' => $validated['due_date'] ?? null,
         ]);
 
         return redirect()->route('tasks.index')
@@ -55,79 +65,104 @@ return view('tasks.index', compact('tasks', 'statuses'));
 
     public function edit(Task $task)
     {
-        return view('tasks.edit', compact('task'));
+        $this->authorize('view', $task);
+
+        $users = auth()->user()->isAdmin()
+            ? User::active()->orderBy('name')->get()
+            : collect();
+
+        return view('tasks.edit', compact('task', 'users'));
     }
 
     public function update(Request $request, Task $task)
     {
-        $task->update($request->all());
+        $this->authorize('update', $task);
 
-        // Auto timestamp when completed
-        if ($request->status === 'completed' && !$task->completed_at) {
-            $task->completed_at = now();
-            $task->save();
+        $rules = [
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'status' => 'required|in:pending,in_progress,completed,cancelled',
+            'due_date' => 'nullable|date',
+        ];
+
+        if (auth()->user()->isAdmin()) {
+            $rules['assigned_to'] = 'required|exists:users,id';
         }
+
+        $validated = $request->validate($rules);
+
+        $task->fill($validated);
+
+        if ($validated['status'] === 'completed') {
+            $task->completed_at = $task->completed_at ?? now();
+        } else {
+            $task->completed_at = null;
+        }
+
+        $task->save();
 
         return redirect()->route('tasks.index')
             ->with('success', 'Task updated successfully');
     }
 
     public function updateBoard(Request $request)
-{
-    $request->validate([
-        'task_id' => 'required|exists:tasks,id',
-        'status' => 'required|in:pending,in_progress,completed,cancelled',
-        'sort_order' => 'required|integer|min:0',
-    ]);
+    {
+        $request->validate([
+            'task_id' => 'required|exists:tasks,id',
+            'status' => 'required|in:pending,in_progress,completed,cancelled',
+            'sort_order' => 'required|integer|min:0',
+        ]);
 
-    $task = Task::findOrFail($request->task_id);
+        $task = Task::findOrFail($request->task_id);
 
-    $task->status = $request->status;
-    $task->sort_order = $request->sort_order;
+        $this->authorize('update', $task);
 
-    if ($request->status === 'completed') {
-        $task->completed_at = now();
-    } else {
-        $task->completed_at = null;
+        $task->status = $request->status;
+        $task->sort_order = $request->sort_order;
+        $task->completed_at = $request->status === 'completed' ? now() : null;
+        $task->save();
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
-
-    $task->save();
-
-    return response()->json([
-        'success' => true
-    ]);
-}
 
     public function destroy(Task $task)
     {
+        $this->authorize('delete', $task);
+
         $task->delete();
 
         return redirect()->route('tasks.index')
             ->with('success', 'Task deleted successfully');
     }
-    // Implement the markComplete method to mark a task as completed
 
     public function markComplete(Task $task)
-{
-    $task->update([
-        'status' => 'completed',
-        'completed_at' => now(),
-    ]);
+    {
+        $this->authorize('update', $task);
 
-    return back()->with('success', 'Task completed');
-}
+        $task->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
 
-public function changeStatus(Request $request, Task $task)
-{
-    $request->validate([
-        'status' => 'required|in:pending,in_progress,completed'
-    ]);
+        return back()->with('success', 'Task completed');
+    }
 
-    $task->update([
-        'status' => $request->status,
-        'completed_at' => $request->status === 'completed' ? now() : null,
-    ]);
+    public function changeStatus(Request $request, Task $task)
+    {
+        $this->authorize('update', $task);
 
-    return back()->with('success', 'Task status updated');
-}
+        $request->validate([
+            'status' => 'required|in:pending,in_progress,completed',
+        ]);
+
+        $task->update([
+            'status' => $request->status,
+            'completed_at' => $request->status === 'completed' ? now() : null,
+        ]);
+
+        return back()->with('success', 'Task status updated');
+    }
 }

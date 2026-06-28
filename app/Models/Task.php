@@ -18,6 +18,7 @@ class Task extends Model
         'description',
         'priority',
         'status',
+        'sort_order',
         'due_date',
         'completed_at',
     ];
@@ -40,5 +41,14 @@ class Task extends Model
     public function lead()
     {
         return $this->belongsTo(Lead::class);
+    }
+
+    public function scopeVisibleTo($query, User $user)
+    {
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        return $query->where('assigned_to', $user->id);
     }
 }
