@@ -4,27 +4,35 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Lead;
+use App\Models\LeadActivity;
 use App\Models\Customer;
+use App\Models\User;
 
 class LeadController extends Controller
 {
-     public function index()
+     public function index(Request $request)
     {
-    $leads = Lead::with('assignee')
-    ->orderBy('status')
-    ->orderBy('sort_order')
-    ->get();
+        $filters = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'status' => 'nullable|in:new,contacted,qualified,proposal_sent,won,lost',
+            'assigned_to' => 'nullable|string',
+            'source' => 'nullable|in:'.implode(',', Lead::SOURCES),
+        ]);
 
-    $statuses = [
-    'new' => 'New',
-    'contacted' => 'Contacted',
-    'qualified' => 'Qualified',
-    'proposal_sent' => 'Proposal Sent',
-    'won' => 'Won',
-    'lost' => 'Lost',
-];
+        $leads = Lead::with('assignee')
+            ->search($filters['search'] ?? null)
+            ->status($filters['status'] ?? null)
+            ->assignedTo($filters['assigned_to'] ?? null)
+            ->source($filters['source'] ?? null)
+            ->orderBy('status')
+            ->orderBy('sort_order')
+            ->get();
 
-return view('leads.index', compact('leads', 'statuses'));
+        $statuses = Lead::STATUSES;
+
+        $users = User::active()->orderBy('name')->get();
+
+        return view('leads.index', compact('leads', 'statuses', 'filters', 'users'));
     }
 
     public function create()
@@ -42,7 +50,7 @@ return view('leads.index', compact('leads', 'statuses'));
 
        $sortOrder = Lead::where('status', 'new')->max('sort_order') + 1;
 
-        Lead::create([
+        $lead = Lead::create([
         'created_by' => auth()->id(),
         'assigned_to' => $request->assigned_to,
         'name' => $request->name,
@@ -57,7 +65,18 @@ return view('leads.index', compact('leads', 'statuses'));
         'follow_up_date' => $request->follow_up_date,
         ]);
 
-        return redirect()->route('leads.index')->with('success', 'Lead created');
+        return redirect()->route('leads.show', $lead)->with('success', 'Lead created');
+    }
+
+    public function show(Lead $lead)
+    {
+        $lead->load(['assignee', 'creator', 'activities.user', 'tasks.assignee']);
+
+        $activityTypes = collect(LeadActivity::TYPE_LABELS)
+            ->except('status_change')
+            ->all();
+
+        return view('leads.show', compact('lead', 'activityTypes'));
     }
 
     public function edit(Lead $lead)
@@ -70,7 +89,7 @@ return view('leads.index', compact('leads', 'statuses'));
     {
         $lead->update($request->all());
 
-        return redirect()->route('leads.index')->with('success', 'Lead updated');
+        return redirect()->route('leads.show', $lead)->with('success', 'Lead updated');
     }
 
     public function destroy(Lead $lead)
@@ -111,10 +130,24 @@ public function updateBoard(Request $request)
 
     $lead = Lead::findOrFail($request->lead_id);
 
+    $previousStatus = $lead->status;
+
     $lead->update([
         'status' => $request->status,
         'sort_order' => $request->sort_order,
     ]);
+
+    if ($previousStatus !== $request->status) {
+        LeadActivity::log(
+            $lead,
+            'status_change',
+            sprintf(
+                'Status changed from %s to %s',
+                Lead::STATUSES[$previousStatus] ?? $previousStatus,
+                Lead::STATUSES[$request->status] ?? $request->status,
+            ),
+        );
+    }
 
     return response()->json([
         'success' => true,

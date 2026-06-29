@@ -324,7 +324,18 @@ return [
             'route' => 'tasks.index',
             'icon' => 'fas fa-fw fa-tasks',
         ],
+        [
+            'text' => 'Notifications',
+            'route' => 'notifications.index',
+            'icon' => 'fas fa-fw fa-bell',
+        ],
         ['header' => 'Administration'],
+        [
+            'text' => 'Website Lead Demo',
+            'route' => 'demo.website-lead',
+            'icon' => 'fas fa-fw fa-globe',
+            'can' => 'manage-users',
+        ],
         [
             'text' => 'Users',
             'route' => 'users.index',

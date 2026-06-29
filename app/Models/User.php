@@ -68,6 +68,36 @@ class User extends Authenticatable
         return $query->where('status', 'active');
     }
 
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (! filled($term)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $builder) use ($term) {
+            $builder->where('name', 'like', "%{$term}%")
+                ->orWhere('email', 'like', "%{$term}%");
+        });
+    }
+
+    public function scopeRole(Builder $query, ?string $role): Builder
+    {
+        if (! filled($role)) {
+            return $query;
+        }
+
+        return $query->where('role', $role);
+    }
+
+    public function scopeStatus(Builder $query, ?string $status): Builder
+    {
+        if (! filled($status)) {
+            return $query;
+        }
+
+        return $query->where('status', $status);
+    }
+
     public function photoUrl(): string
     {
         if ($this->photo_path && Storage::disk('public')->exists($this->photo_path)) {

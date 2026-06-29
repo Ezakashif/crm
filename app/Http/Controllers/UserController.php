@@ -23,14 +23,27 @@ class UserController extends Controller
         'suspended' => 'Suspended',
     ];
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->paginate(10);
+        $filters = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'role' => ['nullable', Rule::in(array_keys(self::ROLES))],
+            'status' => ['nullable', Rule::in(array_keys(self::STATUSES))],
+        ]);
+
+        $users = User::query()
+            ->search($filters['search'] ?? null)
+            ->role($filters['role'] ?? null)
+            ->status($filters['status'] ?? null)
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return view('users.index', [
             'users' => $users,
             'roles' => self::ROLES,
             'statuses' => self::STATUSES,
+            'filters' => $filters,
         ]);
     }
 

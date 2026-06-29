@@ -4,12 +4,20 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\LeadActivityController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\WebsiteLeadDemoController;
+use App\Http\Controllers\WebsiteLeadWebhookController;
 use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\Task;
+
+Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'store'])
+    ->middleware(['website-lead-webhook', 'throttle:website-leads'])
+    ->name('webhooks.leads.website');
 
 Route::get('/', function () {
     return auth()->check()
@@ -34,6 +42,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
     Route::delete('/profile/photo', [ProfileController::class, 'destroyPhoto'])->name('profile.photo.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 });
 
 require __DIR__.'/auth.php';
@@ -50,6 +62,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/leads/board/update', [LeadController::class, 'updateBoard'])
     ->name('leads.board.update');
+
+    Route::post('/leads/{lead}/activities', [LeadActivityController::class, 'store'])
+        ->name('leads.activities.store');
 });
 
 
@@ -64,6 +79,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/demo/website-lead', [WebsiteLeadDemoController::class, 'index'])
+        ->name('demo.website-lead');
+    Route::post('/demo/website-lead', [WebsiteLeadDemoController::class, 'store'])
+        ->name('demo.website-lead.store');
+
     Route::resource('users', UserController::class)->except(['show']);
 
     Route::post('/users/{user}/status', [UserController::class, 'changeStatus'])

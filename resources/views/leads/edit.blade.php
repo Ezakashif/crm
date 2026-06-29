@@ -1,6 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">Edit Lead</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="m-0">Edit Lead</h1>
+            <a href="{{ route('leads.show', $lead) }}" class="btn btn-default btn-sm">
+                <i class="fas fa-eye"></i> View Lead
+            </a>
+        </div>
     </x-slot>
 
     <div class="card card-primary">
@@ -94,7 +99,7 @@
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-save"></i> Update Lead
                     </button>
-                    <a href="{{ route('leads.index') }}" class="btn btn-default">Cancel</a>
+                    <a href="{{ route('leads.show', $lead) }}" class="btn btn-default">Cancel</a>
                 </div>
             </div>
         </form>

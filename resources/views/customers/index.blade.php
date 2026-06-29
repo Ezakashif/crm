@@ -15,6 +15,23 @@
         </div>
     @endif
 
+    <x-list-filters :reset-url="route('customers.index')">
+        <div class="col-md-4 mb-2">
+            <label for="search" class="small text-muted mb-1">Search</label>
+            <input id="search" name="search" type="text" class="form-control form-control-sm"
+                   placeholder="Name, email, phone, company..."
+                   value="{{ $filters['search'] ?? '' }}">
+        </div>
+        <div class="col-md-3 mb-2">
+            <label for="status" class="small text-muted mb-1">Status</label>
+            <select id="status" name="status" class="form-control form-control-sm">
+                <option value="">All statuses</option>
+                <option value="active" @selected(($filters['status'] ?? '') === 'active')>Active</option>
+                <option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>Inactive</option>
+            </select>
+        </div>
+    </x-list-filters>
+
     <div class="card">
         <div class="card-body table-responsive p-0">
             <table class="table table-hover text-nowrap">
@@ -56,7 +73,9 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted">No customers yet.</td>
+                            <td colspan="6" class="text-center text-muted">
+                                {{ collect($filters ?? [])->filter(fn ($v) => filled($v))->isNotEmpty() ? 'No customers match your filters.' : 'No customers yet.' }}
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

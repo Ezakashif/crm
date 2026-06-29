@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Task extends Model
@@ -50,5 +51,48 @@ class Task extends Model
         }
 
         return $query->where('assigned_to', $user->id);
+    }
+
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (! filled($term)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $builder) use ($term) {
+            $builder->where('title', 'like', "%{$term}%")
+                ->orWhere('description', 'like', "%{$term}%");
+        });
+    }
+
+    public function scopeStatus(Builder $query, ?string $status): Builder
+    {
+        if (! filled($status)) {
+            return $query;
+        }
+
+        return $query->where('status', $status);
+    }
+
+    public function scopePriority(Builder $query, ?string $priority): Builder
+    {
+        if (! filled($priority)) {
+            return $query;
+        }
+
+        return $query->where('priority', $priority);
+    }
+
+    public function scopeAssignedTo(Builder $query, ?string $userId): Builder
+    {
+        if (! filled($userId)) {
+            return $query;
+        }
+
+        if ($userId === 'unassigned') {
+            return $query->whereNull('assigned_to');
+        }
+
+        return $query->where('assigned_to', $userId);
     }
 }

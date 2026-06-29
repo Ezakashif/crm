@@ -19,6 +19,53 @@
         ];
     @endphp
 
+    <x-list-filters :reset-url="route('tasks.index')">
+        <div class="col-md-3 mb-2">
+            <label for="search" class="small text-muted mb-1">Search</label>
+            <input id="search" name="search" type="text" class="form-control form-control-sm"
+                   placeholder="Title or description..."
+                   value="{{ $filters['search'] ?? '' }}">
+        </div>
+        <div class="col-md-2 mb-2">
+            <label for="status" class="small text-muted mb-1">Status</label>
+            <select id="status" name="status" class="form-control form-control-sm">
+                <option value="">All statuses</option>
+                @foreach($statuses as $value => $label)
+                    <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2 mb-2">
+            <label for="priority" class="small text-muted mb-1">Priority</label>
+            <select id="priority" name="priority" class="form-control form-control-sm">
+                <option value="">All priorities</option>
+                @foreach($priorities as $value => $label)
+                    <option value="{{ $value }}" @selected(($filters['priority'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+        @if(auth()->user()->isAdmin())
+            <div class="col-md-3 mb-2">
+                <label for="assigned_to" class="small text-muted mb-1">Assigned To</label>
+                <select id="assigned_to" name="assigned_to" class="form-control form-control-sm">
+                    <option value="">Anyone</option>
+                    <option value="unassigned" @selected(($filters['assigned_to'] ?? '') === 'unassigned')>Unassigned</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" @selected(($filters['assigned_to'] ?? '') == $user->id)>
+                            {{ $user->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+    </x-list-filters>
+
+    @if($tasks->isEmpty())
+        <div class="alert alert-info">
+            {{ collect($filters ?? [])->filter(fn ($v) => filled($v))->isNotEmpty() ? 'No tasks match your filters.' : 'No tasks yet.' }}
+        </div>
+    @endif
+
     <div class="row">
         @foreach($statuses as $statusKey => $statusTitle)
             <div class="col-lg-3 col-md-6">

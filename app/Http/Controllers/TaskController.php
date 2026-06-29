@@ -8,12 +8,23 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Task::class);
 
+        $filters = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'status' => 'nullable|in:pending,in_progress,completed,cancelled',
+            'priority' => 'nullable|in:low,medium,high,urgent',
+            'assigned_to' => 'nullable|string',
+        ]);
+
         $tasks = Task::visibleTo(auth()->user())
             ->with(['assignee', 'customer', 'lead'])
+            ->search($filters['search'] ?? null)
+            ->status($filters['status'] ?? null)
+            ->priority($filters['priority'] ?? null)
+            ->assignedTo($filters['assigned_to'] ?? null)
             ->orderBy('status')
             ->orderBy('sort_order')
             ->get();
@@ -25,7 +36,18 @@ class TaskController extends Controller
             'cancelled' => 'Cancelled',
         ];
 
-        return view('tasks.index', compact('tasks', 'statuses'));
+        $priorities = [
+            'low' => 'Low',
+            'medium' => 'Medium',
+            'high' => 'High',
+            'urgent' => 'Urgent',
+        ];
+
+        $users = auth()->user()->isAdmin()
+            ? User::active()->orderBy('name')->get()
+            : collect();
+
+        return view('tasks.index', compact('tasks', 'statuses', 'priorities', 'filters', 'users'));
     }
 
     public function create()

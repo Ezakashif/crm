@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,5 +27,10 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFour();
 
         Gate::define('manage-users', fn ($user) => $user->isAdmin());
+
+        RateLimiter::for('website-leads', function (Request $request) {
+            return Limit::perMinute(config('website_leads.rate_limit', 10))
+                ->by($request->ip());
+        });
     }
 }

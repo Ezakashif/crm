@@ -2,15 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
-use App\models\Customer;
 
 class CustomerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $customers = Customer::latest()->paginate(10);
-        return view('customers.index', compact('customers'));
+        $filters = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'status' => 'nullable|in:active,inactive',
+        ]);
+
+        $customers = Customer::query()
+            ->search($filters['search'] ?? null)
+            ->status($filters['status'] ?? null)
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('customers.index', compact('customers', 'filters'));
     }
 
     public function create()
