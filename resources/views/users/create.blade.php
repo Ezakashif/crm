@@ -43,13 +43,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="role">Role <span class="text-danger">*</span></label>
-                    <select id="role" name="role" class="form-control @error('role') is-invalid @enderror" required>
-                        @foreach($roles as $value => $label)
-                            <option value="{{ $value }}" @selected(old('role', 'user') === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('role')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    <label>Roles <span class="text-danger">*</span></label>
+                    @php
+                        $defaultRoleIds = old('roles', [$roles->firstWhere('slug', 'sales')?->id]);
+                    @endphp
+                    @foreach($roles as $role)
+                        <div class="form-check">
+                            <input id="role-{{ $role->id }}" name="roles[]" type="checkbox"
+                                   class="form-check-input @error('roles') is-invalid @enderror"
+                                   value="{{ $role->id }}"
+                                   @checked(in_array($role->id, array_filter($defaultRoleIds), true))>
+                            <label class="form-check-label" for="role-{{ $role->id }}">
+                                {{ $role->name }}
+                                @if($role->description)
+                                    <small class="text-muted d-block">{{ $role->description }}</small>
+                                @endif
+                            </label>
+                        </div>
+                    @endforeach
+                    @error('roles')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">

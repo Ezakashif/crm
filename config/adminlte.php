@@ -313,16 +313,19 @@ return [
             'text' => 'Customers',
             'route' => 'customers.index',
             'icon' => 'fas fa-fw fa-users',
+            'can' => 'customers.view',
         ],
         [
             'text' => 'Leads',
             'route' => 'leads.index',
             'icon' => 'fas fa-fw fa-funnel-dollar',
+            'can' => 'leads.view',
         ],
         [
             'text' => 'Tasks',
             'route' => 'tasks.index',
             'icon' => 'fas fa-fw fa-tasks',
+            'can' => 'tasks.view',
         ],
         [
             'text' => 'Notifications',
@@ -334,19 +337,19 @@ return [
             'text' => 'Website Lead Demo',
             'route' => 'demo.website-lead',
             'icon' => 'fas fa-fw fa-globe',
-            'can' => 'manage-users',
+            'can' => 'demo.website-lead',
         ],
         [
             'text' => 'Users',
             'route' => 'users.index',
             'icon' => 'fas fa-fw fa-user-cog',
-            'can' => 'manage-users',
+            'can' => 'users.manage',
         ],
         [
             'text' => 'Activity Log',
             'route' => 'activity-logs.index',
             'icon' => 'fas fa-fw fa-history',
-            'can' => 'manage-users',
+            'can' => 'activity-logs.view',
         ],
         ['header' => 'Account'],
         [

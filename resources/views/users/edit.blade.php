@@ -48,18 +48,29 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="role">Role <span class="text-danger">*</span></label>
-                    <select id="role" name="role" class="form-control @error('role') is-invalid @enderror" required
-                            @if($user->id === auth()->id()) disabled @endif>
-                        @foreach($roles as $value => $label)
-                            <option value="{{ $value }}" @selected(old('role', $user->role) === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
+                    <label>Roles <span class="text-danger">*</span></label>
+                    @foreach($roles as $role)
+                        <div class="form-check">
+                            <input id="role-{{ $role->id }}" name="roles[]" type="checkbox"
+                                   class="form-check-input @error('roles') is-invalid @enderror"
+                                   value="{{ $role->id }}"
+                                   @checked(in_array($role->id, old('roles', $user->roles->pluck('id')->all()), true))
+                                   @if($user->id === auth()->id()) disabled @endif>
+                            <label class="form-check-label" for="role-{{ $role->id }}">
+                                {{ $role->name }}
+                                @if($role->description)
+                                    <small class="text-muted d-block">{{ $role->description }}</small>
+                                @endif
+                            </label>
+                        </div>
+                    @endforeach
                     @if($user->id === auth()->id())
-                        <input type="hidden" name="role" value="admin">
-                        <small class="form-text text-muted">You cannot change your own role.</small>
+                        @foreach($user->roles as $role)
+                            <input type="hidden" name="roles[]" value="{{ $role->id }}">
+                        @endforeach
+                        <small class="form-text text-muted">You cannot change your own roles.</small>
                     @endif
-                    @error('role')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    @error('roles')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">

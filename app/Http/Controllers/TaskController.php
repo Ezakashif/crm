@@ -43,7 +43,7 @@ class TaskController extends Controller
             'urgent' => 'Urgent',
         ];
 
-        $users = auth()->user()->isAdmin()
+        $users = auth()->user()->canAssignTasks()
             ? User::active()->orderBy('name')->get()
             : collect();
 
@@ -89,7 +89,7 @@ class TaskController extends Controller
     {
         $this->authorize('view', $task);
 
-        $users = auth()->user()->isAdmin()
+        $users = auth()->user()->canAssignTasks()
             ? User::active()->orderBy('name')->get()
             : collect();
 
@@ -108,7 +108,7 @@ class TaskController extends Controller
             'due_date' => 'nullable|date',
         ];
 
-        if (auth()->user()->isAdmin()) {
+        if (auth()->user()->canAssignTasks()) {
             $rules['assigned_to'] = 'required|exists:users,id';
         }
 

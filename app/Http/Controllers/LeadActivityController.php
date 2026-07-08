@@ -10,6 +10,7 @@ class LeadActivityController extends Controller
 {
     public function store(Request $request, Lead $lead)
     {
+        $this->authorize('createActivity', $lead);
         $validated = $request->validate([
             'type' => 'required|in:'.implode(',', array_diff(LeadActivity::TYPES, ['status_change'])),
             'summary' => 'nullable|string|max:5000',

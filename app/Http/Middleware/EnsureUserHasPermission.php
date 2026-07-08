@@ -6,11 +6,11 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserIsAdmin
+class EnsureUserHasPermission
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $permission): Response
     {
-        if (! $request->user()?->hasPermission('users.manage')) {
+        if (! $request->user()?->hasPermission($permission)) {
             abort(403, 'Unauthorized action.');
         }
 

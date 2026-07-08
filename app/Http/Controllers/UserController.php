@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Notifications\UserStatusChanged;
 use App\Services\ActivityLogger;
@@ -12,11 +13,6 @@ use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
-    public const ROLES = [
-        'admin' => 'Admin',
-        'user' => 'User',
-    ];
-
     public const STATUSES = [
         'active' => 'Active',
         'inactive' => 'Inactive',
@@ -25,13 +21,18 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', User::class);
+
+        $roleSlugs = Role::query()->pluck('slug')->all();
+
         $filters = $request->validate([
             'search' => 'nullable|string|max:255',
-            'role' => ['nullable', Rule::in(array_keys(self::ROLES))],
+            'role' => ['nullable', Rule::in($roleSlugs)],
             'status' => ['nullable', Rule::in(array_keys(self::STATUSES))],
         ]);
 
         $users = User::query()
+            ->with('roles')
             ->search($filters['search'] ?? null)
             ->role($filters['role'] ?? null)
             ->status($filters['status'] ?? null)
@@ -39,9 +40,11 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $roles = Role::query()->orderBy('name')->pluck('name', 'slug');
+
         return view('users.index', [
             'users' => $users,
-            'roles' => self::ROLES,
+            'roles' => $roles,
             'statuses' => self::STATUSES,
             'filters' => $filters,
         ]);
@@ -49,19 +52,24 @@ class UserController extends Controller
 
     public function create()
     {
+        $this->authorize('create', User::class);
+
         return view('users.create', [
-            'roles' => self::ROLES,
+            'roles' => Role::query()->orderBy('name')->get(),
             'statuses' => self::STATUSES,
         ]);
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', User::class);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Password::defaults()],
-            'role' => ['required', Rule::in(array_keys(self::ROLES))],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['integer', 'exists:roles,id'],
             'status' => ['required', Rule::in(array_keys(self::STATUSES))],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ]);
@@ -70,9 +78,11 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
+            'role' => 'user',
             'status' => $validated['status'],
         ]);
+
+        $user->syncRoles($validated['roles']);
 
         if ($request->hasFile('photo')) {
             $user->updatePhoto($request->file('photo'));
@@ -81,7 +91,7 @@ class UserController extends Controller
         ActivityLogger::log('user.created', $user, [
             'name' => $user->name,
             'email' => $user->email,
-            'role' => $user->role,
+            'roles' => $user->roleNames(),
             'status' => $user->status,
         ]);
 
@@ -91,26 +101,33 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $this->authorize('update', $user);
+
         return view('users.edit', [
-            'user' => $user,
-            'roles' => self::ROLES,
+            'user' => $user->load('roles'),
+            'roles' => Role::query()->orderBy('name')->get(),
             'statuses' => self::STATUSES,
         ]);
     }
 
     public function update(Request $request, User $user)
     {
+        $this->authorize('update', $user);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
-            'role' => ['required', Rule::in(array_keys(self::ROLES))],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['integer', 'exists:roles,id'],
             'status' => ['required', Rule::in(array_keys(self::STATUSES))],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ]);
 
-        if ($user->id === auth()->id() && $validated['role'] !== 'admin') {
-            return back()->withErrors(['role' => 'You cannot remove your own admin role.'])
+        $adminRoleId = Role::query()->where('slug', 'admin')->value('id');
+
+        if ($user->id === auth()->id() && $adminRoleId && ! in_array($adminRoleId, $validated['roles'], true)) {
+            return back()->withErrors(['roles' => 'You cannot remove your own admin role.'])
                 ->withInput();
         }
 
@@ -123,7 +140,6 @@ class UserController extends Controller
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        $user->role = $validated['role'];
         $user->status = $validated['status'];
 
         if (! empty($validated['password'])) {
@@ -131,6 +147,7 @@ class UserController extends Controller
         }
 
         $user->save();
+        $user->syncRoles($validated['roles']);
 
         if ($request->hasFile('photo')) {
             $user->updatePhoto($request->file('photo'));
@@ -148,7 +165,7 @@ class UserController extends Controller
         ActivityLogger::log('user.updated', $user, [
             'name' => $user->name,
             'email' => $user->email,
-            'role' => $user->role,
+            'roles' => $user->roleNames(),
             'status' => $user->status,
         ]);
 
@@ -158,6 +175,8 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->authorize('delete', $user);
+
         if ($user->id === auth()->id()) {
             return back()->withErrors(['error' => 'You cannot delete your own account.']);
         }
@@ -176,6 +195,8 @@ class UserController extends Controller
 
     public function changeStatus(Request $request, User $user)
     {
+        $this->authorize('update', $user);
+
         $validated = $request->validate([
             'status' => ['required', Rule::in(array_keys(self::STATUSES))],
         ]);

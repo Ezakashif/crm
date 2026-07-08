@@ -78,17 +78,21 @@ Route::middleware(['auth'])->group(function () {
         ->name('tasks.board.update');
 });
 
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'permission:demo.website-lead'])->group(function () {
     Route::get('/demo/website-lead', [WebsiteLeadDemoController::class, 'index'])
         ->name('demo.website-lead');
     Route::post('/demo/website-lead', [WebsiteLeadDemoController::class, 'store'])
         ->name('demo.website-lead.store');
+});
 
+Route::middleware(['auth', 'permission:users.manage'])->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
 
     Route::post('/users/{user}/status', [UserController::class, 'changeStatus'])
         ->name('users.status');
+});
 
+Route::middleware(['auth', 'permission:activity-logs.view'])->group(function () {
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])
         ->name('activity-logs.index');
 });

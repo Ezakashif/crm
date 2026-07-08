@@ -17,6 +17,13 @@ class UserFactory extends Factory
      */
     protected static ?string $password;
 
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->syncRolesFromLegacyColumn();
+        });
+    }
+
     /**
      * Define the model's default state.
      *
@@ -49,6 +56,13 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => 'admin',
+        ]);
+    }
+
+    public function manager(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'manager',
         ]);
     }
 

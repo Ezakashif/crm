@@ -72,8 +72,8 @@ class WebsiteLeadService
         }
 
         $admin = User::query()
-            ->where('role', 'admin')
             ->where('status', 'active')
+            ->whereHas('roles', fn ($query) => $query->where('slug', 'admin'))
             ->orderBy('id')
             ->first();
 

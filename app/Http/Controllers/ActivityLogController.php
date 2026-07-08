@@ -10,6 +10,7 @@ class ActivityLogController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('activity-logs.view');
         $query = ActivityLog::with(['actor', 'subject'])
             ->latest();
 

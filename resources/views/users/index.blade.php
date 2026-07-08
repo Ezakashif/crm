@@ -78,7 +78,7 @@
                             <td>{{ $user->email }}</td>
                             <td>
                                 <span class="badge badge-{{ $user->roleBadgeClass() }}">
-                                    {{ $roles[$user->role] ?? ucfirst($user->role) }}
+                                    {{ $user->roleNames() }}
                                 </span>
                             </td>
                             <td>

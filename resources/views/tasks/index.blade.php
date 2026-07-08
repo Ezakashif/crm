@@ -44,7 +44,7 @@
                 @endforeach
             </select>
         </div>
-        @if(auth()->user()->isAdmin())
+        @if(auth()->user()->canAssignTasks())
             <div class="col-md-3 mb-2">
                 <label for="assigned_to" class="small text-muted mb-1">Assigned To</label>
                 <select id="assigned_to" name="assigned_to" class="form-control form-control-sm">

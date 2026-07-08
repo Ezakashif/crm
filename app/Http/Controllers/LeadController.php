@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\LeadActivity;
-use App\Models\Customer;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class LeadController extends Controller
 {
-     public function index(Request $request)
+    public function index(Request $request)
     {
+        $this->authorize('viewAny', Lead::class);
+
         $filters = $request->validate([
             'search' => 'nullable|string|max:255',
             'status' => 'nullable|in:new,contacted,qualified,proposal_sent,won,lost',
@@ -37,32 +39,37 @@ class LeadController extends Controller
 
     public function create()
     {
-        $users = \App\Models\User::active()->orderBy('name')->get();
+        $this->authorize('create', Lead::class);
+
+        $users = User::active()->orderBy('name')->get();
+
         return view('leads.create', compact('users'));
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Lead::class);
+
         $request->validate([
             'name' => 'required',
             'status' => 'required',
         ]);
 
-       $sortOrder = Lead::where('status', 'new')->max('sort_order') + 1;
+        $sortOrder = Lead::where('status', 'new')->max('sort_order') + 1;
 
         $lead = Lead::create([
-        'created_by' => auth()->id(),
-        'assigned_to' => $request->assigned_to,
-        'name' => $request->name,
-        'email' => $request->email,
-        'phone' => $request->phone,
-        'company' => $request->company,
-        'source' => $request->source,
-        'status' => 'new',
-        'sort_order' => $sortOrder,
-        'estimated_value' => $request->estimated_value,
-        'notes' => $request->notes,
-        'follow_up_date' => $request->follow_up_date,
+            'created_by' => auth()->id(),
+            'assigned_to' => $request->assigned_to,
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'company' => $request->company,
+            'source' => $request->source,
+            'status' => 'new',
+            'sort_order' => $sortOrder,
+            'estimated_value' => $request->estimated_value,
+            'notes' => $request->notes,
+            'follow_up_date' => $request->follow_up_date,
         ]);
 
         return redirect()->route('leads.show', $lead)->with('success', 'Lead created');
@@ -70,6 +77,8 @@ class LeadController extends Controller
 
     public function show(Lead $lead)
     {
+        $this->authorize('view', $lead);
+
         $lead->load(['assignee', 'creator', 'activities.user', 'tasks.assignee']);
 
         $activityTypes = collect(LeadActivity::TYPE_LABELS)
@@ -81,12 +90,17 @@ class LeadController extends Controller
 
     public function edit(Lead $lead)
     {
-        $users = \App\Models\User::active()->orderBy('name')->get();
+        $this->authorize('update', $lead);
+
+        $users = User::active()->orderBy('name')->get();
+
         return view('leads.edit', compact('lead', 'users'));
     }
 
     public function update(Request $request, Lead $lead)
     {
+        $this->authorize('update', $lead);
+
         $lead->update($request->all());
 
         return redirect()->route('leads.show', $lead)->with('success', 'Lead updated');
@@ -94,63 +108,67 @@ class LeadController extends Controller
 
     public function destroy(Lead $lead)
     {
+        $this->authorize('delete', $lead);
+
         $lead->delete();
 
         return redirect()->route('leads.index')->with('success', 'Lead deleted');
     }
 
-    //Implement the convertToCustomer method to convert a lead to a customer
-
     public function convertToCustomer(Lead $lead)
-{
-    $customer = Customer::create([
-        'created_by' => auth()->id(),
-        'name' => $lead->name,
-        'email' => $lead->email,
-        'phone' => $lead->phone,
-        'company_name' => $lead->company,
-        'address' => null,
-        'notes' => $lead->notes,
-    ]);
+    {
+        $this->authorize('convert', $lead);
 
-    $lead->status = 'won';
-    $lead->save();
+        $customer = Customer::create([
+            'created_by' => auth()->id(),
+            'name' => $lead->name,
+            'email' => $lead->email,
+            'phone' => $lead->phone,
+            'company_name' => $lead->company,
+            'address' => null,
+            'notes' => $lead->notes,
+        ]);
 
-    return redirect()->route('customers.edit', $customer->id)
-        ->with('success', 'Lead converted to customer');
-}
+        $lead->status = 'won';
+        $lead->save();
 
-public function updateBoard(Request $request)
-{
-    $request->validate([
-        'lead_id' => 'required|exists:leads,id',
-        'status' => 'required|in:new,contacted,qualified,proposal_sent,won,lost',
-        'sort_order' => 'required|integer|min:0',
-    ]);
-
-    $lead = Lead::findOrFail($request->lead_id);
-
-    $previousStatus = $lead->status;
-
-    $lead->update([
-        'status' => $request->status,
-        'sort_order' => $request->sort_order,
-    ]);
-
-    if ($previousStatus !== $request->status) {
-        LeadActivity::log(
-            $lead,
-            'status_change',
-            sprintf(
-                'Status changed from %s to %s',
-                Lead::STATUSES[$previousStatus] ?? $previousStatus,
-                Lead::STATUSES[$request->status] ?? $request->status,
-            ),
-        );
+        return redirect()->route('customers.edit', $customer->id)
+            ->with('success', 'Lead converted to customer');
     }
 
-    return response()->json([
-        'success' => true,
-    ]);
-}
+    public function updateBoard(Request $request)
+    {
+        $request->validate([
+            'lead_id' => 'required|exists:leads,id',
+            'status' => 'required|in:new,contacted,qualified,proposal_sent,won,lost',
+            'sort_order' => 'required|integer|min:0',
+        ]);
+
+        $lead = Lead::findOrFail($request->lead_id);
+
+        $this->authorize('update', $lead);
+
+        $previousStatus = $lead->status;
+
+        $lead->update([
+            'status' => $request->status,
+            'sort_order' => $request->sort_order,
+        ]);
+
+        if ($previousStatus !== $request->status) {
+            LeadActivity::log(
+                $lead,
+                'status_change',
+                sprintf(
+                    'Status changed from %s to %s',
+                    Lead::STATUSES[$previousStatus] ?? $previousStatus,
+                    Lead::STATUSES[$request->status] ?? $request->status,
+                ),
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
 }

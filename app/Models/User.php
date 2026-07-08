@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasRoles;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     protected $fillable = [
         'name',
@@ -55,7 +56,12 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->hasRole('admin');
+    }
+
+    public function isManager(): bool
+    {
+        return $this->hasRole('manager');
     }
 
     public function isActive(): bool
@@ -86,7 +92,9 @@ class User extends Authenticatable
             return $query;
         }
 
-        return $query->where('role', $role);
+        $slug = $role === 'user' ? 'sales' : $role;
+
+        return $query->whereHas('roles', fn (Builder $builder) => $builder->where('slug', $slug));
     }
 
     public function scopeStatus(Builder $query, ?string $status): Builder
@@ -152,6 +160,10 @@ class User extends Authenticatable
 
     public function roleBadgeClass(): string
     {
-        return $this->role === 'admin' ? 'primary' : 'info';
+        return match (true) {
+            $this->hasRole('admin') => 'primary',
+            $this->hasRole('manager') => 'warning',
+            default => 'info',
+        };
     }
 }
