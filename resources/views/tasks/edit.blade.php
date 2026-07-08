@@ -63,11 +63,25 @@
                 @endif
             </div>
 
-            <div class="card-footer">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Update Task
-                </button>
-                <a href="{{ route('tasks.index') }}" class="btn btn-default">Cancel</a>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <div>
+                    @can('update', $task)
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Update Task
+                        </button>
+                    @endcan
+                    <a href="{{ route('tasks.index') }}" class="btn btn-default">Cancel</a>
+                </div>
+                @can('delete', $task)
+                    <form method="POST" action="{{ route('tasks.destroy', $task) }}" class="d-inline"
+                          onsubmit="return confirm('Delete this task?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </form>
+                @endcan
             </div>
         </form>
     </div>

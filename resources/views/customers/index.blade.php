@@ -2,9 +2,11 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="m-0">Customers</h1>
-            <a href="{{ route('customers.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Add Customer
-            </a>
+            @can('create', App\Models\Customer::class)
+                <a href="{{ route('customers.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add Customer
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -42,7 +44,9 @@
                         <th>Phone</th>
                         <th>Company</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        @canany(['update.customers', 'delete.customers'])
+                            <th>Actions</th>
+                        @endcanany
                     </tr>
                 </thead>
                 <tbody>
@@ -57,19 +61,25 @@
                                     {{ ucfirst($customer->status) }}
                                 </span>
                             </td>
-                            <td>
-                                <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-info">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <form method="POST" action="{{ route('customers.destroy', $customer) }}" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-danger"
-                                            onclick="return confirm('Delete this customer?')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </form>
-                            </td>
+                            @canany(['update', 'delete'], $customer)
+                                <td>
+                                    @can('update', $customer)
+                                        <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-info">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                    @endcan
+                                    @can('delete', $customer)
+                                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-xs btn-danger"
+                                                    onclick="return confirm('Delete this customer?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    @endcan
+                                </td>
+                            @endcanany
                         </tr>
                     @empty
                         <tr>

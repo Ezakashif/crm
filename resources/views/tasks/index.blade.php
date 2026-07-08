@@ -91,7 +91,9 @@
                                         <span><i class="fas fa-calendar"></i> {{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('d M') : '—' }}</span>
                                     </div>
                                     <div class="mt-2">
-                                        <a href="{{ route('tasks.edit', $task) }}" class="btn btn-xs btn-default">Edit</a>
+                                        @can('update', $task)
+                                            <a href="{{ route('tasks.edit', $task) }}" class="btn btn-xs btn-default">Edit</a>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -104,34 +106,44 @@
 
     @push('js')
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                document.querySelectorAll('.task-column').forEach(column => {
-                    new Sortable(column, {
-                        group: 'kanban',
-                        animation: 200,
-                        draggable: '.task-card',
-                        ghostClass: 'opacity-50',
-                        onEnd: function (evt) {
-                            fetch("{{ route('tasks.board.update') }}", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "Accept": "application/json",
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                                },
-                                body: JSON.stringify({
-                                    task_id: evt.item.dataset.taskId,
-                                    status: evt.to.dataset.status,
-                                    sort_order: evt.newIndex + 1
-                                })
-                            }).then(res => res.json()).then(data => {
-                                if (!data.success) alert('Unable to update task.');
-                            }).catch(() => alert('Something went wrong.'));
-                        }
+        @can('update.tasks')
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('.task-column').forEach(column => {
+                        new Sortable(column, {
+                            group: 'kanban',
+                            animation: 200,
+                            draggable: '.task-card',
+                            ghostClass: 'opacity-50',
+                            onEnd: function (evt) {
+                                fetch("{{ route('tasks.board.update') }}", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "Accept": "application/json",
+                                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                    },
+                                    body: JSON.stringify({
+                                        task_id: evt.item.dataset.taskId,
+                                        status: evt.to.dataset.status,
+                                        sort_order: evt.newIndex + 1
+                                    })
+                                }).then(res => res.json()).then(data => {
+                                    if (!data.success) alert('Unable to update task.');
+                                }).catch(() => alert('Something went wrong.'));
+                            }
+                        });
                     });
                 });
-            });
-        </script>
+            </script>
+        @else
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('.task-card').forEach(card => {
+                        card.style.cursor = 'default';
+                    });
+                });
+            </script>
+        @endcan
     @endpush
 </x-app-layout>

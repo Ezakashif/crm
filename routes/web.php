@@ -27,13 +27,14 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    $taskQuery = Task::visibleTo(auth()->user());
+    $user = auth()->user();
+    $taskQuery = Task::visibleTo($user);
 
     return view('dashboard', [
-        'customerCount' => Customer::count(),
-        'leadCount' => Lead::count(),
-        'taskCount' => (clone $taskQuery)->count(),
-        'pendingTasks' => (clone $taskQuery)->where('status', 'pending')->count(),
+        'customerCount' => $user->can('view.customers') ? Customer::count() : null,
+        'leadCount' => $user->can('view.leads') ? Lead::count() : null,
+        'taskCount' => $user->can('view.tasks') ? (clone $taskQuery)->count() : null,
+        'pendingTasks' => $user->can('view.tasks') ? (clone $taskQuery)->where('status', 'pending')->count() : null,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

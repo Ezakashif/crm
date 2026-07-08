@@ -2,9 +2,11 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="m-0">Users</h1>
-            <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Add User
-            </a>
+            @can('create', App\Models\User::class)
+                <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add User
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -60,7 +62,9 @@
                         <th>Role</th>
                         <th>Status</th>
                         <th>Joined</th>
-                        <th>Actions</th>
+                        @canany(['update.users', 'delete.users'])
+                            <th>Actions</th>
+                        @endcanany
                     </tr>
                 </thead>
                 <tbody>
@@ -82,36 +86,48 @@
                                 </span>
                             </td>
                             <td>
-                                <form method="POST" action="{{ route('users.status', $user) }}" class="d-inline">
-                                    @csrf
-                                    <select name="status" class="form-control form-control-sm d-inline-block"
-                                            style="width: auto;"
-                                            onchange="this.form.submit()"
-                                            @if($user->id === auth()->id()) disabled @endif>
-                                        @foreach($statuses as $value => $label)
-                                            <option value="{{ $value }}" @selected($user->status === $value)>
-                                                {{ $label }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </form>
+                                @can('update', $user)
+                                    <form method="POST" action="{{ route('users.status', $user) }}" class="d-inline">
+                                        @csrf
+                                        <select name="status" class="form-control form-control-sm d-inline-block"
+                                                style="width: auto;"
+                                                onchange="this.form.submit()"
+                                                @if($user->id === auth()->id()) disabled @endif>
+                                            @foreach($statuses as $value => $label)
+                                                <option value="{{ $value }}" @selected($user->status === $value)>
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </form>
+                                @else
+                                    <span class="badge badge-{{ $user->statusBadgeClass() }}">
+                                        {{ $statuses[$user->status] ?? ucfirst($user->status) }}
+                                    </span>
+                                @endcan
                             </td>
                             <td>{{ $user->created_at->format('M d, Y') }}</td>
-                            <td>
-                                <a href="{{ route('users.edit', $user) }}" class="btn btn-xs btn-info">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                @if($user->id !== auth()->id())
-                                    <form method="POST" action="{{ route('users.destroy', $user) }}" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-danger"
-                                                onclick="return confirm('Delete this user?')">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    </form>
-                                @endif
-                            </td>
+                            @canany(['update', 'delete'], $user)
+                                <td>
+                                    @can('update', $user)
+                                        <a href="{{ route('users.edit', $user) }}" class="btn btn-xs btn-info">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                    @endcan
+                                    @can('delete', $user)
+                                        @if($user->id !== auth()->id())
+                                            <form method="POST" action="{{ route('users.destroy', $user) }}" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-xs btn-danger"
+                                                        onclick="return confirm('Delete this user?')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endcan
+                                </td>
+                            @endcanany
                         </tr>
                     @empty
                         <tr>

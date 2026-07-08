@@ -9,9 +9,11 @@
                 <div class="mr-2 mb-1">
                     <x-lead-contact-actions :lead="$lead" />
                 </div>
-                <a href="{{ route('leads.edit', $lead) }}" class="btn btn-default btn-sm mb-1">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
+                @can('update', $lead)
+                    <a href="{{ route('leads.edit', $lead) }}" class="btn btn-default btn-sm mb-1">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                @endcan
                 <a href="{{ route('leads.index') }}" class="btn btn-default btn-sm mb-1">
                     <i class="fas fa-arrow-left"></i> Back to Board
                 </a>
@@ -130,7 +132,11 @@
                             @foreach($lead->tasks as $task)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        <a href="{{ route('tasks.edit', $task) }}">{{ $task->title }}</a>
+                                        @can('update', $task)
+                                            <a href="{{ route('tasks.edit', $task) }}">{{ $task->title }}</a>
+                                        @else
+                                            {{ $task->title }}
+                                        @endcan
                                         <div class="small text-muted">
                                             {{ ucfirst(str_replace('_', ' ', $task->status)) }}
                                             @if($task->due_date)
@@ -149,77 +155,81 @@
             @endif
 
             @if($lead->status !== 'won')
-                <form method="POST" action="{{ route('leads.convert', $lead) }}" class="mt-3">
-                    @csrf
-                    <button type="submit" class="btn btn-info btn-block">
-                        <i class="fas fa-user-check"></i> Convert to Customer
-                    </button>
-                </form>
+                @can('convert', $lead)
+                    <form method="POST" action="{{ route('leads.convert', $lead) }}" class="mt-3">
+                        @csrf
+                        <button type="submit" class="btn btn-info btn-block">
+                            <i class="fas fa-user-check"></i> Convert to Customer
+                        </button>
+                    </form>
+                @endcan
             @endif
         </div>
 
         <div class="col-lg-8">
-            <div class="card card-outline card-success mb-3">
-                <div class="card-header">
-                    <h3 class="card-title">Log Activity</h3>
+            @can('createActivity', $lead)
+                <div class="card card-outline card-success mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Log Activity</h3>
+                    </div>
+                    <form method="POST" action="{{ route('leads.activities.store', $lead) }}">
+                        @csrf
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="type">Activity Type</label>
+                                        <select id="type" name="type" class="form-control @error('type') is-invalid @enderror" required>
+                                            @foreach($activityTypes as $value => $label)
+                                                <option value="{{ $value }}" @selected(old('type') === $value)>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('type')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="occurred_at">When</label>
+                                        <input id="occurred_at" name="occurred_at" type="datetime-local"
+                                               class="form-control @error('occurred_at') is-invalid @enderror"
+                                               value="{{ old('occurred_at', now()->format('Y-m-d\TH:i')) }}">
+                                        @error('occurred_at')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="next_follow_up_date">Next Follow-up</label>
+                                        <input id="next_follow_up_date" name="next_follow_up_date" type="date"
+                                               class="form-control @error('next_follow_up_date') is-invalid @enderror"
+                                               value="{{ old('next_follow_up_date') }}">
+                                        @error('next_follow_up_date')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="summary">What was discussed?</label>
+                                <textarea id="summary" name="summary" rows="3"
+                                          class="form-control @error('summary') is-invalid @enderror"
+                                          placeholder="Summarize the conversation, outcome, or next steps...">{{ old('summary') }}</textarea>
+                                @error('summary')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Log Activity
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <form method="POST" action="{{ route('leads.activities.store', $lead) }}">
-                    @csrf
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="type">Activity Type</label>
-                                    <select id="type" name="type" class="form-control @error('type') is-invalid @enderror" required>
-                                        @foreach($activityTypes as $value => $label)
-                                            <option value="{{ $value }}" @selected(old('type') === $value)>{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('type')
-                                        <span class="invalid-feedback">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="occurred_at">When</label>
-                                    <input id="occurred_at" name="occurred_at" type="datetime-local"
-                                           class="form-control @error('occurred_at') is-invalid @enderror"
-                                           value="{{ old('occurred_at', now()->format('Y-m-d\TH:i')) }}">
-                                    @error('occurred_at')
-                                        <span class="invalid-feedback">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="next_follow_up_date">Next Follow-up</label>
-                                    <input id="next_follow_up_date" name="next_follow_up_date" type="date"
-                                           class="form-control @error('next_follow_up_date') is-invalid @enderror"
-                                           value="{{ old('next_follow_up_date') }}">
-                                    @error('next_follow_up_date')
-                                        <span class="invalid-feedback">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group mb-0">
-                            <label for="summary">What was discussed?</label>
-                            <textarea id="summary" name="summary" rows="3"
-                                      class="form-control @error('summary') is-invalid @enderror"
-                                      placeholder="Summarize the conversation, outcome, or next steps...">{{ old('summary') }}</textarea>
-                            @error('summary')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-plus"></i> Log Activity
-                        </button>
-                    </div>
-                </form>
-            </div>
+            @endcan
 
             <div class="card card-outline card-secondary">
                 <div class="card-header">

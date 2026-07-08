@@ -106,11 +106,13 @@
     </div>
 
     @if($lead->status !== 'won')
-        <form method="POST" action="{{ route('leads.convert', $lead) }}" class="mt-3">
-            @csrf
-            <button type="submit" class="btn btn-info">
-                <i class="fas fa-user-check"></i> Convert to Customer
-            </button>
-        </form>
+        @can('convert', $lead)
+            <form method="POST" action="{{ route('leads.convert', $lead) }}" class="mt-3">
+                @csrf
+                <button type="submit" class="btn btn-info">
+                    <i class="fas fa-user-check"></i> Convert to Customer
+                </button>
+            </form>
+        @endcan
     @endif
 </x-app-layout>

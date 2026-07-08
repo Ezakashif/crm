@@ -87,7 +87,7 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
-        $this->authorize('view', $task);
+        $this->authorize('update', $task);
 
         $users = auth()->user()->canAssignTasks()
             ? User::active()->orderBy('name')->get()

@@ -2,9 +2,11 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="m-0">Roles</h1>
-            <a href="{{ route('roles.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Add Role
-            </a>
+            @can('create', App\Models\Role::class)
+                <a href="{{ route('roles.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add Role
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -41,7 +43,9 @@
                         <th>Permissions</th>
                         <th>Users</th>
                         <th>Type</th>
-                        <th>Actions</th>
+                        @canany(['update.roles', 'delete.roles'])
+                            <th>Actions</th>
+                        @endcanany
                     </tr>
                 </thead>
                 <tbody>
@@ -63,21 +67,27 @@
                                     <span class="badge badge-light">Custom</span>
                                 @endif
                             </td>
-                            <td>
-                                <a href="{{ route('roles.edit', $role) }}" class="btn btn-xs btn-info">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                @unless($role->is_system)
-                                    <form method="POST" action="{{ route('roles.destroy', $role) }}" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-danger"
-                                                onclick="return confirm('Delete this role?')">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    </form>
-                                @endunless
-                            </td>
+                            @canany(['update', 'delete'], $role)
+                                <td>
+                                    @can('update', $role)
+                                        <a href="{{ route('roles.edit', $role) }}" class="btn btn-xs btn-info">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                    @endcan
+                                    @can('delete', $role)
+                                        @unless($role->is_system)
+                                            <form method="POST" action="{{ route('roles.destroy', $role) }}" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-xs btn-danger"
+                                                        onclick="return confirm('Delete this role?')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        @endunless
+                                    @endcan
+                                </td>
+                            @endcanany
                         </tr>
                     @empty
                         <tr>
