@@ -8,7 +8,6 @@ use App\Http\Controllers\LeadActivityController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WebsiteLeadDemoController;
@@ -80,29 +79,25 @@ Route::middleware(['auth'])->group(function () {
         ->name('tasks.board.update');
 });
 
-Route::middleware(['auth', 'permission:demo.website-lead'])->group(function () {
+Route::middleware(['auth', 'permission:website_lead.demo'])->group(function () {
     Route::get('/demo/website-lead', [WebsiteLeadDemoController::class, 'index'])
         ->name('demo.website-lead');
     Route::post('/demo/website-lead', [WebsiteLeadDemoController::class, 'store'])
         ->name('demo.website-lead.store');
 });
 
-Route::middleware(['auth', 'permission:users.manage'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
 
     Route::post('/users/{user}/status', [UserController::class, 'changeStatus'])
         ->name('users.status');
 });
 
-Route::middleware(['auth', 'permission:roles.manage'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class)->except(['show']);
 });
 
-Route::middleware(['auth', 'permission:permissions.manage'])->group(function () {
-    Route::resource('permissions', PermissionController::class)->except(['show']);
-});
-
-Route::middleware(['auth', 'permission:activity-logs.view'])->group(function () {
+Route::middleware(['auth', 'permission:view.activity_logs'])->group(function () {
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])
         ->name('activity-logs.index');
 });

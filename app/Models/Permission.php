@@ -18,13 +18,4 @@ class Permission extends Model
     {
         return $this->belongsToMany(Role::class);
     }
-
-    public static function grouped(): \Illuminate\Support\Collection
-    {
-        return static::query()
-            ->orderBy('group')
-            ->orderBy('name')
-            ->get()
-            ->groupBy(fn (Permission $permission) => $permission->group ?: 'general');
-    }
 }

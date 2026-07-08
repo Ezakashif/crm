@@ -9,12 +9,12 @@ class TaskPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasPermission('tasks.view');
+        return $user->hasPermission('view.tasks');
     }
 
     public function view(User $user, Task $task): bool
     {
-        if (! $user->hasPermission('tasks.view')) {
+        if (! $user->hasPermission('view.tasks')) {
             return false;
         }
 
@@ -23,12 +23,12 @@ class TaskPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasPermission('tasks.create');
+        return $user->hasPermission('create.tasks');
     }
 
     public function update(User $user, Task $task): bool
     {
-        if (! $user->hasPermission('tasks.update')) {
+        if (! $user->hasPermission('update.tasks')) {
             return false;
         }
 
@@ -37,6 +37,6 @@ class TaskPolicy
 
     public function delete(User $user, Task $task): bool
     {
-        return $user->hasPermission('tasks.delete');
+        return $user->hasPermission('delete.tasks');
     }
 }

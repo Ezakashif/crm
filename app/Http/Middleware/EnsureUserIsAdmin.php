@@ -10,7 +10,7 @@ class EnsureUserIsAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()?->hasPermission('users.manage')) {
+        if (! $request->user()?->hasPermission('view.users')) {
             abort(403, 'Unauthorized action.');
         }
 

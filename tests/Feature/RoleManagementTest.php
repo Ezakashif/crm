@@ -34,7 +34,7 @@ class RoleManagementTest extends TestCase
     public function test_admin_can_create_role_with_permissions(): void
     {
         $admin = User::factory()->admin()->create();
-        $permissionIds = Permission::query()->whereIn('slug', ['leads.view', 'customers.view'])->pluck('id')->all();
+        $permissionIds = Permission::query()->whereIn('slug', ['view.leads', 'view.customers'])->pluck('id')->all();
 
         $response = $this->actingAs($admin)->post(route('roles.store'), [
             'name' => 'Support Agent',
@@ -64,14 +64,14 @@ class RoleManagementTest extends TestCase
         ]);
 
         $role->permissions()->sync(
-            Permission::query()->where('slug', 'leads.view')->pluck('id')
+            Permission::query()->where('slug', 'view.leads')->pluck('id')
         );
 
         $user = User::factory()->create();
         $user->syncRoles([$role->id]);
 
-        $this->assertTrue($user->hasPermission('leads.view'));
-        $this->assertFalse($user->hasPermission('customers.view'));
+        $this->assertTrue($user->hasPermission('view.leads'));
+        $this->assertFalse($user->hasPermission('view.customers'));
 
         $response = $this->actingAs($user)->get(route('customers.index'));
 
@@ -97,5 +97,14 @@ class RoleManagementTest extends TestCase
         $response = $this->actingAs($salesRep)->get(route('roles.index'));
 
         $response->assertForbidden();
+    }
+
+    public function test_permissions_page_is_not_available(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->get('/permissions');
+
+        $response->assertNotFound();
     }
 }

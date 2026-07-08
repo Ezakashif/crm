@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Services\PermissionRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -42,7 +43,7 @@ class RoleController extends Controller
         $this->authorize('create', Role::class);
 
         return view('roles.create', [
-            'permissionGroups' => Permission::grouped(),
+            'modulePermissions' => app(PermissionRegistry::class)->groupedForUi(),
         ]);
     }
 
@@ -79,7 +80,7 @@ class RoleController extends Controller
 
         return view('roles.edit', [
             'role' => $role,
-            'permissionGroups' => Permission::grouped(),
+            'modulePermissions' => app(PermissionRegistry::class)->groupedForUi(),
         ]);
     }
 

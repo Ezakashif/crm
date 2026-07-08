@@ -43,7 +43,7 @@
                 <p class="text-muted">Users with this role will receive the selected permissions.</p>
 
                 <x-permission-checklist
-                    :permission-groups="$permissionGroups"
+                    :module-permissions="$modulePermissions"
                     :selected="array_map('intval', old('permissions', $role->permissions->pluck('id')->all()))"
                 />
             </div>

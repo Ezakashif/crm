@@ -61,7 +61,7 @@ trait HasRoles
 
     public function canAssignTasks(): bool
     {
-        return $this->hasPermission('tasks.assign');
+        return $this->hasPermission('assign.tasks');
     }
 
     /**

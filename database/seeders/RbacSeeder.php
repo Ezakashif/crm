@@ -4,33 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Services\PermissionRegistry;
 use Illuminate\Database\Seeder;
 
 class RbacSeeder extends Seeder
 {
-    public const PERMISSIONS = [
-        ['name' => 'View Customers', 'slug' => 'customers.view', 'group' => 'customers'],
-        ['name' => 'Create Customers', 'slug' => 'customers.create', 'group' => 'customers'],
-        ['name' => 'Update Customers', 'slug' => 'customers.update', 'group' => 'customers'],
-        ['name' => 'Delete Customers', 'slug' => 'customers.delete', 'group' => 'customers'],
-        ['name' => 'View Leads', 'slug' => 'leads.view', 'group' => 'leads'],
-        ['name' => 'Create Leads', 'slug' => 'leads.create', 'group' => 'leads'],
-        ['name' => 'Update Leads', 'slug' => 'leads.update', 'group' => 'leads'],
-        ['name' => 'Delete Leads', 'slug' => 'leads.delete', 'group' => 'leads'],
-        ['name' => 'Convert Leads', 'slug' => 'leads.convert', 'group' => 'leads'],
-        ['name' => 'Create Lead Activities', 'slug' => 'leads.activities.create', 'group' => 'leads'],
-        ['name' => 'View Tasks', 'slug' => 'tasks.view', 'group' => 'tasks'],
-        ['name' => 'Create Tasks', 'slug' => 'tasks.create', 'group' => 'tasks'],
-        ['name' => 'Update Tasks', 'slug' => 'tasks.update', 'group' => 'tasks'],
-        ['name' => 'Delete Tasks', 'slug' => 'tasks.delete', 'group' => 'tasks'],
-        ['name' => 'Assign Tasks', 'slug' => 'tasks.assign', 'group' => 'tasks'],
-        ['name' => 'Manage Users', 'slug' => 'users.manage', 'group' => 'admin'],
-        ['name' => 'Manage Roles', 'slug' => 'roles.manage', 'group' => 'admin'],
-        ['name' => 'Manage Permissions', 'slug' => 'permissions.manage', 'group' => 'admin'],
-        ['name' => 'View Activity Logs', 'slug' => 'activity-logs.view', 'group' => 'admin'],
-        ['name' => 'Website Lead Demo', 'slug' => 'demo.website-lead', 'group' => 'admin'],
-    ];
-
     public const ROLES = [
         'admin' => [
             'name' => 'Administrator',
@@ -52,25 +30,20 @@ class RbacSeeder extends Seeder
     public const ROLE_PERMISSIONS = [
         'admin' => '*',
         'manager' => [
-            'customers.view', 'customers.create', 'customers.update', 'customers.delete',
-            'leads.view', 'leads.create', 'leads.update', 'leads.delete', 'leads.convert', 'leads.activities.create',
-            'tasks.view', 'tasks.create', 'tasks.update', 'tasks.delete', 'tasks.assign',
+            'view.customers', 'create.customers', 'update.customers', 'delete.customers',
+            'view.leads', 'create.leads', 'update.leads', 'delete.leads', 'convert.leads', 'log.leads',
+            'view.tasks', 'create.tasks', 'update.tasks', 'delete.tasks', 'assign.tasks',
         ],
         'sales' => [
-            'customers.view', 'customers.create', 'customers.update', 'customers.delete',
-            'leads.view', 'leads.create', 'leads.update', 'leads.delete', 'leads.convert', 'leads.activities.create',
-            'tasks.view', 'tasks.update',
+            'view.customers', 'create.customers', 'update.customers', 'delete.customers',
+            'view.leads', 'create.leads', 'update.leads', 'delete.leads', 'convert.leads', 'log.leads',
+            'view.tasks', 'update.tasks',
         ],
     ];
 
     public function run(): void
     {
-        foreach (self::PERMISSIONS as $permission) {
-            Permission::query()->updateOrCreate(
-                ['slug' => $permission['slug']],
-                $permission,
-            );
-        }
+        app(PermissionRegistry::class)->sync();
 
         $allPermissionIds = Permission::query()->pluck('id', 'slug');
 

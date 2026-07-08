@@ -34,7 +34,7 @@
                 <p class="text-muted">Select which permissions this role grants to assigned users.</p>
 
                 <x-permission-checklist
-                    :permission-groups="$permissionGroups"
+                    :module-permissions="$modulePermissions"
                     :selected="array_map('intval', old('permissions', []))"
                 />
             </div>

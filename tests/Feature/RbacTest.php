@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\PermissionRegistry;
 use Database\Seeders\RbacSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -24,10 +26,9 @@ class RbacTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         $this->assertTrue($admin->hasRole('admin'));
-        $this->assertTrue($admin->hasPermission('users.manage'));
-        $this->assertTrue($admin->hasPermission('roles.manage'));
-        $this->assertTrue($admin->hasPermission('permissions.manage'));
-        $this->assertTrue($admin->hasPermission('tasks.create'));
+        $this->assertTrue($admin->hasPermission('view.users'));
+        $this->assertTrue($admin->hasPermission('view.roles'));
+        $this->assertTrue($admin->hasPermission('create.tasks'));
         $this->assertTrue($admin->canAssignTasks());
     }
 
@@ -36,11 +37,11 @@ class RbacTest extends TestCase
         $salesRep = User::factory()->create();
 
         $this->assertTrue($salesRep->hasRole('sales'));
-        $this->assertTrue($salesRep->hasPermission('leads.view'));
-        $this->assertTrue($salesRep->hasPermission('tasks.view'));
-        $this->assertTrue($salesRep->hasPermission('tasks.update'));
-        $this->assertFalse($salesRep->hasPermission('tasks.create'));
-        $this->assertFalse($salesRep->hasPermission('users.manage'));
+        $this->assertTrue($salesRep->hasPermission('view.leads'));
+        $this->assertTrue($salesRep->hasPermission('view.tasks'));
+        $this->assertTrue($salesRep->hasPermission('update.tasks'));
+        $this->assertFalse($salesRep->hasPermission('create.tasks'));
+        $this->assertFalse($salesRep->hasPermission('view.users'));
         $this->assertFalse($salesRep->canAssignTasks());
     }
 
@@ -49,11 +50,11 @@ class RbacTest extends TestCase
         $manager = User::factory()->manager()->create();
 
         $this->assertTrue($manager->hasRole('manager'));
-        $this->assertTrue($manager->hasPermission('tasks.create'));
-        $this->assertTrue($manager->hasPermission('tasks.delete'));
+        $this->assertTrue($manager->hasPermission('create.tasks'));
+        $this->assertTrue($manager->hasPermission('delete.tasks'));
         $this->assertTrue($manager->canAssignTasks());
-        $this->assertFalse($manager->hasPermission('users.manage'));
-        $this->assertFalse($manager->hasPermission('activity-logs.view'));
+        $this->assertFalse($manager->hasPermission('view.users'));
+        $this->assertFalse($manager->hasPermission('view.activity_logs'));
     }
 
     public function test_user_can_have_multiple_roles(): void
