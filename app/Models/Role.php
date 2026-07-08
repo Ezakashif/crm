@@ -30,4 +30,9 @@ class Role extends Model
     {
         return $this->belongsToMany(User::class)->withTimestamps();
     }
+
+    public function isProtected(): bool
+    {
+        return $this->is_system;
+    }
 }

@@ -22,4 +22,9 @@ class PermissionRegistrar
 
         Gate::define('manage-users', fn (User $user) => $user->hasPermission('users.manage'));
     }
+
+    public function refreshGates(): void
+    {
+        $this->registerGates();
+    }
 }

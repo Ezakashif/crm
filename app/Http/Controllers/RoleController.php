@@ -1,0 +1,132 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Permission;
+use App\Models\Role;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
+class RoleController extends Controller
+{
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', Role::class);
+
+        $filters = $request->validate([
+            'search' => 'nullable|string|max:255',
+        ]);
+
+        $roles = Role::query()
+            ->withCount(['users', 'permissions'])
+            ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
+                $term = $filters['search'];
+
+                $query->where(function ($builder) use ($term) {
+                    $builder->where('name', 'like', "%{$term}%")
+                        ->orWhere('slug', 'like', "%{$term}%");
+                });
+            })
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('roles.index', [
+            'roles' => $roles,
+            'filters' => $filters,
+        ]);
+    }
+
+    public function create()
+    {
+        $this->authorize('create', Role::class);
+
+        return view('roles.create', [
+            'permissionGroups' => Permission::grouped(),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $this->authorize('create', Role::class);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'slug' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:roles,slug'],
+            'description' => 'nullable|string|max:1000',
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['integer', 'exists:permissions,id'],
+        ]);
+
+        $role = Role::create([
+            'name' => $validated['name'],
+            'slug' => $validated['slug'],
+            'description' => $validated['description'] ?? null,
+            'is_system' => false,
+        ]);
+
+        $role->permissions()->sync($validated['permissions'] ?? []);
+
+        return redirect()->route('roles.index')
+            ->with('success', 'Role created successfully.');
+    }
+
+    public function edit(Role $role)
+    {
+        $this->authorize('update', $role);
+
+        $role->load('permissions');
+
+        return view('roles.edit', [
+            'role' => $role,
+            'permissionGroups' => Permission::grouped(),
+        ]);
+    }
+
+    public function update(Request $request, Role $role)
+    {
+        $this->authorize('update', $role);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'slug' => ['required', 'string', 'max:50', 'alpha_dash', Rule::unique('roles', 'slug')->ignore($role->id)],
+            'description' => 'nullable|string|max:1000',
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['integer', 'exists:permissions,id'],
+        ]);
+
+        if ($role->isProtected()) {
+            $validated['slug'] = $role->slug;
+        }
+
+        $role->update([
+            'name' => $validated['name'],
+            'slug' => $validated['slug'],
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        $role->permissions()->sync($validated['permissions'] ?? []);
+
+        return redirect()->route('roles.index')
+            ->with('success', 'Role updated successfully.');
+    }
+
+    public function destroy(Role $role)
+    {
+        $this->authorize('delete', $role);
+
+        if ($role->isProtected()) {
+            return back()->withErrors(['error' => 'System roles cannot be deleted.']);
+        }
+
+        if ($role->users()->exists()) {
+            return back()->withErrors(['error' => 'Cannot delete a role that is assigned to users.']);
+        }
+
+        $role->permissions()->detach();
+        $role->delete();
+
+        return redirect()->route('roles.index')
+            ->with('success', 'Role deleted successfully.');
+    }
+}

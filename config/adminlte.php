@@ -346,6 +346,18 @@ return [
             'can' => 'users.manage',
         ],
         [
+            'text' => 'Roles',
+            'route' => 'roles.index',
+            'icon' => 'fas fa-fw fa-user-shield',
+            'can' => 'roles.manage',
+        ],
+        [
+            'text' => 'Permissions',
+            'route' => 'permissions.index',
+            'icon' => 'fas fa-fw fa-key',
+            'can' => 'permissions.manage',
+        ],
+        [
             'text' => 'Activity Log',
             'route' => 'activity-logs.index',
             'icon' => 'fas fa-fw fa-history',

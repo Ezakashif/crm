@@ -25,6 +25,8 @@ class RbacSeeder extends Seeder
         ['name' => 'Delete Tasks', 'slug' => 'tasks.delete', 'group' => 'tasks'],
         ['name' => 'Assign Tasks', 'slug' => 'tasks.assign', 'group' => 'tasks'],
         ['name' => 'Manage Users', 'slug' => 'users.manage', 'group' => 'admin'],
+        ['name' => 'Manage Roles', 'slug' => 'roles.manage', 'group' => 'admin'],
+        ['name' => 'Manage Permissions', 'slug' => 'permissions.manage', 'group' => 'admin'],
         ['name' => 'View Activity Logs', 'slug' => 'activity-logs.view', 'group' => 'admin'],
         ['name' => 'Website Lead Demo', 'slug' => 'demo.website-lead', 'group' => 'admin'],
     ];

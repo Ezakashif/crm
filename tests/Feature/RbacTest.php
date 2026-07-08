@@ -25,6 +25,8 @@ class RbacTest extends TestCase
 
         $this->assertTrue($admin->hasRole('admin'));
         $this->assertTrue($admin->hasPermission('users.manage'));
+        $this->assertTrue($admin->hasPermission('roles.manage'));
+        $this->assertTrue($admin->hasPermission('permissions.manage'));
         $this->assertTrue($admin->hasPermission('tasks.create'));
         $this->assertTrue($admin->canAssignTasks());
     }

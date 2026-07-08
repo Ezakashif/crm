@@ -7,6 +7,8 @@ use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadActivityController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WebsiteLeadDemoController;
@@ -90,6 +92,14 @@ Route::middleware(['auth', 'permission:users.manage'])->group(function () {
 
     Route::post('/users/{user}/status', [UserController::class, 'changeStatus'])
         ->name('users.status');
+});
+
+Route::middleware(['auth', 'permission:roles.manage'])->group(function () {
+    Route::resource('roles', RoleController::class)->except(['show']);
+});
+
+Route::middleware(['auth', 'permission:permissions.manage'])->group(function () {
+    Route::resource('permissions', PermissionController::class)->except(['show']);
 });
 
 Route::middleware(['auth', 'permission:activity-logs.view'])->group(function () {
