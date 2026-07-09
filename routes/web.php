@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadActivityController;
 use App\Http\Controllers\TaskController;
@@ -12,9 +13,6 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WebsiteLeadDemoController;
 use App\Http\Controllers\WebsiteLeadWebhookController;
-use App\Models\Customer;
-use App\Models\Lead;
-use App\Models\Task;
 
 Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'store'])
     ->middleware(['website-lead-webhook', 'throttle:website-leads'])
@@ -26,17 +24,9 @@ Route::get('/', function () {
         : redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    $user = auth()->user();
-    $taskQuery = Task::visibleTo($user);
-
-    return view('dashboard', [
-        'customerCount' => $user->can('view.customers') ? Customer::count() : null,
-        'leadCount' => $user->can('view.leads') ? Lead::count() : null,
-        'taskCount' => $user->can('view.tasks') ? (clone $taskQuery)->count() : null,
-        'pendingTasks' => $user->can('view.tasks') ? (clone $taskQuery)->where('status', 'pending')->count() : null,
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
