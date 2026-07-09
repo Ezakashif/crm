@@ -29,6 +29,10 @@ class RoleManagementTest extends TestCase
         $response->assertOk()
             ->assertSee('Roles')
             ->assertSee('Administrator');
+
+        $this->assertDatabaseHas('roles', ['slug' => 'admin', 'is_system' => true]);
+        $this->assertDatabaseHas('roles', ['slug' => 'sales', 'is_system' => false]);
+        $this->assertDatabaseMissing('roles', ['slug' => 'manager']);
     }
 
     public function test_admin_can_create_role_with_permissions(): void
