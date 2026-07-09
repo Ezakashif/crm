@@ -16,6 +16,10 @@ class DashboardService
     /**
      * Build the dashboard payload for the authenticated user.
      *
+     * Lead and task analytics are scoped to the current assignee unless the
+     * user can view organization-wide data (admin, or view_all.tasks for tasks /
+     * admin|manager for leads).
+     *
      * @return array<string, mixed>
      */
     public function forUser(User $user): array
@@ -26,11 +30,13 @@ class DashboardService
         $canViewAllActivityLogs = $user->hasPermission('view.activity_logs');
         $canViewOwnActivityLogs = $user->hasPermission('view_own.activity_logs');
         $canViewActivityLogs = $canViewAllActivityLogs || $canViewOwnActivityLogs;
+        $canViewAllLeadAnalytics = $this->canViewAllLeadAnalytics($user);
 
         $taskQuery = $canViewTasks ? Task::visibleTo($user) : null;
+        $leadQuery = $canViewLeads ? $this->leadsVisibleTo($user) : null;
 
         $leadStatusCounts = $canViewLeads
-            ? Lead::query()
+            ? (clone $leadQuery)
                 ->selectRaw('status, COUNT(*) as aggregate')
                 ->groupBy('status')
                 ->pluck('aggregate', 'status')
@@ -46,12 +52,15 @@ class DashboardService
             'canViewTasks' => $canViewTasks,
             'canViewCustomers' => $canViewCustomers,
             'canViewActivityLogs' => $canViewActivityLogs,
+            'canViewAllLeadAnalytics' => $canViewAllLeadAnalytics,
 
             'customerCount' => $canViewCustomers ? Customer::count() : null,
             'leadCount' => $canViewLeads ? (int) $leadStatusCounts->sum() : null,
             'taskCount' => $canViewTasks ? (clone $taskQuery)->count() : null,
 
-            'todaysFollowUpsCount' => $canViewLeads ? $this->todaysFollowUpsQuery()->count() : null,
+            'todaysFollowUpsCount' => $canViewLeads
+                ? $this->todaysFollowUpsQuery(clone $leadQuery)->count()
+                : null,
             'pendingTasksCount' => $canViewTasks
                 ? (clone $taskQuery)->where('status', 'pending')->count()
                 : null,
@@ -67,7 +76,7 @@ class DashboardService
                 : null,
 
             'todaysFollowUps' => $canViewLeads
-                ? $this->todaysFollowUpsQuery()
+                ? $this->todaysFollowUpsQuery(clone $leadQuery)
                     ->with('assignee')
                     ->orderBy('name')
                     ->limit(8)
@@ -93,7 +102,7 @@ class DashboardService
                 : collect(),
 
             'recentLeads' => $canViewLeads
-                ? Lead::with('assignee')->latest()->limit(8)->get()
+                ? (clone $leadQuery)->with('assignee')->latest()->limit(8)->get()
                 : collect(),
 
             'recentCustomers' => $canViewCustomers
@@ -107,23 +116,47 @@ class DashboardService
                     ->get()
                 : collect(),
 
-            'monthlyLeadGrowth' => $canViewLeads ? $this->monthlyLeadGrowth(6) : [
-                'labels' => [],
-                'data' => [],
-            ],
+            'monthlyLeadGrowth' => $canViewLeads
+                ? $this->monthlyLeadGrowth(clone $leadQuery, 6)
+                : [
+                    'labels' => [],
+                    'data' => [],
+                ],
 
-            'leadSourceDistribution' => $canViewLeads ? $this->leadSourceDistribution() : [
-                'labels' => [],
-                'data' => [],
-            ],
+            'leadSourceDistribution' => $canViewLeads
+                ? $this->leadSourceDistribution(clone $leadQuery)
+                : [
+                    'labels' => [],
+                    'data' => [],
+                ],
 
             'quickActions' => $this->quickActions($user),
         ];
     }
 
-    protected function todaysFollowUpsQuery(): Builder
+    /**
+     * Admins and managers see organization-wide lead analytics.
+     * Sales users only see leads assigned to them.
+     */
+    protected function canViewAllLeadAnalytics(User $user): bool
     {
-        return Lead::query()
+        return $user->isAdmin() || $user->isManager();
+    }
+
+    protected function leadsVisibleTo(User $user): Builder
+    {
+        $query = Lead::query();
+
+        if ($this->canViewAllLeadAnalytics($user)) {
+            return $query;
+        }
+
+        return $query->where('assigned_to', $user->id);
+    }
+
+    protected function todaysFollowUpsQuery(Builder $leadQuery): Builder
+    {
+        return $leadQuery
             ->whereDate('follow_up_date', today())
             ->whereNotIn('status', ['won', 'lost']);
     }
@@ -150,17 +183,17 @@ class DashboardService
     /**
      * @return array{labels: list<string>, data: list<int>}
      */
-    protected function monthlyLeadGrowth(int $months): array
+    protected function monthlyLeadGrowth(Builder $leadQuery, int $months): array
     {
         $start = now()->startOfMonth()->subMonths($months - 1);
         $end = now()->endOfMonth();
 
-        $driver = Lead::query()->getConnection()->getDriverName();
+        $driver = $leadQuery->getConnection()->getDriverName();
         $monthExpression = $driver === 'sqlite'
             ? "strftime('%Y-%m', created_at)"
             : "DATE_FORMAT(created_at, '%Y-%m')";
 
-        $counts = Lead::query()
+        $counts = (clone $leadQuery)
             ->where('created_at', '>=', $start)
             ->selectRaw("{$monthExpression} as month_key, COUNT(*) as aggregate")
             ->groupBy('month_key')
@@ -185,9 +218,9 @@ class DashboardService
     /**
      * @return array{labels: list<string>, data: list<int>}
      */
-    protected function leadSourceDistribution(): array
+    protected function leadSourceDistribution(Builder $leadQuery): array
     {
-        $rows = Lead::query()
+        $rows = (clone $leadQuery)
             ->selectRaw('source, COUNT(*) as aggregate')
             ->groupBy('source')
             ->get();
