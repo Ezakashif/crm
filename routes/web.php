@@ -98,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class)->except(['show']);
 });
 
-Route::middleware(['auth', 'permission:view.activity_logs'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])
         ->name('activity-logs.index');
 });

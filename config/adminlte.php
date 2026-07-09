@@ -359,6 +359,12 @@ return [
         ],
         ['header' => 'Account'],
         [
+            'text' => 'My Activity',
+            'route' => 'activity-logs.index',
+            'icon' => 'fas fa-fw fa-history',
+            'can' => 'view_own.activity_logs',
+        ],
+        [
             'text' => 'Profile',
             'route' => 'profile.edit',
             'icon' => 'fas fa-fw fa-user',

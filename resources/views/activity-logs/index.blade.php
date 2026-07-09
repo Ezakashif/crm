@@ -1,40 +1,64 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">Activity Log</h1>
+        <h1 class="m-0">{{ $canViewAll ? 'Activity Log' : 'My Activity' }}</h1>
     </x-slot>
 
-    <div class="card card-outline card-secondary mb-3">
-        <div class="card-body">
-            <form method="GET" action="{{ route('activity-logs.index') }}" class="form-inline">
-                <div class="form-group mr-2 mb-2">
-                    <label for="user_id" class="mr-2">User</label>
-                    <select name="user_id" id="user_id" class="form-control form-control-sm">
-                        <option value="">All users</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}" @selected(request('user_id') == $user->id)>
-                                {{ $user->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-group mr-2 mb-2">
-                    <label for="action" class="mr-2">Action</label>
-                    <select name="action" id="action" class="form-control form-control-sm">
-                        <option value="">All actions</option>
-                        @foreach($actions as $value => $label)
-                            <option value="{{ $value }}" @selected(request('action') === $value)>
-                                {{ $label }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-sm btn-primary mb-2 mr-2">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-                <a href="{{ route('activity-logs.index') }}" class="btn btn-sm btn-default mb-2">Clear</a>
-            </form>
+    @if($canViewAll)
+        <div class="card card-outline card-secondary mb-3">
+            <div class="card-body">
+                <form method="GET" action="{{ route('activity-logs.index') }}" class="form-inline">
+                    <div class="form-group mr-2 mb-2">
+                        <label for="user_id" class="mr-2">User</label>
+                        <select name="user_id" id="user_id" class="form-control form-control-sm">
+                            <option value="">All users</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" @selected(request('user_id') == $user->id)>
+                                    {{ $user->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group mr-2 mb-2">
+                        <label for="action" class="mr-2">Action</label>
+                        <select name="action" id="action" class="form-control form-control-sm">
+                            <option value="">All actions</option>
+                            @foreach($actions as $value => $label)
+                                <option value="{{ $value }}" @selected(request('action') === $value)>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary mb-2 mr-2">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <a href="{{ route('activity-logs.index') }}" class="btn btn-sm btn-default mb-2">Clear</a>
+                </form>
+            </div>
         </div>
-    </div>
+    @else
+        <div class="card card-outline card-secondary mb-3">
+            <div class="card-body">
+                <form method="GET" action="{{ route('activity-logs.index') }}" class="form-inline">
+                    <div class="form-group mr-2 mb-2">
+                        <label for="action" class="mr-2">Action</label>
+                        <select name="action" id="action" class="form-control form-control-sm">
+                            <option value="">All actions</option>
+                            @foreach($actions as $value => $label)
+                                <option value="{{ $value }}" @selected(request('action') === $value)>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary mb-2 mr-2">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <a href="{{ route('activity-logs.index') }}" class="btn btn-sm btn-default mb-2">Clear</a>
+                </form>
+            </div>
+        </div>
+    @endif
 
     <div class="card">
         <div class="card-body table-responsive p-0">

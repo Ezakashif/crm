@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\LeadActivity;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
 class LeadController extends Controller
@@ -72,6 +73,10 @@ class LeadController extends Controller
             'follow_up_date' => $request->follow_up_date,
         ]);
 
+        ActivityLogger::log('lead.created', $lead, [
+            'name' => $lead->name,
+        ]);
+
         return redirect()->route('leads.show', $lead)->with('success', 'Lead created');
     }
 
@@ -103,12 +108,20 @@ class LeadController extends Controller
 
         $lead->update($request->all());
 
+        ActivityLogger::log('lead.updated', $lead, [
+            'name' => $lead->name,
+        ]);
+
         return redirect()->route('leads.show', $lead)->with('success', 'Lead updated');
     }
 
     public function destroy(Lead $lead)
     {
         $this->authorize('delete', $lead);
+
+        ActivityLogger::log('lead.deleted', $lead, [
+            'name' => $lead->name,
+        ]);
 
         $lead->delete();
 
@@ -131,6 +144,14 @@ class LeadController extends Controller
 
         $lead->status = 'won';
         $lead->save();
+
+        ActivityLogger::log('lead.converted', $lead, [
+            'name' => $lead->name,
+        ]);
+
+        ActivityLogger::log('customer.created', $customer, [
+            'name' => $customer->name,
+        ]);
 
         return redirect()->route('customers.edit', $customer->id)
             ->with('success', 'Lead converted to customer');
@@ -156,6 +177,11 @@ class LeadController extends Controller
         ]);
 
         if ($previousStatus !== $request->status) {
+            ActivityLogger::log('lead.status_changed', $lead, [
+                'from' => $previousStatus,
+                'to' => $request->status,
+            ]);
+
             LeadActivity::log(
                 $lead,
                 'status_change',

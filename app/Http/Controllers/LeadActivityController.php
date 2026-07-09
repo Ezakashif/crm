@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use App\Models\LeadActivity;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
 class LeadActivityController extends Controller
@@ -25,6 +26,11 @@ class LeadActivityController extends Controller
             isset($validated['occurred_at']) ? \Carbon\Carbon::parse($validated['occurred_at']) : null,
             isset($validated['next_follow_up_date']) ? \Carbon\Carbon::parse($validated['next_follow_up_date']) : null,
         );
+
+        ActivityLogger::log('lead.activity_logged', $lead, [
+            'type' => $validated['type'],
+            'lead_name' => $lead->name,
+        ]);
 
         return redirect()->route('leads.show', $lead)
             ->with('success', 'Activity logged successfully.');

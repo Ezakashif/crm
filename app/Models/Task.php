@@ -46,7 +46,7 @@ class Task extends Model
 
     public function scopeVisibleTo($query, User $user)
     {
-        if ($user->canAssignTasks()) {
+        if ($user->canViewAllTasks()) {
             return $query;
         }
 

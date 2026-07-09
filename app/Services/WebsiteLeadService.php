@@ -40,7 +40,9 @@ class WebsiteLeadService
             'notes' => $validated['notes'] ?? $validated['message'] ?? null,
         ]);
 
-        ActivityLogger::log('lead.created_via_website', $lead, [], $createdById);
+        ActivityLogger::log('lead.created_via_website', $lead, [
+            'name' => $lead->name,
+        ], $createdById);
 
         $initialMessage = $validated['notes'] ?? $validated['message'] ?? null;
 

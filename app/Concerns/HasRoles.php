@@ -2,6 +2,7 @@
 
 namespace App\Concerns;
 
+use App\Models\Task;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
@@ -59,9 +60,24 @@ trait HasRoles
         return $this->permissionSlugs()->intersect($slugs)->isNotEmpty();
     }
 
+    public function canViewAllTasks(): bool
+    {
+        return $this->hasPermission('view_all.tasks');
+    }
+
     public function canAssignTasks(): bool
     {
         return $this->hasPermission('assign.tasks');
+    }
+
+    public function ownsTask(Task $task): bool
+    {
+        return $task->assigned_to === $this->id;
+    }
+
+    public function canManageAnyTask(): bool
+    {
+        return $this->canViewAllTasks() && $this->canAssignTasks();
     }
 
     /**

@@ -44,7 +44,7 @@
                            value="{{ old('due_date', $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('Y-m-d') : '') }}">
                 </div>
 
-                @if(auth()->user()->canAssignTasks())
+                @can('assign', $task)
                     <div class="form-group">
                         <label for="assigned_to">Assign To <span class="text-danger">*</span></label>
                         <select id="assigned_to" name="assigned_to" class="form-control" required>

@@ -18,7 +18,7 @@ class TaskPolicy
             return false;
         }
 
-        return $user->canAssignTasks() || $task->assigned_to === $user->id;
+        return $user->canViewAllTasks() || $user->ownsTask($task);
     }
 
     public function create(User $user): bool
@@ -32,11 +32,24 @@ class TaskPolicy
             return false;
         }
 
-        return $user->canAssignTasks() || $task->assigned_to === $user->id;
+        return $user->ownsTask($task) || $user->canManageAnyTask();
     }
 
     public function delete(User $user, Task $task): bool
     {
-        return $user->hasPermission('delete.tasks');
+        if (! $user->hasPermission('delete.tasks')) {
+            return false;
+        }
+
+        return $user->ownsTask($task) || $user->canManageAnyTask();
+    }
+
+    public function assign(User $user, Task $task): bool
+    {
+        if (! $user->hasPermission('assign.tasks')) {
+            return false;
+        }
+
+        return $user->canManageAnyTask() || $user->ownsTask($task);
     }
 }

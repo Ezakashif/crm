@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -43,7 +44,7 @@ class CustomerController extends Controller
             'phone' => 'nullable|string',
         ]);
 
-        Customer::create([
+        $customer = Customer::create([
             'created_by' => auth()->id(),
             'name' => $request->name,
             'email' => $request->email,
@@ -52,6 +53,10 @@ class CustomerController extends Controller
             'notes' => $request->notes,
             'company_name' => $request->company_name,
             'status' => 'active',
+        ]);
+
+        ActivityLogger::log('customer.created', $customer, [
+            'name' => $customer->name,
         ]);
 
         return redirect()->route('customers.index')
@@ -75,6 +80,10 @@ class CustomerController extends Controller
 
         $customer->update($request->all());
 
+        ActivityLogger::log('customer.updated', $customer, [
+            'name' => $customer->name,
+        ]);
+
         return redirect()->route('customers.index')
             ->with('success', 'Customer updated successfully');
     }
@@ -82,6 +91,10 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         $this->authorize('delete', $customer);
+
+        ActivityLogger::log('customer.deleted', $customer, [
+            'name' => $customer->name,
+        ]);
 
         $customer->delete();
 

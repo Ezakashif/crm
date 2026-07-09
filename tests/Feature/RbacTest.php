@@ -40,6 +40,9 @@ class RbacTest extends TestCase
         $this->assertTrue($salesRep->hasPermission('view.leads'));
         $this->assertTrue($salesRep->hasPermission('view.tasks'));
         $this->assertTrue($salesRep->hasPermission('update.tasks'));
+        $this->assertTrue($salesRep->hasPermission('delete.tasks'));
+        $this->assertTrue($salesRep->hasPermission('view_own.activity_logs'));
+        $this->assertFalse($salesRep->hasPermission('view_all.tasks'));
         $this->assertFalse($salesRep->hasPermission('create.tasks'));
         $this->assertFalse($salesRep->hasPermission('view.users'));
         $this->assertFalse($salesRep->canAssignTasks());
@@ -52,9 +55,10 @@ class RbacTest extends TestCase
         $this->assertTrue($manager->hasRole('manager'));
         $this->assertTrue($manager->hasPermission('create.tasks'));
         $this->assertTrue($manager->hasPermission('delete.tasks'));
+        $this->assertTrue($manager->hasPermission('view_all.tasks'));
         $this->assertTrue($manager->canAssignTasks());
         $this->assertFalse($manager->hasPermission('view.users'));
-        $this->assertFalse($manager->hasPermission('view.activity_logs'));
+        $this->assertTrue($manager->hasPermission('view.activity_logs'));
     }
 
     public function test_user_can_have_multiple_roles(): void

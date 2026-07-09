@@ -10,12 +10,22 @@ class ActivityLogController extends Controller
 {
     public function index(Request $request)
     {
-        $this->authorize('view.activity_logs');
-        $query = ActivityLog::with(['actor', 'subject'])
-            ->latest();
+        $user = $request->user();
 
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
+        if (! $user->hasPermission('view.activity_logs') && ! $user->hasPermission('view_own.activity_logs')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $canViewAll = $user->hasPermission('view.activity_logs');
+
+        $query = ActivityLog::with(['actor', 'subject'])->latest();
+
+        if ($canViewAll) {
+            if ($request->filled('user_id')) {
+                $query->where('user_id', $request->user_id);
+            }
+        } else {
+            $query->where('user_id', $user->id);
         }
 
         if ($request->filled('action')) {
@@ -26,8 +36,9 @@ class ActivityLogController extends Controller
 
         return view('activity-logs.index', [
             'logs' => $logs,
-            'users' => User::orderBy('name')->get(),
+            'users' => $canViewAll ? User::orderBy('name')->get() : collect(),
             'actions' => ActivityLog::ACTION_LABELS,
+            'canViewAll' => $canViewAll,
         ]);
     }
 }

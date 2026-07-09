@@ -44,7 +44,7 @@
                 @endforeach
             </select>
         </div>
-        @if(auth()->user()->canAssignTasks())
+        @if(auth()->user()->canViewAllTasks())
             <div class="col-md-3 mb-2">
                 <label for="assigned_to" class="small text-muted mb-1">Assigned To</label>
                 <select id="assigned_to" name="assigned_to" class="form-control form-control-sm">
@@ -92,7 +92,19 @@
                                     </div>
                                     <div class="mt-2">
                                         @can('update', $task)
-                                            <a href="{{ route('tasks.edit', $task) }}" class="btn btn-xs btn-default">Edit</a>
+                                            <a href="{{ route('tasks.edit', $task) }}" class="btn btn-xs btn-default">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        @endcan
+                                        @can('delete', $task)
+                                            <form method="POST" action="{{ route('tasks.destroy', $task) }}" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-xs btn-danger"
+                                                        onclick="return confirm('Delete this task?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         @endcan
                                     </div>
                                 </div>

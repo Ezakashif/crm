@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -43,7 +44,7 @@ class TaskController extends Controller
             'urgent' => 'Urgent',
         ];
 
-        $users = auth()->user()->canAssignTasks()
+        $users = auth()->user()->canViewAllTasks()
             ? User::active()->orderBy('name')->get()
             : collect();
 
@@ -71,7 +72,7 @@ class TaskController extends Controller
             'assigned_to' => 'required|exists:users,id',
         ]);
 
-        Task::create([
+        $task = Task::create([
             'created_by' => auth()->id(),
             'assigned_to' => $validated['assigned_to'],
             'title' => $validated['title'],
@@ -79,6 +80,10 @@ class TaskController extends Controller
             'priority' => $validated['priority'],
             'status' => 'pending',
             'due_date' => $validated['due_date'] ?? null,
+        ]);
+
+        ActivityLogger::log('task.created', $task, [
+            'title' => $task->title,
         ]);
 
         return redirect()->route('tasks.index')
@@ -89,7 +94,7 @@ class TaskController extends Controller
     {
         $this->authorize('update', $task);
 
-        $users = auth()->user()->canAssignTasks()
+        $users = auth()->user()->canViewAllTasks()
             ? User::active()->orderBy('name')->get()
             : collect();
 
@@ -108,11 +113,13 @@ class TaskController extends Controller
             'due_date' => 'nullable|date',
         ];
 
-        if (auth()->user()->canAssignTasks()) {
+        if (auth()->user()->can('assign', $task)) {
             $rules['assigned_to'] = 'required|exists:users,id';
         }
 
         $validated = $request->validate($rules);
+
+        $previousStatus = $task->status;
 
         $task->fill($validated);
 
@@ -123,6 +130,17 @@ class TaskController extends Controller
         }
 
         $task->save();
+
+        ActivityLogger::log('task.updated', $task, [
+            'title' => $task->title,
+        ]);
+
+        if ($previousStatus !== $task->status) {
+            ActivityLogger::log('task.status_changed', $task, [
+                'from' => $previousStatus,
+                'to' => $task->status,
+            ]);
+        }
 
         return redirect()->route('tasks.index')
             ->with('success', 'Task updated successfully');
@@ -140,10 +158,19 @@ class TaskController extends Controller
 
         $this->authorize('update', $task);
 
+        $previousStatus = $task->status;
+
         $task->status = $request->status;
         $task->sort_order = $request->sort_order;
         $task->completed_at = $request->status === 'completed' ? now() : null;
         $task->save();
+
+        if ($previousStatus !== $task->status) {
+            ActivityLogger::log('task.status_changed', $task, [
+                'from' => $previousStatus,
+                'to' => $task->status,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -153,6 +180,10 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         $this->authorize('delete', $task);
+
+        ActivityLogger::log('task.deleted', $task, [
+            'title' => $task->title,
+        ]);
 
         $task->delete();
 
@@ -180,10 +211,19 @@ class TaskController extends Controller
             'status' => 'required|in:pending,in_progress,completed',
         ]);
 
+        $previousStatus = $task->status;
+
         $task->update([
             'status' => $request->status,
             'completed_at' => $request->status === 'completed' ? now() : null,
         ]);
+
+        if ($previousStatus !== $request->status) {
+            ActivityLogger::log('task.status_changed', $task, [
+                'from' => $previousStatus,
+                'to' => $request->status,
+            ]);
+        }
 
         return back()->with('success', 'Task status updated');
     }

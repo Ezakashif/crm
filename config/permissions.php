@@ -33,7 +33,8 @@ return [
         'tasks' => [
             'label' => 'Tasks',
             'actions' => [
-                'view' => 'View',
+                'view' => 'View Own',
+                'view_all' => 'View All',
                 'create' => 'Create',
                 'update' => 'Update',
                 'delete' => 'Delete',
@@ -61,7 +62,8 @@ return [
         'activity_logs' => [
             'label' => 'Activity Logs',
             'actions' => [
-                'view' => 'View',
+                'view' => 'View All',
+                'view_own' => 'View Own',
             ],
         ],
         'demo' => [
