@@ -80,7 +80,11 @@
                     </div>
                     <div class="card-body task-column p-2" data-status="{{ $statusKey }}" style="min-height: 350px;">
                         @foreach($tasks->where('status', $statusKey) as $task)
-                            <div class="card card-sm mb-2 task-card" data-task-id="{{ $task->id }}" style="cursor: move;">
+                            @php($canChangeStatus = auth()->user()->can('changeStatus', $task))
+                            <div class="card card-sm mb-2 task-card"
+                                 data-task-id="{{ $task->id }}"
+                                 data-draggable="{{ $canChangeStatus ? '1' : '0' }}"
+                                 style="cursor: {{ $canChangeStatus ? 'move' : 'default' }};">
                                 <div class="card-body p-2">
                                     <h6 class="mb-1">{{ $task->title }}</h6>
                                     @if($task->description)
@@ -118,14 +122,14 @@
 
     @push('js')
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-        @can('update.tasks')
+        @if($tasks->contains(fn ($task) => auth()->user()->can('changeStatus', $task)))
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     document.querySelectorAll('.task-column').forEach(column => {
                         new Sortable(column, {
                             group: 'kanban',
                             animation: 200,
-                            draggable: '.task-card',
+                            draggable: '.task-card[data-draggable="1"]',
                             ghostClass: 'opacity-50',
                             onEnd: function (evt) {
                                 fetch("{{ route('tasks.board.update') }}", {
@@ -148,14 +152,6 @@
                     });
                 });
             </script>
-        @else
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    document.querySelectorAll('.task-card').forEach(card => {
-                        card.style.cursor = 'default';
-                    });
-                });
-            </script>
-        @endcan
+        @endif
     @endpush
 </x-app-layout>

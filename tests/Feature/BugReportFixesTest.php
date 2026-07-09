@@ -114,4 +114,38 @@ class BugReportFixesTest extends TestCase
             ->assertSee('Activity Log')
             ->assertSee('Sales Customer');
     }
+
+    public function test_change_status_permission_allows_drag_but_not_edit(): void
+    {
+        $user = User::factory()->create();
+        $salesRole = \App\Models\Role::query()->where('slug', 'sales')->firstOrFail();
+        $updatePermission = \App\Models\Permission::query()->where('slug', 'update.tasks')->firstOrFail();
+        $changeStatusPermission = \App\Models\Permission::query()->where('slug', 'change_status.tasks')->firstOrFail();
+
+        $salesRole->permissions()->detach($updatePermission->id);
+        $salesRole->permissions()->syncWithoutDetaching([$changeStatusPermission->id]);
+        $user->cachedPermissionSlugs = null;
+
+        $ownTask = Task::factory()->assignedTo($user)->create();
+
+        $this->assertTrue($user->can('changeStatus', $ownTask));
+        $this->assertFalse($user->can('update', $ownTask));
+
+        $response = $this->actingAs($user)->get(route('tasks.edit', $ownTask));
+
+        $response->assertForbidden();
+    }
+
+    public function test_task_view_permissions_have_distinct_labels(): void
+    {
+        $this->assertDatabaseHas('permissions', [
+            'slug' => 'view.tasks',
+            'name' => 'View Own Tasks',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'slug' => 'view_all.tasks',
+            'name' => 'View All Tasks',
+        ]);
+    }
 }

@@ -35,6 +35,19 @@ class TaskPolicy
         return $user->ownsTask($task) || $user->canManageAnyTask();
     }
 
+    public function changeStatus(User $user, Task $task): bool
+    {
+        if ($this->update($user, $task)) {
+            return true;
+        }
+
+        if (! $user->hasPermission('change_status.tasks')) {
+            return false;
+        }
+
+        return $user->ownsTask($task) || $user->canManageAnyTask();
+    }
+
     public function delete(User $user, Task $task): bool
     {
         if (! $user->hasPermission('delete.tasks')) {

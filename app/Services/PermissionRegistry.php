@@ -30,6 +30,7 @@ class PermissionRegistry
             'tasks.update' => 'update.tasks',
             'tasks.delete' => 'delete.tasks',
             'tasks.assign' => 'assign.tasks',
+            'tasks.change_status' => 'change_status.tasks',
             'users.manage' => 'view.users',
             'roles.manage' => 'view.roles',
             'permissions.manage' => 'view.roles',

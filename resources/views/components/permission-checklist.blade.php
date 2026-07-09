@@ -22,7 +22,7 @@
                                        value="{{ $permission->id }}"
                                        @checked(in_array($permission->id, $selected, true))>
                                 <label class="form-check-label" for="{{ $name }}-{{ $permission->id }}">
-                                    {{ explode(' ', $permission->name)[0] }}
+                                    {{ $permission->name }}
                                     <small class="text-muted d-block">{{ $permission->slug }}</small>
                                 </label>
                             </div>

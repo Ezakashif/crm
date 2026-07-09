@@ -158,7 +158,7 @@ class TaskController extends Controller
 
         $task = Task::findOrFail($request->task_id);
 
-        $this->authorize('update', $task);
+        $this->authorize('changeStatus', $task);
 
         $previousStatus = $task->status;
 
@@ -195,7 +195,7 @@ class TaskController extends Controller
 
     public function markComplete(Task $task)
     {
-        $this->authorize('update', $task);
+        $this->authorize('changeStatus', $task);
 
         $task->update([
             'status' => 'completed',
@@ -207,7 +207,7 @@ class TaskController extends Controller
 
     public function changeStatus(Request $request, Task $task)
     {
-        $this->authorize('update', $task);
+        $this->authorize('changeStatus', $task);
 
         $request->validate([
             'status' => 'required|in:pending,in_progress,completed',

@@ -36,6 +36,7 @@ return [
                 'view' => 'View Own',
                 'view_all' => 'View All',
                 'create' => 'Create',
+                'change_status' => 'Change Status',
                 'update' => 'Update',
                 'delete' => 'Delete',
                 'assign' => 'Assign',
