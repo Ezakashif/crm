@@ -30,7 +30,7 @@ class DashboardTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Dashboard');
-        $response->assertSee('Here's what needs your attention today');
+        $response->assertSee("Here's what needs your attention today");
     }
 
     public function test_dashboard_shows_actionable_metrics_for_sales_user(): void
@@ -86,7 +86,7 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee('Today's Follow-ups');
+        $response->assertSee("Today's Follow-ups");
         $response->assertSee('Pending Tasks');
         $response->assertSee('Overdue Tasks');
         $response->assertSee('New Leads');
