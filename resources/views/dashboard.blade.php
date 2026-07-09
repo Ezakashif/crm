@@ -3,7 +3,7 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <div>
                 <h1 class="m-0">Dashboard</h1>
-                <small class="text-muted">Here's what needs your attention today, {{ Auth::user()->name }}.</small>
+                <small class="text-muted">What needs your attention today, {{ Auth::user()->name }}.</small>
             </div>
             @if(! empty($quickActions))
                 <div class="mt-2 mt-md-0">
@@ -24,7 +24,7 @@
                 <div class="small-box bg-info">
                     <div class="inner">
                         <h3>{{ $todaysFollowUpsCount }}</h3>
-                        <p>Today's Follow-ups</p>
+                        <p>Follow-ups Today</p>
                     </div>
                     <div class="icon"><i class="fas fa-calendar-check"></i></div>
                     <a href="#todays-follow-ups" class="small-box-footer">
@@ -185,7 +185,7 @@
             <div class="col-lg-6" id="todays-follow-ups">
                 <div class="card card-outline card-info">
                     <div class="card-header">
-                        <h3 class="card-title">Today's Follow-ups</h3>
+                        <h3 class="card-title">Follow-ups Today</h3>
                         <div class="card-tools">
                             <span class="badge badge-info">{{ $todaysFollowUpsCount }}</span>
                         </div>
