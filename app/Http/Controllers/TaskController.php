@@ -94,7 +94,9 @@ class TaskController extends Controller
     {
         $this->authorize('update', $task);
 
-        $users = auth()->user()->canViewAllTasks()
+        $user = auth()->user();
+
+        $users = ($user->canViewAllTasks() || $user->can('assign', $task))
             ? User::active()->orderBy('name')->get()
             : collect();
 
