@@ -20,9 +20,9 @@ class DashboardService
      */
     public function forUser(User $user): array
     {
-        $canViewLeads = $user->can('view.leads');
-        $canViewTasks = $user->can('view.tasks');
-        $canViewCustomers = $user->can('view.customers');
+        $canViewLeads = $user->hasPermission('view.leads');
+        $canViewTasks = $user->hasPermission('view.tasks');
+        $canViewCustomers = $user->hasPermission('view.customers');
         $canViewAllActivityLogs = $user->hasPermission('view.activity_logs');
         $canViewOwnActivityLogs = $user->hasPermission('view_own.activity_logs');
         $canViewActivityLogs = $canViewAllActivityLogs || $canViewOwnActivityLogs;
@@ -228,7 +228,7 @@ class DashboardService
     {
         $actions = [];
 
-        if ($user->can('create.leads')) {
+        if ($user->hasPermission('create.leads')) {
             $actions[] = [
                 'label' => 'Add Lead',
                 'route' => route('leads.create'),
@@ -237,7 +237,7 @@ class DashboardService
             ];
         }
 
-        if ($user->can('create.tasks')) {
+        if ($user->hasPermission('create.tasks')) {
             $actions[] = [
                 'label' => 'Add Task',
                 'route' => route('tasks.create'),
@@ -246,7 +246,7 @@ class DashboardService
             ];
         }
 
-        if ($user->can('create.customers')) {
+        if ($user->hasPermission('create.customers')) {
             $actions[] = [
                 'label' => 'Add Customer',
                 'route' => route('customers.create'),
@@ -255,7 +255,7 @@ class DashboardService
             ];
         }
 
-        if ($user->can('view.leads')) {
+        if ($user->hasPermission('view.leads')) {
             $actions[] = [
                 'label' => 'Lead Board',
                 'route' => route('leads.index'),
@@ -264,7 +264,7 @@ class DashboardService
             ];
         }
 
-        if ($user->can('view.tasks')) {
+        if ($user->hasPermission('view.tasks')) {
             $actions[] = [
                 'label' => 'Task Board',
                 'route' => route('tasks.index'),
