@@ -17,8 +17,7 @@ class DashboardService
      * Build the dashboard payload for the authenticated user.
      *
      * Lead and task analytics are scoped to the current assignee unless the
-     * user can view organization-wide data (admin, or view_all.tasks for tasks /
-     * admin|manager for leads).
+     * user has view_all.leads / view_all.tasks.
      *
      * @return array<string, mixed>
      */
@@ -30,10 +29,10 @@ class DashboardService
         $canViewAllActivityLogs = $user->hasPermission('view.activity_logs');
         $canViewOwnActivityLogs = $user->hasPermission('view_own.activity_logs');
         $canViewActivityLogs = $canViewAllActivityLogs || $canViewOwnActivityLogs;
-        $canViewAllLeadAnalytics = $this->canViewAllLeadAnalytics($user);
+        $canViewAllLeadAnalytics = $user->canViewAllLeads();
 
         $taskQuery = $canViewTasks ? Task::visibleTo($user) : null;
-        $leadQuery = $canViewLeads ? $this->leadsVisibleTo($user) : null;
+        $leadQuery = $canViewLeads ? Lead::visibleTo($user) : null;
 
         $leadStatusCounts = $canViewLeads
             ? (clone $leadQuery)
@@ -132,26 +131,6 @@ class DashboardService
 
             'quickActions' => $this->quickActions($user),
         ];
-    }
-
-    /**
-     * Admins and managers see organization-wide lead analytics.
-     * Sales users only see leads assigned to them.
-     */
-    protected function canViewAllLeadAnalytics(User $user): bool
-    {
-        return $user->isAdmin() || $user->isManager();
-    }
-
-    protected function leadsVisibleTo(User $user): Builder
-    {
-        $query = Lead::query();
-
-        if ($this->canViewAllLeadAnalytics($user)) {
-            return $query;
-        }
-
-        return $query->where('assigned_to', $user->id);
     }
 
     protected function todaysFollowUpsQuery(Builder $leadQuery): Builder

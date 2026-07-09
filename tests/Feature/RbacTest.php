@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use App\Services\PermissionRegistry;
 use Database\Seeders\RbacSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -30,9 +29,11 @@ class RbacTest extends TestCase
         $this->assertTrue($admin->hasPermission('view.roles'));
         $this->assertTrue($admin->hasPermission('create.tasks'));
         $this->assertTrue($admin->canAssignTasks());
+        $this->assertTrue($admin->canViewAllLeads());
+        $this->assertTrue($admin->canAssignLeads());
     }
 
-    public function test_sales_rep_has_limited_task_permissions(): void
+    public function test_sales_rep_has_limited_task_and_lead_permissions(): void
     {
         $salesRep = User::factory()->create();
 
@@ -43,36 +44,43 @@ class RbacTest extends TestCase
         $this->assertTrue($salesRep->hasPermission('delete.tasks'));
         $this->assertTrue($salesRep->hasPermission('view_own.activity_logs'));
         $this->assertFalse($salesRep->hasPermission('view_all.tasks'));
+        $this->assertFalse($salesRep->hasPermission('view_all.leads'));
+        $this->assertFalse($salesRep->hasPermission('assign.leads'));
         $this->assertFalse($salesRep->hasPermission('create.tasks'));
         $this->assertFalse($salesRep->hasPermission('view.users'));
         $this->assertFalse($salesRep->canAssignTasks());
+        $this->assertFalse($salesRep->canAssignLeads());
     }
 
-    public function test_manager_can_manage_tasks_but_not_users(): void
+    public function test_manager_system_role_is_removed(): void
     {
-        $manager = User::factory()->manager()->create();
-
-        $this->assertTrue($manager->hasRole('manager'));
-        $this->assertTrue($manager->hasPermission('create.tasks'));
-        $this->assertTrue($manager->hasPermission('delete.tasks'));
-        $this->assertTrue($manager->hasPermission('view_all.tasks'));
-        $this->assertTrue($manager->canAssignTasks());
-        $this->assertFalse($manager->hasPermission('view.users'));
-        $this->assertTrue($manager->hasPermission('view.activity_logs'));
+        $this->assertFalse(Role::query()->where('slug', 'manager')->exists());
+        $this->assertTrue(Role::query()->where('slug', 'admin')->where('is_system', true)->exists());
+        $this->assertTrue(Role::query()->where('slug', 'sales')->exists());
+        $this->assertFalse(Role::query()->where('slug', 'sales')->where('is_system', true)->exists());
+        $this->assertSame(1, Role::query()->where('is_system', true)->count());
     }
 
-    public function test_user_can_have_multiple_roles(): void
+    public function test_user_can_have_multiple_custom_roles(): void
     {
         $user = User::factory()->create();
-        $managerRole = Role::query()->where('slug', 'manager')->firstOrFail();
+        $customRole = Role::query()->create([
+            'name' => 'Team Lead',
+            'slug' => 'team-lead',
+            'description' => 'Custom role',
+            'is_system' => false,
+        ]);
+
+        $assignPermission = Permission::query()->where('slug', 'assign.tasks')->firstOrFail();
+        $customRole->permissions()->sync([$assignPermission->id]);
 
         $user->syncRoles([
             ...$user->roles()->pluck('roles.id')->all(),
-            $managerRole->id,
+            $customRole->id,
         ]);
 
         $this->assertTrue($user->hasRole('sales'));
-        $this->assertTrue($user->hasRole('manager'));
+        $this->assertTrue($user->hasRole('team-lead'));
         $this->assertTrue($user->canAssignTasks());
     }
 
@@ -81,15 +89,6 @@ class RbacTest extends TestCase
         $salesRep = User::factory()->create();
 
         $response = $this->actingAs($salesRep)->get(route('users.index'));
-
-        $response->assertForbidden();
-    }
-
-    public function test_manager_cannot_access_user_management(): void
-    {
-        $manager = User::factory()->manager()->create();
-
-        $response = $this->actingAs($manager)->get(route('users.index'));
 
         $response->assertForbidden();
     }

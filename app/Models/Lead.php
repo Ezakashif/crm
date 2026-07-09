@@ -138,6 +138,15 @@ class Lead extends Model
         return $query->where('status', $status);
     }
 
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if ($user->canViewAllLeads()) {
+            return $query;
+        }
+
+        return $query->where('assigned_to', $user->id);
+    }
+
     public function scopeAssignedTo(Builder $query, ?string $userId): Builder
     {
         if (! filled($userId)) {

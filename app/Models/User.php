@@ -59,11 +59,6 @@ class User extends Authenticatable
         return $this->hasRole('admin');
     }
 
-    public function isManager(): bool
-    {
-        return $this->hasRole('manager');
-    }
-
     public function isActive(): bool
     {
         return $this->status === 'active';
@@ -162,7 +157,6 @@ class User extends Authenticatable
     {
         return match (true) {
             $this->hasRole('admin') => 'primary',
-            $this->hasRole('manager') => 'warning',
             default => 'info',
         };
     }

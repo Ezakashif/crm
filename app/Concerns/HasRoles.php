@@ -2,6 +2,7 @@
 
 namespace App\Concerns;
 
+use App\Models\Lead;
 use App\Models\Task;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -80,6 +81,26 @@ trait HasRoles
         return $this->canViewAllTasks() && $this->canAssignTasks();
     }
 
+    public function canViewAllLeads(): bool
+    {
+        return $this->hasPermission('view_all.leads');
+    }
+
+    public function canAssignLeads(): bool
+    {
+        return $this->hasPermission('assign.leads');
+    }
+
+    public function ownsLead(Lead $lead): bool
+    {
+        return $lead->assigned_to === $this->id;
+    }
+
+    public function canManageAnyLead(): bool
+    {
+        return $this->canViewAllLeads() && $this->canAssignLeads();
+    }
+
     /**
      * @param  array<int|string>  $roleIds
      */
@@ -107,7 +128,6 @@ trait HasRoles
     {
         $slug = match ($this->role) {
             'admin' => 'admin',
-            'manager' => 'manager',
             default => 'sales',
         };
 
@@ -124,7 +144,6 @@ trait HasRoles
 
         $this->role = match (true) {
             in_array('admin', $slugs, true) => 'admin',
-            in_array('manager', $slugs, true) => 'manager',
             default => 'user',
         };
 

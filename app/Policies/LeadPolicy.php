@@ -14,7 +14,11 @@ class LeadPolicy
 
     public function view(User $user, Lead $lead): bool
     {
-        return $user->hasPermission('view.leads');
+        if (! $user->hasPermission('view.leads')) {
+            return false;
+        }
+
+        return $user->canViewAllLeads() || $user->ownsLead($lead);
     }
 
     public function create(User $user): bool
@@ -24,21 +28,46 @@ class LeadPolicy
 
     public function update(User $user, Lead $lead): bool
     {
-        return $user->hasPermission('update.leads');
+        if (! $user->hasPermission('update.leads')) {
+            return false;
+        }
+
+        return $user->ownsLead($lead) || $user->canManageAnyLead();
     }
 
     public function delete(User $user, Lead $lead): bool
     {
-        return $user->hasPermission('delete.leads');
+        if (! $user->hasPermission('delete.leads')) {
+            return false;
+        }
+
+        return $user->ownsLead($lead) || $user->canManageAnyLead();
+    }
+
+    public function assign(User $user, Lead $lead): bool
+    {
+        if (! $user->hasPermission('assign.leads')) {
+            return false;
+        }
+
+        return $user->canManageAnyLead() || $user->ownsLead($lead);
     }
 
     public function convert(User $user, Lead $lead): bool
     {
-        return $user->hasPermission('convert.leads');
+        if (! $user->hasPermission('convert.leads')) {
+            return false;
+        }
+
+        return $user->ownsLead($lead) || $user->canViewAllLeads();
     }
 
     public function createActivity(User $user, Lead $lead): bool
     {
-        return $user->hasPermission('log.leads');
+        if (! $user->hasPermission('log.leads')) {
+            return false;
+        }
+
+        return $user->ownsLead($lead) || $user->canViewAllLeads();
     }
 }

@@ -47,17 +47,28 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="assigned_to">Assign To</label>
-                            <select id="assigned_to" name="assigned_to" class="form-control">
-                                <option value="">— Unassigned —</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" @selected(old('assigned_to') == $user->id)>{{ $user->name }}</option>
-                                @endforeach
-                            </select>
+                    @if(auth()->user()->canAssignLeads())
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="assigned_to">Assign To</label>
+                                <select id="assigned_to" name="assigned_to" class="form-control @error('assigned_to') is-invalid @enderror">
+                                    <option value="">— Unassigned —</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" @selected(old('assigned_to') == $user->id)>{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('assigned_to')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Assign To</label>
+                                <input type="text" class="form-control" value="{{ auth()->user()->name }} (you)" disabled>
+                                <small class="form-text text-muted">This lead will be assigned to you automatically.</small>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="row">

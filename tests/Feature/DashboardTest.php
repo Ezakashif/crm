@@ -226,11 +226,11 @@ class DashboardTest extends TestCase
         $response->assertSee('Sales overdue task');
     }
 
-    public function test_manager_sees_quick_actions_they_can_perform(): void
+    public function test_admin_sees_quick_actions_they_can_perform(): void
     {
-        $manager = User::factory()->manager()->create();
+        $admin = User::factory()->admin()->create();
 
-        $response = $this->actingAs($manager)->get(route('dashboard'));
+        $response = $this->actingAs($admin)->get(route('dashboard'));
 
         $response->assertOk();
         $response->assertSee('Add Lead');

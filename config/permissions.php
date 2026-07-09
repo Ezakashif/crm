@@ -22,10 +22,12 @@ return [
         'leads' => [
             'label' => 'Leads',
             'actions' => [
-                'view' => 'View',
+                'view' => 'View Own',
+                'view_all' => 'View All',
                 'create' => 'Create',
                 'update' => 'Update',
                 'delete' => 'Delete',
+                'assign' => 'Assign',
                 'convert' => 'Convert',
                 'log' => 'Log Activities',
             ],

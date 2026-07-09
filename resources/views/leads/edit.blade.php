@@ -42,7 +42,14 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="source">Source</label>
-                            <input id="source" name="source" type="text" class="form-control" value="{{ old('source', $lead->source) }}">
+                            <select id="source" name="source" class="form-control">
+                                <option value="">— Select —</option>
+                                @foreach(\App\Models\Lead::SOURCES as $source)
+                                    <option value="{{ $source }}" @selected(old('source', $lead->source) === $source)>
+                                        {{ ucfirst(str_replace('_', ' ', $source)) }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -60,19 +67,29 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="assigned_to">Assign To</label>
-                            <select id="assigned_to" name="assigned_to" class="form-control">
-                                <option value="">— Unassigned —</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" @selected(old('assigned_to', $lead->assigned_to) == $user->id)>
-                                        {{ $user->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                    @can('assign', $lead)
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="assigned_to">Assign To</label>
+                                <select id="assigned_to" name="assigned_to" class="form-control @error('assigned_to') is-invalid @enderror">
+                                    <option value="">— Unassigned —</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" @selected(old('assigned_to', $lead->assigned_to) == $user->id)>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('assigned_to')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Assigned To</label>
+                                <input type="text" class="form-control" value="{{ $lead->assignee?->name ?? 'Unassigned' }}" disabled>
+                            </div>
+                        </div>
+                    @endcan
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="estimated_value">Estimated Value</label>

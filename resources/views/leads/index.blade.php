@@ -44,18 +44,20 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-3 mb-2">
-            <label for="assigned_to" class="small text-muted mb-1">Assigned To</label>
-            <select id="assigned_to" name="assigned_to" class="form-control form-control-sm">
-                <option value="">Anyone</option>
-                <option value="unassigned" @selected(($filters['assigned_to'] ?? '') === 'unassigned')>Unassigned</option>
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}" @selected(($filters['assigned_to'] ?? '') == $user->id)>
-                        {{ $user->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+        @if(auth()->user()->canViewAllLeads())
+            <div class="col-md-3 mb-2">
+                <label for="assigned_to" class="small text-muted mb-1">Assigned To</label>
+                <select id="assigned_to" name="assigned_to" class="form-control form-control-sm">
+                    <option value="">Anyone</option>
+                    <option value="unassigned" @selected(($filters['assigned_to'] ?? '') === 'unassigned')>Unassigned</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" @selected(($filters['assigned_to'] ?? '') == $user->id)>
+                            {{ $user->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
     </x-list-filters>
 
     @php

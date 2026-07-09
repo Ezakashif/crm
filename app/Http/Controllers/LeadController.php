@@ -15,6 +15,8 @@ class LeadController extends Controller
     {
         $this->authorize('viewAny', Lead::class);
 
+        $user = $request->user();
+
         $filters = $request->validate([
             'search' => 'nullable|string|max:255',
             'status' => 'nullable|in:new,contacted,qualified,proposal_sent,won,lost',
@@ -22,10 +24,11 @@ class LeadController extends Controller
             'source' => 'nullable|in:'.implode(',', Lead::SOURCES),
         ]);
 
-        $leads = Lead::with('assignee')
+        $leads = Lead::visibleTo($user)
+            ->with('assignee')
             ->search($filters['search'] ?? null)
             ->status($filters['status'] ?? null)
-            ->assignedTo($filters['assigned_to'] ?? null)
+            ->when($user->canViewAllLeads(), fn ($query) => $query->assignedTo($filters['assigned_to'] ?? null))
             ->source($filters['source'] ?? null)
             ->orderBy('status')
             ->orderBy('sort_order')
@@ -33,7 +36,9 @@ class LeadController extends Controller
 
         $statuses = Lead::STATUSES;
 
-        $users = User::active()->orderBy('name')->get();
+        $users = $user->canViewAllLeads()
+            ? User::active()->orderBy('name')->get()
+            : collect();
 
         return view('leads.index', compact('leads', 'statuses', 'filters', 'users'));
     }
@@ -42,7 +47,11 @@ class LeadController extends Controller
     {
         $this->authorize('create', Lead::class);
 
-        $users = User::active()->orderBy('name')->get();
+        $user = auth()->user();
+
+        $users = $user->canAssignLeads()
+            ? User::active()->orderBy('name')->get()
+            : collect();
 
         return view('leads.create', compact('users'));
     }
@@ -51,26 +60,44 @@ class LeadController extends Controller
     {
         $this->authorize('create', Lead::class);
 
-        $request->validate([
-            'name' => 'required',
-            'status' => 'required',
-        ]);
+        $user = $request->user();
+
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'source' => 'nullable|in:'.implode(',', Lead::SOURCES),
+            'estimated_value' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string',
+            'follow_up_date' => 'nullable|date',
+        ];
+
+        if ($user->canAssignLeads()) {
+            $rules['assigned_to'] = 'nullable|exists:users,id';
+        }
+
+        $validated = $request->validate($rules);
+
+        $assignedTo = $user->canAssignLeads()
+            ? ($validated['assigned_to'] ?? null)
+            : $user->id;
 
         $sortOrder = Lead::where('status', 'new')->max('sort_order') + 1;
 
         $lead = Lead::create([
-            'created_by' => auth()->id(),
-            'assigned_to' => $request->assigned_to,
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'company' => $request->company,
-            'source' => $request->source,
+            'created_by' => $user->id,
+            'assigned_to' => $assignedTo,
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'company' => $validated['company'] ?? null,
+            'source' => $validated['source'] ?? null,
             'status' => 'new',
             'sort_order' => $sortOrder,
-            'estimated_value' => $request->estimated_value,
-            'notes' => $request->notes,
-            'follow_up_date' => $request->follow_up_date,
+            'estimated_value' => $validated['estimated_value'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'follow_up_date' => $validated['follow_up_date'] ?? null,
         ]);
 
         ActivityLogger::log('lead.created', $lead, [
@@ -97,7 +124,11 @@ class LeadController extends Controller
     {
         $this->authorize('update', $lead);
 
-        $users = User::active()->orderBy('name')->get();
+        $user = auth()->user();
+
+        $users = ($user->canViewAllLeads() || $user->can('assign', $lead))
+            ? User::active()->orderBy('name')->get()
+            : collect();
 
         return view('leads.edit', compact('lead', 'users'));
     }
@@ -106,11 +137,44 @@ class LeadController extends Controller
     {
         $this->authorize('update', $lead);
 
-        $lead->update($request->all());
+        $user = $request->user();
+
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'source' => 'nullable|in:'.implode(',', Lead::SOURCES),
+            'status' => 'required|in:'.implode(',', array_keys(Lead::STATUSES)),
+            'estimated_value' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string',
+            'follow_up_date' => 'nullable|date',
+        ];
+
+        if ($user->can('assign', $lead)) {
+            $rules['assigned_to'] = 'nullable|exists:users,id';
+        }
+
+        $validated = $request->validate($rules);
+
+        if (! $user->can('assign', $lead)) {
+            unset($validated['assigned_to']);
+        }
+
+        $previousStatus = $lead->status;
+
+        $lead->update($validated);
 
         ActivityLogger::log('lead.updated', $lead, [
             'name' => $lead->name,
         ]);
+
+        if ($previousStatus !== $lead->status) {
+            ActivityLogger::log('lead.status_changed', $lead, [
+                'from' => $previousStatus,
+                'to' => $lead->status,
+            ]);
+        }
 
         return redirect()->route('leads.show', $lead)->with('success', 'Lead updated');
     }
