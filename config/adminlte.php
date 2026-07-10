@@ -305,6 +305,7 @@ return [
             'route' => 'search.index',
             'input_name' => 'q',
             'method' => 'get',
+            'id' => 'navbar-global-search',
             'topnav_right' => true,
         ],
         [

@@ -163,4 +163,50 @@ class GlobalSearchTest extends TestCase
             ->assertOk()
             ->assertSee('Unassigned Search Lead');
     }
+
+    public function test_suggest_returns_categorized_json_for_assigned_leads(): void
+    {
+        $viewer = User::factory()->create();
+        $other = User::factory()->create();
+
+        $lead = Lead::factory()->assignedTo($viewer)->create([
+            'created_by' => $viewer->id,
+            'name' => 'Suggestable Lead',
+            'email' => 'suggestable@example.com',
+            'company' => 'Suggest Co',
+        ]);
+
+        Lead::factory()->assignedTo($other)->create([
+            'created_by' => $other->id,
+            'name' => 'Other Suggest Lead',
+            'company' => 'Suggest Co',
+        ]);
+
+        Customer::factory()->create([
+            'created_by' => $viewer->id,
+            'name' => 'Suggestable Customer',
+            'company_name' => 'Suggest Co',
+        ]);
+
+        $response = $this->actingAs($viewer)->getJson(route('search.suggest', ['q' => 'Suggest']));
+
+        $response->assertOk();
+        $response->assertJsonPath('too_short', false);
+        $response->assertJsonFragment(['title' => 'Suggestable Lead']);
+        $response->assertJsonFragment(['title' => 'Suggestable Customer']);
+        $response->assertJsonFragment(['title' => 'Suggest Co']);
+        $response->assertJsonMissing(['title' => 'Other Suggest Lead']);
+        $response->assertJsonFragment(['url' => route('leads.show', $lead)]);
+    }
+
+    public function test_suggest_returns_empty_groups_for_short_query(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->getJson(route('search.suggest', ['q' => 'a']))
+            ->assertOk()
+            ->assertJsonPath('too_short', true)
+            ->assertJsonPath('groups', []);
+    }
 }
