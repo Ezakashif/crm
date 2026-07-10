@@ -87,7 +87,7 @@ class TaskBoardTest extends TestCase
     public function test_task_board_page_enables_dragging_for_sales_user(): void
     {
         $user = User::factory()->create();
-        Task::factory()->assignedTo($user)->create([
+        $task = Task::factory()->assignedTo($user)->create([
             'created_by' => $user->id,
             'status' => 'pending',
             'title' => 'Visible task',
@@ -99,6 +99,8 @@ class TaskBoardTest extends TestCase
         $response->assertSee('data-draggable="1"', false);
         $response->assertSee('tasks-kanban', false);
         $response->assertSee('Visible task');
+        $response->assertSee(route('tasks.show', $task), false);
+        $response->assertSee('fa-eye', false);
     }
 
     public function test_sales_user_can_view_assigned_task_details(): void

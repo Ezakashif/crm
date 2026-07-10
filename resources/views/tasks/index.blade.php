@@ -97,8 +97,19 @@
                                         <span><i class="fas fa-calendar"></i> {{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('d M') : '—' }}</span>
                                     </div>
                                     <div class="mt-2">
+                                        @can('view', $task)
+                                            <a href="{{ route('tasks.show', $task) }}"
+                                               class="btn btn-xs btn-primary"
+                                               title="View task"
+                                               aria-label="View task">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        @endcan
                                         @can('update', $task)
-                                            <a href="{{ route('tasks.edit', $task) }}" class="btn btn-xs btn-default">
+                                            <a href="{{ route('tasks.edit', $task) }}"
+                                               class="btn btn-xs btn-default"
+                                               title="Edit task"
+                                               aria-label="Edit task">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         @endcan
@@ -107,6 +118,8 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-xs btn-danger"
+                                                        title="Delete task"
+                                                        aria-label="Delete task"
                                                         onclick="return confirm('Delete this task?')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
