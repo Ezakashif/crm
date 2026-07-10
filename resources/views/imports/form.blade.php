@@ -32,7 +32,8 @@
                                 <span class="invalid-feedback d-block">{{ $message }}</span>
                             @enderror
                             <small class="form-text text-muted">
-                                Max 2 MB · up to {{ $maxRows }} data rows · invalid and duplicate rows are skipped.
+                                Max 2 MB · up to {{ $maxRows }} data rows · invalid and duplicate emails are skipped.
+                                Tip: in Excel use <strong>Save As → CSV UTF-8</strong>. Avoid email hyperlinks — paste emails as plain text.
                             </small>
                         </div>
                     </div>

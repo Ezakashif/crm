@@ -150,6 +150,49 @@ class CsvImportTest extends TestCase
         $this->assertDatabaseHas('customers', ['email' => 'fresh-customer@example.com']);
     }
 
+    public function test_customer_import_allows_different_emails_with_same_name(): void
+    {
+        $user = User::factory()->create();
+
+        $csv = $this->csvFile([
+            ['name', 'email', 'phone', 'company_name', 'address', 'notes'],
+            ['Acme Corp', 'billing@acme.com', '-654', 'Acme Inc', '123 Main', 'VIP account'],
+            ['Acme Corp', 'bolling@acme.com', '-634', 'Acme Inc', '123 Main', 'VIP account'],
+            ['Acme Corp', 'biing@acme.com', '-954', 'Acme Inc', '123 Main', 'VIP account'],
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('imports.store', 'customers'), ['csv_file' => $csv])
+            ->assertRedirect(route('customers.index'))
+            ->assertSessionHas('success');
+
+        $this->assertSame(3, Customer::query()->where('name', 'Acme Corp')->count());
+        $this->assertDatabaseHas('customers', ['email' => 'billing@acme.com']);
+        $this->assertDatabaseHas('customers', ['email' => 'bolling@acme.com']);
+        $this->assertDatabaseHas('customers', ['email' => 'biing@acme.com']);
+    }
+
+    public function test_customer_import_uses_hyperlink_display_email_and_semicolon_delimiter(): void
+    {
+        $user = User::factory()->create();
+
+        $content = "name;email;phone;company_name;address;notes\n"
+            ."Acme Corp;\"=HYPERLINK(\"\"mailto:billing@acme.com\"\",\"\"billing@acme.com\"\")\";-654;Acme Inc;123 Main;VIP\n"
+            ."Acme Corp;\"=HYPERLINK(\"\"mailto:billing@acme.com\"\",\"\"bolling@acme.com\"\")\";-634;Acme Inc;123 Main;VIP\n"
+            ."Acme Corp;mailto:biing@acme.com;-954;Acme Inc;123 Main;VIP\n";
+
+        $csv = UploadedFile::fake()->createWithContent('customers.csv', $content);
+
+        $this->actingAs($user)
+            ->post(route('imports.store', 'customers'), ['csv_file' => $csv])
+            ->assertRedirect(route('customers.index'));
+
+        $this->assertDatabaseHas('customers', ['email' => 'billing@acme.com']);
+        $this->assertDatabaseHas('customers', ['email' => 'bolling@acme.com']);
+        $this->assertDatabaseHas('customers', ['email' => 'biing@acme.com']);
+        $this->assertSame(3, Customer::count());
+    }
+
     public function test_import_form_is_available_for_permitted_types(): void
     {
         $user = User::factory()->create();

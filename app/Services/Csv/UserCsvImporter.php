@@ -35,10 +35,11 @@ class UserCsvImporter
         foreach ($parsed['rows'] as $row) {
             $rowNumber = $row['row'];
             $data = $row['data'];
+            $email = CsvValueNormalizer::email($data['email'] ?? null);
 
             $payload = [
                 'name' => $data['name'] ?? '',
-                'email' => $data['email'] ?? '',
+                'email' => $email ?? '',
                 'password' => $data['password'] ?? '',
                 'roles' => $data['roles'] ?? '',
                 'status' => ($data['status'] ?? '') !== '' ? strtolower((string) $data['status']) : 'active',
@@ -53,15 +54,23 @@ class UserCsvImporter
             }
 
             $validated = $validator->validated();
-            $email = mb_strtolower(trim($validated['email']));
+            $email = CsvValueNormalizer::email($validated['email']);
 
-            if (isset($seenEmails[$email])) {
-                $result->addDuplicate($rowNumber, "Duplicate email in file: {$email}");
+            if ($email === null) {
+                $result->addError($rowNumber, 'A valid email is required.');
 
                 continue;
             }
 
-            // unique:users,email already covers DB duplicates, but keep an explicit message.
+            if (isset($seenEmails[$email])) {
+                $result->addDuplicate(
+                    $rowNumber,
+                    "Duplicate email in file: {$email} (same as row {$seenEmails[$email]})"
+                );
+
+                continue;
+            }
+
             if (User::query()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
                 $result->addDuplicate($rowNumber, "User with email already exists: {$email}");
 
@@ -92,7 +101,7 @@ class UserCsvImporter
 
             $user = User::create([
                 'name' => $validated['name'],
-                'email' => $validated['email'],
+                'email' => $email,
                 'password' => Hash::make($validated['password']),
                 'role' => 'user',
                 'status' => $validated['status'],
@@ -108,7 +117,7 @@ class UserCsvImporter
                 'via' => 'csv_import',
             ]);
 
-            $seenEmails[$email] = true;
+            $seenEmails[$email] = $rowNumber;
             $result->imported++;
         }
 
