@@ -28,7 +28,7 @@ class RbacSeeder extends Seeder
         'sales' => [
             'view.customers', 'create.customers', 'update.customers', 'delete.customers',
             'view.leads', 'create.leads', 'update.leads', 'delete.leads', 'convert.leads', 'log.leads',
-            'view.tasks', 'update.tasks', 'delete.tasks',
+            'view.tasks', 'change_status.tasks', 'update.tasks', 'delete.tasks',
             'view_own.activity_logs',
         ],
     ];

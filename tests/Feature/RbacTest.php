@@ -40,6 +40,7 @@ class RbacTest extends TestCase
         $this->assertTrue($salesRep->hasRole('sales'));
         $this->assertTrue($salesRep->hasPermission('view.leads'));
         $this->assertTrue($salesRep->hasPermission('view.tasks'));
+        $this->assertTrue($salesRep->hasPermission('change_status.tasks'));
         $this->assertTrue($salesRep->hasPermission('update.tasks'));
         $this->assertTrue($salesRep->hasPermission('delete.tasks'));
         $this->assertTrue($salesRep->hasPermission('view_own.activity_logs'));

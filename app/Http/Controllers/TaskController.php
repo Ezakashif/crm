@@ -210,7 +210,7 @@ class TaskController extends Controller
         $this->authorize('changeStatus', $task);
 
         $request->validate([
-            'status' => 'required|in:pending,in_progress,completed',
+            'status' => 'required|in:pending,in_progress,completed,cancelled',
         ]);
 
         $previousStatus = $task->status;

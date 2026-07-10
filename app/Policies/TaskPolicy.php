@@ -37,15 +37,14 @@ class TaskPolicy
 
     public function changeStatus(User $user, Task $task): bool
     {
-        if ($this->update($user, $task)) {
-            return true;
-        }
-
-        if (! $user->hasPermission('change_status.tasks')) {
+        if (! $this->view($user, $task)) {
             return false;
         }
 
-        return $user->ownsTask($task) || $user->canManageAnyTask();
+        // Anyone who can see the task and has update or change_status may
+        // move it across the kanban columns (pending, in_progress, completed, cancelled).
+        return $user->hasPermission('update.tasks')
+            || $user->hasPermission('change_status.tasks');
     }
 
     public function delete(User $user, Task $task): bool

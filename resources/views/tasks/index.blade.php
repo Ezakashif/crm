@@ -17,6 +17,8 @@
             'completed' => 'card-success',
             'cancelled' => 'card-secondary',
         ];
+        $canDragTasks = auth()->user()->hasPermission('update.tasks')
+            || auth()->user()->hasPermission('change_status.tasks');
     @endphp
 
     <x-list-filters :reset-url="route('tasks.index')">
@@ -73,7 +75,7 @@
                     <div class="card-header">
                         <h3 class="card-title">{{ $statusTitle }}</h3>
                         <div class="card-tools">
-                            <span class="badge badge-light">
+                            <span class="badge badge-light column-count">
                                 {{ $tasks->where('status', $statusKey)->count() }}
                             </span>
                         </div>
@@ -84,7 +86,7 @@
                             <div class="card card-sm mb-2 task-card"
                                  data-task-id="{{ $task->id }}"
                                  data-draggable="{{ $canChangeStatus ? '1' : '0' }}"
-                                 style="cursor: {{ $canChangeStatus ? 'move' : 'default' }};">
+                                 style="cursor: {{ $canChangeStatus ? 'grab' : 'default' }};">
                                 <div class="card-body p-2">
                                     <h6 class="mb-1">{{ $task->title }}</h6>
                                     @if($task->description)
@@ -122,31 +124,74 @@
 
     @push('js')
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-        @if($tasks->contains(fn ($task) => auth()->user()->can('changeStatus', $task)))
+        @if($canDragTasks)
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+                        || @json(csrf_token());
+
+                    function refreshColumnCounts() {
+                        document.querySelectorAll('.task-column').forEach(column => {
+                            const badge = column.closest('.card')?.querySelector('.column-count');
+                            if (badge) {
+                                badge.textContent = column.querySelectorAll('.task-card').length;
+                            }
+                        });
+                    }
+
                     document.querySelectorAll('.task-column').forEach(column => {
                         new Sortable(column, {
-                            group: 'kanban',
+                            group: 'tasks-kanban',
                             animation: 200,
                             draggable: '.task-card[data-draggable="1"]',
                             ghostClass: 'opacity-50',
                             onEnd: function (evt) {
-                                fetch("{{ route('tasks.board.update') }}", {
-                                    method: "POST",
+                                const taskId = evt.item.dataset.taskId;
+                                const status = evt.to.dataset.status;
+                                const sortOrder = evt.newIndex + 1;
+
+                                if (evt.from === evt.to && evt.oldIndex === evt.newIndex) {
+                                    return;
+                                }
+
+                                fetch(@json(route('tasks.board.update')), {
+                                    method: 'POST',
                                     headers: {
-                                        "Content-Type": "application/json",
-                                        "Accept": "application/json",
-                                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': csrfToken,
+                                        'X-Requested-With': 'XMLHttpRequest'
                                     },
                                     body: JSON.stringify({
-                                        task_id: evt.item.dataset.taskId,
-                                        status: evt.to.dataset.status,
-                                        sort_order: evt.newIndex + 1
+                                        task_id: taskId,
+                                        status: status,
+                                        sort_order: sortOrder
                                     })
-                                }).then(res => res.json()).then(data => {
-                                    if (!data.success) alert('Unable to update task.');
-                                }).catch(() => alert('Something went wrong.'));
+                                }).then(async (res) => {
+                                    let data = null;
+                                    try {
+                                        data = await res.json();
+                                    } catch (e) {
+                                        data = null;
+                                    }
+
+                                    if (! res.ok || ! data?.success) {
+                                        evt.from.insertBefore(
+                                            evt.item,
+                                            evt.from.children[evt.oldIndex] || null
+                                        );
+                                        alert(data?.message || 'Unable to update task status.');
+                                        return;
+                                    }
+
+                                    refreshColumnCounts();
+                                }).catch(() => {
+                                    evt.from.insertBefore(
+                                        evt.item,
+                                        evt.from.children[evt.oldIndex] || null
+                                    );
+                                    alert('Something went wrong while updating the task.');
+                                });
                             }
                         });
                     });
