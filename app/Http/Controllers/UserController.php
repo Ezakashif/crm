@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Notifications\UserStatusChanged;
 use App\Services\ActivityLogger;
+use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -74,15 +75,7 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'roles' => ['required', 'array', 'min:1'],
-            'roles.*' => ['integer', 'exists:roles,id'],
-            'status' => ['required', Rule::in(array_keys(self::STATUSES))],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
-        ]);
+        $validated = $request->validate(CrmValidation::userStoreRules());
 
         $user = User::create([
             'name' => $validated['name'],

@@ -7,6 +7,7 @@ use App\Models\Lead;
 use App\Models\LeadActivity;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 
 class LeadController extends Controller
@@ -62,20 +63,7 @@ class LeadController extends Controller
 
         $user = $request->user();
 
-        $rules = [
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'company' => 'nullable|string|max:255',
-            'source' => 'nullable|in:'.implode(',', Lead::SOURCES),
-            'estimated_value' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-            'follow_up_date' => 'nullable|date',
-        ];
-
-        if ($user->canAssignLeads()) {
-            $rules['assigned_to'] = 'nullable|exists:users,id';
-        }
+        $rules = CrmValidation::leadStoreRules($user);
 
         $validated = $request->validate($rules);
 

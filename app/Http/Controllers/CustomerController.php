@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Task;
 use App\Services\ActivityLogger;
+use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -39,11 +40,7 @@ class CustomerController extends Controller
     {
         $this->authorize('create', Customer::class);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-        ]);
+        $request->validate(CrmValidation::customerStoreRules());
 
         $customer = Customer::create([
             'created_by' => auth()->id(),

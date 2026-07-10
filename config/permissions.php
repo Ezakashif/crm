@@ -15,6 +15,7 @@ return [
             'actions' => [
                 'view' => 'View',
                 'create' => 'Create',
+                'import' => 'Import',
                 'update' => 'Update',
                 'delete' => 'Delete',
             ],
@@ -25,6 +26,7 @@ return [
                 'view' => 'View Own',
                 'view_all' => 'View All',
                 'create' => 'Create',
+                'import' => 'Import',
                 'update' => 'Update',
                 'delete' => 'Delete',
                 'assign' => 'Assign',
@@ -49,6 +51,7 @@ return [
             'actions' => [
                 'view' => 'View',
                 'create' => 'Create',
+                'import' => 'Import',
                 'update' => 'Update',
                 'delete' => 'Delete',
             ],

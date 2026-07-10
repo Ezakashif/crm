@@ -14,6 +14,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WebsiteLeadDemoController;
+use App\Http\Controllers\CsvImportController;
 use App\Http\Controllers\WebsiteLeadWebhookController;
 
 Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'store'])
@@ -48,6 +49,18 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/imports/{type}', [CsvImportController::class, 'create'])
+        ->whereIn('type', ['leads', 'customers', 'users'])
+        ->name('imports.create');
+    Route::post('/imports/{type}', [CsvImportController::class, 'store'])
+        ->whereIn('type', ['leads', 'customers', 'users'])
+        ->name('imports.store');
+    Route::get('/imports/{type}/sample', [CsvImportController::class, 'sample'])
+        ->whereIn('type', ['leads', 'customers', 'users'])
+        ->name('imports.sample');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('customers', CustomerController::class);
