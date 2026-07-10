@@ -1,0 +1,32 @@
+:root {
+    --crm-surface: #ffffff;
+    --crm-surface-muted: #f8fafc;
+    --crm-surface-soft: #f1f5f9;
+    --crm-border: #e2e8f0;
+    --crm-border-strong: #cbd5e1;
+    --crm-text: #0f172a;
+    --crm-text-secondary: #334155;
+    --crm-text-muted: #64748b;
+    --crm-accent: #2563eb;
+    --crm-accent-soft: #eff6ff;
+    --crm-accent-hover: #1d4ed8;
+    --crm-success: #059669;
+    --crm-success-soft: #ecfdf5;
+    --crm-warning: #d97706;
+    --crm-warning-soft: #fffbeb;
+    --crm-danger: #dc2626;
+    --crm-danger-soft: #fef2f2;
+    --crm-purple: #7c3aed;
+    --crm-radius: 0.625rem;
+    --crm-radius-sm: 0.5rem;
+    --crm-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --crm-shadow-hover: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --crm-font: "Source Sans Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --crm-chart-1: #2563eb;
+    --crm-chart-2: #059669;
+    --crm-chart-3: #d97706;
+    --crm-chart-4: #7c3aed;
+    --crm-chart-5: #0891b2;
+    --crm-chart-6: #ea580c;
+    --crm-chart-7: #64748b;
+}
