@@ -44,15 +44,19 @@
                         <th>Phone</th>
                         <th>Company</th>
                         <th>Status</th>
-                        @canany(['update.customers', 'delete.customers'])
-                            <th>Actions</th>
-                        @endcanany
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($customers as $customer)
                         <tr>
-                            <td>{{ $customer->name }}</td>
+                            <td>
+                                @can('view', $customer)
+                                    <a href="{{ route('customers.show', $customer) }}">{{ $customer->name }}</a>
+                                @else
+                                    {{ $customer->name }}
+                                @endcan
+                            </td>
                             <td>{{ $customer->email ?? '—' }}</td>
                             <td>{{ $customer->phone ?? '—' }}</td>
                             <td>{{ $customer->company_name ?? '—' }}</td>
@@ -61,25 +65,29 @@
                                     {{ ucfirst($customer->status) }}
                                 </span>
                             </td>
-                            @canany(['update', 'delete'], $customer)
-                                <td>
-                                    @can('update', $customer)
-                                        <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-info">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                    @endcan
-                                    @can('delete', $customer)
-                                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-xs btn-danger"
-                                                    onclick="return confirm('Delete this customer?')">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
-                                        </form>
-                                    @endcan
-                                </td>
-                            @endcanany
+                            <td>
+                                @can('view', $customer)
+                                    <a href="{{ route('customers.show', $customer) }}" class="btn btn-xs btn-primary" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                @endcan
+                                @can('update', $customer)
+                                    <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-info" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                @endcan
+                                @can('delete', $customer)
+                                    <form method="POST" action="{{ route('customers.destroy', $customer) }}" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-xs btn-danger"
+                                                title="Delete"
+                                                onclick="return confirm('Delete this customer?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @endcan
+                            </td>
                         </tr>
                     @empty
                         <tr>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Task;
 use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
@@ -61,6 +62,22 @@ class CustomerController extends Controller
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer created successfully');
+    }
+
+    public function show(Customer $customer)
+    {
+        $this->authorize('view', $customer);
+
+        $customer->load('creator');
+
+        $tasks = Task::query()
+            ->where('customer_id', $customer->id)
+            ->with('assignee:id,name')
+            ->latest('id')
+            ->limit(10)
+            ->get();
+
+        return view('customers.show', compact('customer', 'tasks'));
     }
 
     public function edit(Customer $customer)

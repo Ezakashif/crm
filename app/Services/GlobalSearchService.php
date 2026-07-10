@@ -17,9 +17,9 @@ class GlobalSearchService
     public const SUGGEST_LIMIT = 5;
 
     /**
-     * Run a permission-aware global search across leads, customers, tasks, and companies.
+     * Run a permission-aware global search across leads, customers, tasks, users, and companies.
      *
-     * Reuses Lead/Task::visibleTo and Lead/Customer/Task::search — no duplicated match logic.
+     * Reuses existing model search/visibility scopes — no duplicated match logic.
      *
      * @return array{
      *     term: string,
@@ -27,9 +27,11 @@ class GlobalSearchService
      *     can_view_leads: bool,
      *     can_view_customers: bool,
      *     can_view_tasks: bool,
+     *     can_view_users: bool,
      *     leads: Collection<int, Lead>,
      *     customers: Collection<int, Customer>,
      *     tasks: Collection<int, Task>,
+     *     users: Collection<int, User>,
      *     companies: list<array{name: string, sources: list<string>}>,
      *     total: int
      * }
@@ -41,6 +43,7 @@ class GlobalSearchService
         $canViewLeads = $user->hasPermission('view.leads');
         $canViewCustomers = $user->hasPermission('view.customers');
         $canViewTasks = $user->hasPermission('view.tasks');
+        $canViewUsers = $user->hasPermission('view.users');
 
         $empty = [
             'term' => $term,
@@ -48,14 +51,16 @@ class GlobalSearchService
             'can_view_leads' => $canViewLeads,
             'can_view_customers' => $canViewCustomers,
             'can_view_tasks' => $canViewTasks,
+            'can_view_users' => $canViewUsers,
             'leads' => collect(),
             'customers' => collect(),
             'tasks' => collect(),
+            'users' => collect(),
             'companies' => [],
             'total' => 0,
         ];
 
-        if ($empty['too_short'] || (! $canViewLeads && ! $canViewCustomers && ! $canViewTasks)) {
+        if ($empty['too_short'] || (! $canViewLeads && ! $canViewCustomers && ! $canViewTasks && ! $canViewUsers)) {
             return $empty;
         }
 
@@ -95,6 +100,15 @@ class GlobalSearchService
                 ])
             : collect();
 
+        $users = $canViewUsers
+            ? User::query()
+                ->with('roles')
+                ->search($term)
+                ->latest('id')
+                ->limit($limit)
+                ->get(['id', 'name', 'email', 'status', 'photo_path', 'role'])
+            : collect();
+
         $companies = $this->searchCompanies($user, $term, $canViewLeads, $canViewCustomers, $limit);
 
         return [
@@ -103,11 +117,13 @@ class GlobalSearchService
             'can_view_leads' => $canViewLeads,
             'can_view_customers' => $canViewCustomers,
             'can_view_tasks' => $canViewTasks,
+            'can_view_users' => $canViewUsers,
             'leads' => $leads,
             'customers' => $customers,
             'tasks' => $tasks,
+            'users' => $users,
             'companies' => $companies,
-            'total' => $leads->count() + $customers->count() + $tasks->count() + count($companies),
+            'total' => $leads->count() + $customers->count() + $tasks->count() + $users->count() + count($companies),
         ];
     }
 
@@ -154,9 +170,7 @@ class GlobalSearchService
                         $customer->phone,
                         $customer->company_name,
                     ]),
-                    'url' => $user->hasPermission('update.customers')
-                        ? route('customers.edit', $customer)
-                        : route('customers.index', ['search' => $customer->name]),
+                    'url' => route('customers.show', $customer),
                 ])->values()->all(),
             ];
         }
@@ -174,6 +188,23 @@ class GlobalSearchService
                         $task->customer?->name ?? $task->lead?->name,
                     ]),
                     'url' => route('tasks.show', $task),
+                ])->values()->all(),
+            ];
+        }
+
+        if ($payload['can_view_users'] && $payload['users']->isNotEmpty()) {
+            $groups[] = [
+                'type' => 'users',
+                'label' => 'Users',
+                'items' => $payload['users']->map(fn (User $result) => [
+                    'id' => $result->id,
+                    'title' => $result->name,
+                    'subtitle' => $this->joinSubtitle([
+                        $result->email,
+                        $result->roleNames(),
+                        ucfirst($result->status),
+                    ]),
+                    'url' => route('users.show', $result),
                 ])->values()->all(),
             ];
         }

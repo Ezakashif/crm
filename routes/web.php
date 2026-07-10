@@ -85,7 +85,7 @@ Route::middleware(['auth', 'permission:website_lead.demo'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::resource('users', UserController::class)->except(['show']);
+    Route::resource('users', UserController::class);
 
     Route::post('/users/{user}/status', [UserController::class, 'changeStatus'])
         ->name('users.status');

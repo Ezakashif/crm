@@ -265,4 +265,68 @@ class GlobalSearchTest extends TestCase
         $response->assertJsonMissing(['title' => 'Prepare other deck']);
         $response->assertJsonFragment(['url' => route('tasks.show', $task)]);
     }
+
+    public function test_customer_search_links_to_customer_profile(): void
+    {
+        $user = User::factory()->create();
+        $customer = Customer::factory()->create([
+            'created_by' => $user->id,
+            'name' => 'Profile Customer',
+            'email' => 'profile-customer@example.com',
+        ]);
+
+        $this->actingAs($user)
+            ->getJson(route('search.suggest', ['q' => 'Profile Customer']))
+            ->assertOk()
+            ->assertJsonFragment([
+                'title' => 'Profile Customer',
+                'url' => route('customers.show', $customer),
+            ]);
+
+        $this->actingAs($user)
+            ->get(route('customers.show', $customer))
+            ->assertOk()
+            ->assertSee('Profile Customer')
+            ->assertSee('Customer Details');
+    }
+
+    public function test_admin_can_search_users_and_open_profile(): void
+    {
+        $admin = User::factory()->admin()->create(['name' => 'Admin Searcher']);
+        $target = User::factory()->create([
+            'name' => 'Searchable Staff',
+            'email' => 'searchable-staff@example.com',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('search.index', ['q' => 'Searchable Staff']))
+            ->assertOk()
+            ->assertSee('Searchable Staff')
+            ->assertSee('Users');
+
+        $this->actingAs($admin)
+            ->getJson(route('search.suggest', ['q' => 'searchable-staff']))
+            ->assertOk()
+            ->assertJsonFragment([
+                'title' => 'Searchable Staff',
+                'url' => route('users.show', $target),
+            ]);
+
+        $this->actingAs($admin)
+            ->get(route('users.show', $target))
+            ->assertOk()
+            ->assertSee('Searchable Staff')
+            ->assertSee('User profile');
+    }
+
+    public function test_sales_user_does_not_see_users_in_search(): void
+    {
+        $sales = User::factory()->create(['name' => 'Sales Viewer']);
+        User::factory()->create(['name' => 'Hidden Admin User']);
+
+        $this->actingAs($sales)
+            ->get(route('search.index', ['q' => 'Hidden Admin']))
+            ->assertOk()
+            ->assertDontSee('Hidden Admin User');
+    }
 }

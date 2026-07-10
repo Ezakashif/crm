@@ -347,7 +347,7 @@
                         <ul class="list-group list-group-flush">
                             @forelse($recentCustomers as $customer)
                                 <li class="list-group-item">
-                                    <a href="{{ route('customers.edit', $customer) }}" class="font-weight-bold">{{ $customer->name }}</a>
+                                    <a href="{{ route('customers.show', $customer) }}" class="font-weight-bold">{{ $customer->name }}</a>
                                     <div class="small text-muted">
                                         {{ $customer->company_name ?? 'No company' }}
                                         · {{ $customer->created_at->diffForHumans() }}

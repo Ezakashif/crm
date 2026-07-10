@@ -18,7 +18,7 @@
 
 @section('js')
     @auth
-        @if(auth()->user()->hasAnyPermission(['view.leads', 'view.customers', 'view.tasks']))
+        @if(auth()->user()->hasAnyPermission(['view.leads', 'view.customers', 'view.tasks', 'view.users']))
             @include('partials.global-search-autocomplete')
         @endif
     @endauth

@@ -14,7 +14,7 @@ class GlobalSearchRequest extends FormRequest
             return false;
         }
 
-        return $user->hasAnyPermission(['view.leads', 'view.customers', 'view.tasks']);
+        return $user->hasAnyPermission(['view.leads', 'view.customers', 'view.tasks', 'view.users']);
     }
 
     /**

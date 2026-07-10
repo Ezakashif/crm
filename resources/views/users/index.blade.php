@@ -62,9 +62,7 @@
                         <th>Role</th>
                         <th>Status</th>
                         <th>Joined</th>
-                        @canany(['update.users', 'delete.users'])
-                            <th>Actions</th>
-                        @endcanany
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,7 +72,11 @@
                                 <x-user-avatar :user="$user" :size="36" />
                             </td>
                             <td>
-                                {{ $user->name }}
+                                @can('view', $user)
+                                    <a href="{{ route('users.show', $user) }}">{{ $user->name }}</a>
+                                @else
+                                    {{ $user->name }}
+                                @endcan
                                 @if($user->id === auth()->id())
                                     <span class="badge badge-light ml-1">You</span>
                                 @endif
@@ -107,27 +109,31 @@
                                 @endcan
                             </td>
                             <td>{{ $user->created_at->format('M d, Y') }}</td>
-                            @canany(['update', 'delete'], $user)
-                                <td>
-                                    @can('update', $user)
-                                        <a href="{{ route('users.edit', $user) }}" class="btn btn-xs btn-info">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                    @endcan
-                                    @can('delete', $user)
-                                        @if($user->id !== auth()->id())
-                                            <form method="POST" action="{{ route('users.destroy', $user) }}" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-xs btn-danger"
-                                                        onclick="return confirm('Delete this user?')">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </button>
-                                            </form>
-                                        @endif
-                                    @endcan
-                                </td>
-                            @endcanany
+                            <td>
+                                @can('view', $user)
+                                    <a href="{{ route('users.show', $user) }}" class="btn btn-xs btn-primary" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                @endcan
+                                @can('update', $user)
+                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-xs btn-info" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                @endcan
+                                @can('delete', $user)
+                                    @if($user->id !== auth()->id())
+                                        <form method="POST" action="{{ route('users.destroy', $user) }}" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-xs btn-danger"
+                                                    title="Delete"
+                                                    onclick="return confirm('Delete this user?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endcan
+                            </td>
                         </tr>
                     @empty
                         <tr>

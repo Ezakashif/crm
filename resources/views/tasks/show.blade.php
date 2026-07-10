@@ -105,8 +105,8 @@
                         <dt class="col-sm-4">Related Customer</dt>
                         <dd class="col-sm-8">
                             @if($task->customer)
-                                @can('update', $task->customer)
-                                    <a href="{{ route('customers.edit', $task->customer) }}">{{ $task->customer->name }}</a>
+                                @can('view', $task->customer)
+                                    <a href="{{ route('customers.show', $task->customer) }}">{{ $task->customer->name }}</a>
                                 @else
                                     {{ $task->customer->name }}
                                 @endcan

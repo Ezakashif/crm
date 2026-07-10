@@ -6,7 +6,7 @@
                 @if($term !== '')
                     <small class="text-muted">Results for “{{ $term }}”</small>
                 @else
-                    <small class="text-muted">Find leads, customers, tasks, and companies</small>
+                    <small class="text-muted">Find leads, customers, tasks, users, and companies</small>
                 @endif
             </div>
         </div>
@@ -18,7 +18,7 @@
                 <div class="input-group input-group-sm mr-2 mb-2" style="min-width: 280px; max-width: 480px; width: 100%;">
                     <input type="search" name="q" value="{{ $term }}"
                            class="form-control js-global-search"
-                           placeholder="Name, email, phone, company, task..."
+                           placeholder="Name, email, phone, company, task, user..."
                            minlength="{{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }}"
                            maxlength="100"
                            autocomplete="off"
@@ -35,7 +35,7 @@
 
     @if($term === '')
         <div class="alert alert-info mb-0">
-            Type at least {{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }} characters to search leads, customers, tasks, and companies.
+            Type at least {{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }} characters to search leads, customers, tasks, users, and companies.
         </div>
     @elseif($too_short)
         <div class="alert alert-warning mb-0">
@@ -135,18 +135,76 @@
                                         </span>
                                     </td>
                                     <td class="text-right">
+                                        @can('view', $customer)
+                                            <a href="{{ route('customers.show', $customer) }}" class="btn btn-xs btn-outline-primary">
+                                                View
+                                            </a>
+                                        @endcan
                                         @can('update', $customer)
-                                            <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-outline-primary">
+                                            <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-outline-secondary">
                                                 Edit
                                             </a>
-                                        @else
-                                            <span class="text-muted small">—</span>
                                         @endcan
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-muted">No matching customers.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
+        @if($can_view_users)
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-user-shield text-dark mr-1"></i>
+                        Users
+                        <span class="badge badge-dark">{{ $users->count() }}</span>
+                    </h3>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover text-nowrap mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($users as $resultUser)
+                                <tr>
+                                    <td>{{ $resultUser->name }}</td>
+                                    <td>{{ $resultUser->email }}</td>
+                                    <td>{{ $resultUser->roleNames() ?: '—' }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ $resultUser->statusBadgeClass() }}">
+                                            {{ ucfirst($resultUser->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        @can('view', $resultUser)
+                                            <a href="{{ route('users.show', $resultUser) }}" class="btn btn-xs btn-outline-primary">
+                                                View
+                                            </a>
+                                        @endcan
+                                        @can('update', $resultUser)
+                                            <a href="{{ route('users.edit', $resultUser) }}" class="btn btn-xs btn-outline-secondary">
+                                                Edit
+                                            </a>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-muted">No matching users.</td>
                                 </tr>
                             @endforelse
                         </tbody>
