@@ -38,6 +38,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/search', [GlobalSearchController::class, 'index'])->name('search.index');
+    Route::get('/search/suggest', [GlobalSearchController::class, 'suggest'])
+        ->middleware('throttle:60,1')
+        ->name('search.suggest');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');

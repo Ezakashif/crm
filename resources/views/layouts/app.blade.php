@@ -17,5 +17,10 @@
 @stop
 
 @section('js')
+    @auth
+        @if(auth()->user()->hasAnyPermission(['view.leads', 'view.customers']))
+            @include('partials.global-search-autocomplete')
+        @endif
+    @endauth
     @stack('js')
 @stop

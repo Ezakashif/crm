@@ -16,10 +16,12 @@
         <div class="card-body">
             <form method="GET" action="{{ route('search.index') }}" class="form-inline flex-wrap">
                 <div class="input-group input-group-sm mr-2 mb-2" style="min-width: 280px; max-width: 480px; width: 100%;">
-                    <input type="search" name="q" value="{{ $term }}" class="form-control"
+                    <input type="search" name="q" value="{{ $term }}"
+                           class="form-control js-global-search"
                            placeholder="Name, email, phone, company..."
                            minlength="{{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }}"
                            maxlength="100"
+                           autocomplete="off"
                            autofocus>
                     <div class="input-group-append">
                         <button type="submit" class="btn btn-primary">
