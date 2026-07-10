@@ -10,7 +10,7 @@ class ReportFilterRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasPermission('view.reports') ?? false;
+        return $this->user()?->canAccessReports() ?? false;
     }
 
     /**
@@ -28,7 +28,7 @@ class ReportFilterRequest extends FormRequest
     }
 
     /**
-     * Normalized filters with defaults (current month → today).
+     * Normalized filters with defaults (last 90 days → today).
      *
      * @return array{
      *     date_from: string,
@@ -43,7 +43,7 @@ class ReportFilterRequest extends FormRequest
         $validated = $this->validated();
 
         return [
-            'date_from' => $validated['date_from'] ?? now()->startOfMonth()->toDateString(),
+            'date_from' => $validated['date_from'] ?? now()->subDays(89)->toDateString(),
             'date_to' => $validated['date_to'] ?? now()->toDateString(),
             'employee_id' => isset($validated['employee_id']) ? (int) $validated['employee_id'] : null,
             'source' => $validated['source'] ?? null,
