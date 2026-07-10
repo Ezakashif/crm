@@ -2,36 +2,148 @@
 
 namespace App\Services;
 
+use App\Jobs\SendLeadFollowUpReminderJob;
 use App\Models\Lead;
 use App\Notifications\LeadFollowUpDue;
+use Carbon\Carbon;
+use InvalidArgumentException;
 
 class LeadFollowUpReminderService
 {
-    public function sendDueReminders(): int
+    public const TIERS = ['day_before', 'hours_before', 'due'];
+
+    /**
+     * Dispatch reminder jobs for one tier (or all enabled tiers).
+     *
+     * @return int Number of jobs dispatched
+     */
+    public function dispatchReminders(?string $tier = null): int
     {
         if (! config('lead_reminders.enabled')) {
             return 0;
         }
 
-        $sent = 0;
+        $tiers = $tier ? [$tier] : self::TIERS;
+        $dispatched = 0;
+
+        foreach ($tiers as $tierKey) {
+            $this->assertValidTier($tierKey);
+
+            if (! config("lead_reminders.tiers.{$tierKey}.enabled", true)) {
+                continue;
+            }
+
+            $dispatched += $this->dispatchTier($tierKey);
+        }
+
+        return $dispatched;
+    }
+
+    /**
+     * @deprecated Use dispatchReminders() — kept for backward-compatible callers.
+     */
+    public function sendDueReminders(): int
+    {
+        return $this->dispatchReminders('due');
+    }
+
+    /**
+     * Deliver a single reminder synchronously (called by the queued job).
+     * Marks the tier sent only after successful notification delivery.
+     */
+    public function deliverReminder(int $leadId, string $tier): bool
+    {
+        $this->assertValidTier($tier);
+
+        if (! config('lead_reminders.enabled') || ! config("lead_reminders.tiers.{$tier}.enabled", true)) {
+            return false;
+        }
+
+        $lead = Lead::query()
+            ->with('assignee')
+            ->find($leadId);
+
+        if (! $lead || ! $this->isEligible($lead, $tier)) {
+            return false;
+        }
+
+        $assignee = $lead->assignee;
+
+        if (! $assignee || $assignee->status !== 'active') {
+            return false;
+        }
+
+        $assignee->notifyNow(new LeadFollowUpDue($lead, $tier));
+
+        $lead->markFollowUpReminderSent($tier);
+
+        return true;
+    }
+
+    protected function dispatchTier(string $tier): int
+    {
+        $dispatched = 0;
 
         Lead::query()
-            ->dueForFollowUpReminder()
-            ->with('assignee')
-            ->chunkById(50, function ($leads) use (&$sent) {
+            ->eligibleForFollowUpReminderTier($tier)
+            ->chunkById(50, function ($leads) use ($tier, &$dispatched) {
                 foreach ($leads as $lead) {
-                    if (! $lead->assignee) {
+                    if ($tier === 'hours_before' && ! $this->isInsideHoursBeforeWindow($lead)) {
                         continue;
                     }
 
-                    $lead->assignee->notify(new LeadFollowUpDue($lead));
-
-                    $lead->forceFill(['follow_up_reminder_sent_at' => now()])->save();
-
-                    $sent++;
+                    SendLeadFollowUpReminderJob::dispatch($lead->id, $tier);
+                    $dispatched++;
                 }
             });
 
-        return $sent;
+        return $dispatched;
+    }
+
+    public function isEligible(Lead $lead, string $tier): bool
+    {
+        if (! $lead->assigned_to || ! $lead->follow_up_date) {
+            return false;
+        }
+
+        if (in_array($lead->status, ['won', 'lost'], true)) {
+            return false;
+        }
+
+        if ($lead->hasFollowUpReminderBeenSent($tier)) {
+            return false;
+        }
+
+        return match ($tier) {
+            'day_before' => $lead->follow_up_date->isSameDay(today()->addDay()),
+            'hours_before' => $lead->follow_up_date->isSameDay(today())
+                && $this->isInsideHoursBeforeWindow($lead),
+            'due' => $lead->follow_up_date->lessThanOrEqualTo(today()),
+            default => false,
+        };
+    }
+
+    public function isInsideHoursBeforeWindow(Lead $lead): bool
+    {
+        if (! $lead->follow_up_date || ! $lead->follow_up_date->isSameDay(today())) {
+            return false;
+        }
+
+        $hours = (int) config('lead_reminders.tiers.hours_before.hours', 2);
+        $defaultTime = (string) config('lead_reminders.default_follow_up_time', '09:00');
+
+        $followUpAt = Carbon::parse($lead->follow_up_date->toDateString().' '.$defaultTime);
+
+        $windowStart = $followUpAt->copy()->subHours($hours);
+        $windowEnd = $windowStart->copy()->addHour();
+
+        return now()->betweenIncluded($windowStart, $windowEnd);
+    }
+
+    protected function assertValidTier(string $tier): void
+    {
+        if (! in_array($tier, self::TIERS, true)) {
+            throw new InvalidArgumentException("Unknown follow-up reminder tier [{$tier}].");
+        }
     }
 }

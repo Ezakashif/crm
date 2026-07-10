@@ -8,6 +8,20 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('leads:send-follow-up-reminders')
-    ->dailyAt(config('lead_reminders.schedule_time', '08:00'))
-    ->when(fn () => config('lead_reminders.enabled', true));
+$remindersEnabled = fn () => (bool) config('lead_reminders.enabled', true);
+$dailyTime = config('lead_reminders.schedule_time', '08:00');
+
+Schedule::command('leads:send-follow-up-reminders --tier=day_before')
+    ->dailyAt($dailyTime)
+    ->when($remindersEnabled)
+    ->when(fn () => config('lead_reminders.tiers.day_before.enabled', true));
+
+Schedule::command('leads:send-follow-up-reminders --tier=due')
+    ->dailyAt($dailyTime)
+    ->when($remindersEnabled)
+    ->when(fn () => config('lead_reminders.tiers.due.enabled', true));
+
+Schedule::command('leads:send-follow-up-reminders --tier=hours_before')
+    ->hourly()
+    ->when($remindersEnabled)
+    ->when(fn () => config('lead_reminders.tiers.hours_before.enabled', true));

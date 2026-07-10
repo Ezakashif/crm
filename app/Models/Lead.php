@@ -42,14 +42,14 @@ class Lead extends Model
         'estimated_value',
         'notes',
         'follow_up_date',
-        'follow_up_reminder_sent_at',
+        'follow_up_reminders_sent',
     ];
 
     protected function casts(): array
     {
         return [
             'follow_up_date' => 'date',
-            'follow_up_reminder_sent_at' => 'datetime',
+            'follow_up_reminders_sent' => 'array',
             'estimated_value' => 'decimal:2',
         ];
     }
@@ -57,8 +57,8 @@ class Lead extends Model
     protected static function booted(): void
     {
         static::updating(function (Lead $lead) {
-            if ($lead->isDirty('follow_up_date')) {
-                $lead->follow_up_reminder_sent_at = null;
+            if ($lead->isDirty('follow_up_date') || $lead->isDirty('assigned_to')) {
+                $lead->follow_up_reminders_sent = null;
             }
         });
     }
@@ -171,12 +171,41 @@ class Lead extends Model
 
     public function scopeDueForFollowUpReminder(Builder $query): Builder
     {
-        return $query
+        return $query->eligibleForFollowUpReminderTier('due');
+    }
+
+    public function scopeEligibleForFollowUpReminderTier(Builder $query, string $tier): Builder
+    {
+        $query
             ->whereNotNull('assigned_to')
             ->whereNotNull('follow_up_date')
-            ->whereDate('follow_up_date', '<=', today())
-            ->whereNull('follow_up_reminder_sent_at')
             ->whereNotIn('status', ['won', 'lost'])
-            ->whereHas('assignee', fn (Builder $assignee) => $assignee->where('status', 'active'));
+            ->whereHas('assignee', fn (Builder $assignee) => $assignee->where('status', 'active'))
+            ->where(function (Builder $builder) use ($tier) {
+                $builder->whereNull('follow_up_reminders_sent')
+                    ->orWhereNull("follow_up_reminders_sent->{$tier}");
+            });
+
+        return match ($tier) {
+            'day_before' => $query->whereDate('follow_up_date', today()->addDay()),
+            'hours_before' => $query->whereDate('follow_up_date', today()),
+            'due' => $query->whereDate('follow_up_date', '<=', today()),
+            default => $query->whereRaw('1 = 0'),
+        };
+    }
+
+    public function hasFollowUpReminderBeenSent(string $tier): bool
+    {
+        $sent = $this->follow_up_reminders_sent ?? [];
+
+        return filled($sent[$tier] ?? null);
+    }
+
+    public function markFollowUpReminderSent(string $tier): void
+    {
+        $sent = $this->follow_up_reminders_sent ?? [];
+        $sent[$tier] = now()->toIso8601String();
+
+        $this->forceFill(['follow_up_reminders_sent' => $sent])->save();
     }
 }
