@@ -61,6 +61,16 @@ trait HasRoles
         return $this->permissionSlugs()->intersect($slugs)->isNotEmpty();
     }
 
+    /**
+     * Reports hub is available with an explicit reports permission,
+     * or when the user can already view CRM lead/task/customer data.
+     */
+    public function canAccessReports(): bool
+    {
+        return $this->hasPermission('view.reports')
+            || $this->hasAnyPermission(['view.leads', 'view.tasks', 'view.customers']);
+    }
+
     public function canViewAllTasks(): bool
     {
         return $this->hasPermission('view_all.tasks');

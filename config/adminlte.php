@@ -331,7 +331,7 @@ return [
             'text' => 'Reports',
             'route' => 'reports.index',
             'icon' => 'fas fa-fw fa-chart-bar',
-            'can' => 'view.reports',
+            'can' => 'access-reports',
         ],
         [
             'text' => 'Notifications',

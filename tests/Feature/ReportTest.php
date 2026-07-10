@@ -135,7 +135,7 @@ class ReportTest extends TestCase
         $this->assertStringContainsString('Conversion Rate', $performanceCsv->streamedContent());
     }
 
-    public function test_user_without_reports_permission_is_forbidden(): void
+    public function test_user_with_crm_view_but_without_reports_permission_can_access_reports(): void
     {
         $user = User::factory()->create();
         $salesRole = \App\Models\Role::query()->where('slug', 'sales')->firstOrFail();
@@ -145,9 +145,49 @@ class ReportTest extends TestCase
         $salesRole->permissions()->detach([$viewReports->id, $exportReports->id]);
         $user->cachedPermissionSlugs = null;
 
+        $this->assertFalse($user->hasPermission('view.reports'));
+        $this->assertTrue($user->canAccessReports());
+
+        $this->actingAs($user)
+            ->get(route('reports.index'))
+            ->assertOk()
+            ->assertSee('Reports');
+    }
+
+    public function test_user_without_crm_or_reports_permission_is_forbidden(): void
+    {
+        $user = User::factory()->create();
+        $salesRole = \App\Models\Role::query()->where('slug', 'sales')->firstOrFail();
+
+        $salesRole->permissions()->detach();
+        $user->cachedPermissionSlugs = null;
+
         $this->actingAs($user)
             ->get(route('reports.index'))
             ->assertForbidden();
+    }
+
+    public function test_monthly_growth_includes_leads_outside_date_filter(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        Lead::factory()->assignedTo($admin)->create([
+            'created_by' => $admin->id,
+            'status' => 'new',
+            'source' => 'website',
+            'created_at' => now()->subMonths(2)->startOfMonth()->addDays(3),
+        ]);
+
+        $payload = app(\App\Services\ReportService::class)->forUser($admin, [
+            'date_from' => now()->toDateString(),
+            'date_to' => now()->toDateString(),
+            'employee_id' => null,
+            'source' => null,
+            'status' => null,
+        ]);
+
+        $this->assertSame(0, $payload['leads']['total']);
+        $this->assertGreaterThan(0, array_sum($payload['leads']['monthly_growth']['data']));
     }
 
     public function test_export_requires_export_permission(): void
@@ -162,7 +202,7 @@ class ReportTest extends TestCase
         $this->actingAs($user)
             ->get(route('reports.export', [
                 'type' => 'leads',
-                'date_from' => now()->startOfMonth()->toDateString(),
+                'date_from' => now()->subDays(89)->toDateString(),
                 'date_to' => now()->toDateString(),
             ]))
             ->assertForbidden();
