@@ -30,6 +30,7 @@ class RbacSeeder extends Seeder
             'view.leads', 'create.leads', 'update.leads', 'delete.leads', 'convert.leads', 'log.leads',
             'view.tasks', 'change_status.tasks', 'update.tasks', 'delete.tasks',
             'view_own.activity_logs',
+            'view.reports', 'export.reports',
         ],
     ];
 

@@ -144,7 +144,7 @@ class Lead extends Model
             return $query;
         }
 
-        return $query->where('assigned_to', $user->id);
+        return $query->where($query->getModel()->getTable().'.assigned_to', $user->id);
     }
 
     public function scopeAssignedTo(Builder $query, ?string $userId): Builder
