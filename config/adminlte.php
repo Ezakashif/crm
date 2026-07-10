@@ -300,6 +300,14 @@ return [
 
     'menu' => [
         [
+            'type' => 'navbar-search',
+            'text' => 'Search leads, customers, companies...',
+            'route' => 'search.index',
+            'input_name' => 'q',
+            'method' => 'get',
+            'topnav_right' => true,
+        ],
+        [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
