@@ -263,6 +263,6 @@ class GlobalSearchTest extends TestCase
         $response->assertOk();
         $response->assertJsonFragment(['title' => 'Prepare demo deck']);
         $response->assertJsonMissing(['title' => 'Prepare other deck']);
-        $response->assertJsonFragment(['url' => route('tasks.edit', $task)]);
+        $response->assertJsonFragment(['url' => route('tasks.show', $task)]);
     }
 }

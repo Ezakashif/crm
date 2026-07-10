@@ -196,14 +196,14 @@
                                     <td>{{ $task->assignee?->name ?? '—' }}</td>
                                     <td>{{ $task->customer?->name ?? $task->lead?->name ?? '—' }}</td>
                                     <td class="text-right">
-                                        @can('update', $task)
-                                            <a href="{{ route('tasks.edit', $task) }}" class="btn btn-xs btn-outline-primary">
-                                                Edit
+                                        @can('view', $task)
+                                            <a href="{{ route('tasks.show', $task) }}" class="btn btn-xs btn-outline-primary">
+                                                View
                                             </a>
-                                        @else
-                                            <a href="{{ route('tasks.index', ['search' => $task->title]) }}"
-                                               class="btn btn-xs btn-outline-secondary">
-                                                Board
+                                        @endcan
+                                        @can('update', $task)
+                                            <a href="{{ route('tasks.edit', $task) }}" class="btn btn-xs btn-outline-secondary">
+                                                Edit
                                             </a>
                                         @endcan
                                     </td>

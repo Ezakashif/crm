@@ -100,4 +100,37 @@ class TaskBoardTest extends TestCase
         $response->assertSee('tasks-kanban', false);
         $response->assertSee('Visible task');
     }
+
+    public function test_sales_user_can_view_assigned_task_details(): void
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->assignedTo($user)->create([
+            'created_by' => $user->id,
+            'title' => 'Review contract details',
+            'description' => 'Check payment terms',
+            'status' => 'pending',
+            'priority' => 'high',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('tasks.show', $task))
+            ->assertOk()
+            ->assertSee('Review contract details')
+            ->assertSee('Check payment terms')
+            ->assertSee('Task details');
+    }
+
+    public function test_sales_user_cannot_view_another_users_task_details(): void
+    {
+        $viewer = User::factory()->create();
+        $other = User::factory()->create();
+        $task = Task::factory()->assignedTo($other)->create([
+            'created_by' => $other->id,
+            'title' => 'Private task',
+        ]);
+
+        $this->actingAs($viewer)
+            ->get(route('tasks.show', $task))
+            ->assertForbidden();
+    }
 }

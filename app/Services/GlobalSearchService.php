@@ -173,9 +173,7 @@ class GlobalSearchService
                         $task->assignee?->name,
                         $task->customer?->name ?? $task->lead?->name,
                     ]),
-                    'url' => $user->can('update', $task)
-                        ? route('tasks.edit', $task)
-                        : route('tasks.index', ['search' => $task->title]),
+                    'url' => route('tasks.show', $task),
                 ])->values()->all(),
             ];
         }
