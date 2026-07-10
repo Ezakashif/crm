@@ -6,6 +6,7 @@ use App\Models\Lead;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Support\CrmValidation;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 
 class LeadCsvImporter
@@ -27,7 +28,7 @@ class LeadCsvImporter
         protected CsvReader $reader,
     ) {}
 
-    public function import(User $actor, \Illuminate\Http\UploadedFile $file): CsvImportResult
+    public function import(User $actor, UploadedFile $file): CsvImportResult
     {
         $parsed = $this->reader->read($file);
         $result = new CsvImportResult;
@@ -37,10 +38,12 @@ class LeadCsvImporter
         foreach ($parsed['rows'] as $row) {
             $rowNumber = $row['row'];
             $data = $row['data'];
+            $email = CsvValueNormalizer::email($data['email'] ?? null);
+            $assignedEmail = CsvValueNormalizer::email($data['assigned_to'] ?? null);
 
             $payload = [
                 'name' => $data['name'] ?? '',
-                'email' => ($data['email'] ?? '') !== '' ? $data['email'] : null,
+                'email' => $email,
                 'phone' => ($data['phone'] ?? '') !== '' ? $data['phone'] : null,
                 'company' => ($data['company'] ?? '') !== '' ? $data['company'] : null,
                 'source' => ($data['source'] ?? '') !== '' ? strtolower((string) $data['source']) : null,
@@ -50,7 +53,7 @@ class LeadCsvImporter
             ];
 
             if ($actor->canAssignLeads()) {
-                $payload['assigned_to'] = ($data['assigned_to'] ?? '') !== '' ? $data['assigned_to'] : null;
+                $payload['assigned_to'] = $assignedEmail;
             }
 
             $validator = Validator::make($payload, CrmValidation::leadStoreRules($actor, forImport: true));
@@ -62,30 +65,36 @@ class LeadCsvImporter
             }
 
             $validated = $validator->validated();
-            $email = isset($validated['email']) ? mb_strtolower(trim((string) $validated['email'])) : null;
+            $normalizedEmail = CsvValueNormalizer::email($validated['email'] ?? null);
 
-            if ($email !== null && $email !== '') {
-                if (isset($seenEmails[$email])) {
-                    $result->addDuplicate($rowNumber, "Duplicate email in file: {$email}");
-
-                    continue;
-                }
-
-                if (Lead::query()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
-                    $result->addDuplicate($rowNumber, "Lead with email already exists: {$email}");
+            if ($normalizedEmail !== null) {
+                if (isset($seenEmails[$normalizedEmail])) {
+                    $result->addDuplicate(
+                        $rowNumber,
+                        "Duplicate email in file: {$normalizedEmail} (same as row {$seenEmails[$normalizedEmail]})"
+                    );
 
                     continue;
                 }
 
-                $seenEmails[$email] = true;
+                if (Lead::query()->whereRaw('LOWER(email) = ?', [$normalizedEmail])->exists()) {
+                    $result->addDuplicate(
+                        $rowNumber,
+                        "Lead with email already exists: {$normalizedEmail}"
+                    );
+
+                    continue;
+                }
+
+                $seenEmails[$normalizedEmail] = $rowNumber;
             }
 
             $assignedTo = $actor->id;
 
             if ($actor->canAssignLeads()) {
-                $assigneeEmail = $validated['assigned_to'] ?? null;
+                $assigneeEmail = CsvValueNormalizer::email($validated['assigned_to'] ?? null);
                 $assignedTo = $assigneeEmail
-                    ? User::query()->where('email', $assigneeEmail)->value('id')
+                    ? User::query()->whereRaw('LOWER(email) = ?', [$assigneeEmail])->value('id')
                     : null;
             }
 
@@ -95,7 +104,7 @@ class LeadCsvImporter
                 'created_by' => $actor->id,
                 'assigned_to' => $assignedTo,
                 'name' => $validated['name'],
-                'email' => $validated['email'] ?? null,
+                'email' => $normalizedEmail,
                 'phone' => $validated['phone'] ?? null,
                 'company' => $validated['company'] ?? null,
                 'source' => $validated['source'] ?? null,

@@ -33,11 +33,15 @@ class CustomerCsvImporter
 
         foreach ($parsed['rows'] as $row) {
             $rowNumber = $row['row'];
-            $data = $row['data'];
+            $data = CsvValueNormalizer::applyHeaderAliases($row['data'], [
+                'company' => 'company_name',
+            ]);
+
+            $email = CsvValueNormalizer::email($data['email'] ?? null);
 
             $payload = [
                 'name' => $data['name'] ?? '',
-                'email' => ($data['email'] ?? '') !== '' ? $data['email'] : null,
+                'email' => $email,
                 'phone' => ($data['phone'] ?? '') !== '' ? $data['phone'] : null,
                 'company_name' => ($data['company_name'] ?? '') !== '' ? $data['company_name'] : null,
                 'address' => ($data['address'] ?? '') !== '' ? $data['address'] : null,
@@ -53,28 +57,34 @@ class CustomerCsvImporter
             }
 
             $validated = $validator->validated();
-            $email = isset($validated['email']) ? mb_strtolower(trim((string) $validated['email'])) : null;
+            $normalizedEmail = CsvValueNormalizer::email($validated['email'] ?? null);
 
-            if ($email !== null && $email !== '') {
-                if (isset($seenEmails[$email])) {
-                    $result->addDuplicate($rowNumber, "Duplicate email in file: {$email}");
-
-                    continue;
-                }
-
-                if (Customer::query()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
-                    $result->addDuplicate($rowNumber, "Customer with email already exists: {$email}");
+            if ($normalizedEmail !== null) {
+                if (isset($seenEmails[$normalizedEmail])) {
+                    $result->addDuplicate(
+                        $rowNumber,
+                        "Duplicate email in file: {$normalizedEmail} (same as row {$seenEmails[$normalizedEmail]})"
+                    );
 
                     continue;
                 }
 
-                $seenEmails[$email] = true;
+                if (Customer::query()->whereRaw('LOWER(email) = ?', [$normalizedEmail])->exists()) {
+                    $result->addDuplicate(
+                        $rowNumber,
+                        "Customer with email already exists: {$normalizedEmail}"
+                    );
+
+                    continue;
+                }
+
+                $seenEmails[$normalizedEmail] = $rowNumber;
             }
 
             $customer = Customer::create([
                 'created_by' => $actor->id,
                 'name' => $validated['name'],
-                'email' => $validated['email'] ?? null,
+                'email' => $normalizedEmail,
                 'phone' => $validated['phone'] ?? null,
                 'company_name' => $validated['company_name'] ?? null,
                 'address' => $validated['address'] ?? null,

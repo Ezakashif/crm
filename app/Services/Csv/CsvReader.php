@@ -14,14 +14,44 @@ class CsvReader
      */
     public function read(UploadedFile $file): array
     {
-        $handle = fopen($file->getRealPath(), 'r');
+        $path = $file->getRealPath();
 
-        if ($handle === false) {
+        if ($path === false) {
             throw new RuntimeException('Unable to open the uploaded CSV file.');
         }
 
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            throw new RuntimeException('Unable to read the uploaded CSV file.');
+        }
+
+        // Excel sometimes saves UTF-16 CSV files.
+        if (str_starts_with($contents, "\xFF\xFE") || str_starts_with($contents, "\xFE\xFF")) {
+            $contents = mb_convert_encoding($contents, 'UTF-8', 'UTF-16');
+        }
+
+        $contents = preg_replace('/^\xEF\xBB\xBF/', '', $contents) ?? $contents;
+
+        $handle = fopen('php://temp', 'r+');
+
+        if ($handle === false) {
+            throw new RuntimeException('Unable to open a temporary stream for CSV parsing.');
+        }
+
         try {
-            $headerRow = fgetcsv($handle);
+            fwrite($handle, $contents);
+            rewind($handle);
+
+            $firstLine = fgets($handle);
+            if ($firstLine === false) {
+                throw new RuntimeException('The CSV file is empty or missing a header row.');
+            }
+
+            $delimiter = $this->detectDelimiter($firstLine);
+            rewind($handle);
+
+            $headerRow = fgetcsv($handle, 0, $delimiter);
 
             if ($headerRow === false || $headerRow === [null] || $headerRow === []) {
                 throw new RuntimeException('The CSV file is empty or missing a header row.');
@@ -36,7 +66,7 @@ class CsvReader
             $rows = [];
             $rowNumber = 1;
 
-            while (($data = fgetcsv($handle)) !== false) {
+            while (($data = fgetcsv($handle, 0, $delimiter)) !== false) {
                 $rowNumber++;
 
                 if ($this->rowIsEmpty($data)) {
@@ -65,6 +95,23 @@ class CsvReader
         } finally {
             fclose($handle);
         }
+    }
+
+    protected function detectDelimiter(string $line): string
+    {
+        $comma = substr_count($line, ',');
+        $semicolon = substr_count($line, ';');
+        $tab = substr_count($line, "\t");
+
+        if ($semicolon > $comma && $semicolon >= $tab) {
+            return ';';
+        }
+
+        if ($tab > $comma && $tab > $semicolon) {
+            return "\t";
+        }
+
+        return ',';
     }
 
     protected function normalizeHeader(string $header): string
