@@ -3,12 +3,10 @@
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="m-0">Customers</h1>
             <div>
-                @can('import.customers')
+                @can('create', App\Models\Customer::class)
                     <a href="{{ route('imports.create', 'customers') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-file-upload"></i> Import CSV
                     </a>
-                @endcan
-                @can('create', App\Models\Customer::class)
                     <a href="{{ route('customers.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Add Customer
                     </a>

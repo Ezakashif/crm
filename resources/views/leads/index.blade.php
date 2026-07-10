@@ -3,12 +3,10 @@
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="m-0">Leads</h1>
             <div>
-                @can('import.leads')
+                @can('create', App\Models\Lead::class)
                     <a href="{{ route('imports.create', 'leads') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-file-upload"></i> Import CSV
                     </a>
-                @endcan
-                @can('create', App\Models\Lead::class)
                     <a href="{{ route('leads.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Add Lead
                     </a>

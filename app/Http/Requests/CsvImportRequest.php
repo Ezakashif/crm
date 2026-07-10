@@ -17,8 +17,7 @@ class CsvImportRequest extends FormRequest
             return false;
         }
 
-        return $user->hasPermission("import.{$type}")
-            && $user->hasPermission("create.{$type}");
+        return $user->hasPermission("create.{$type}");
     }
 
     /**

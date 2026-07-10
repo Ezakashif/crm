@@ -64,9 +64,7 @@ class CsvImportController extends Controller
         $user = auth()->user();
 
         abort_unless(
-            $user
-            && $user->hasPermission($this->imports->permissionSlug($type))
-            && $user->hasPermission($this->imports->createPermissionSlug($type)),
+            $user && $user->hasPermission($this->imports->createPermissionSlug($type)),
             403
         );
     }
