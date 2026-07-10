@@ -139,6 +139,7 @@ class CsvExportTest extends TestCase
     public function test_index_pages_show_export_button(): void
     {
         $user = User::factory()->create();
+        $admin = User::factory()->admin()->create();
 
         $this->actingAs($user)
             ->get(route('leads.index'))
@@ -155,6 +156,51 @@ class CsvExportTest extends TestCase
             ->get(route('tasks.index'))
             ->assertOk()
             ->assertSee('Export CSV');
+
+        $this->actingAs($admin)
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertSee('Export CSV')
+            ->assertSee(route('exports.users'), false);
+    }
+
+    public function test_admin_can_export_filtered_users(): void
+    {
+        $admin = User::factory()->admin()->create(['name' => 'Admin Exporter']);
+        $activeSales = User::factory()->create([
+            'name' => 'Active Sales Export',
+            'status' => 'active',
+        ]);
+        User::factory()->create([
+            'name' => 'Inactive Sales Export',
+            'status' => 'inactive',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('exports.users', [
+                'status' => 'active',
+                'role' => 'sales',
+                'search' => 'Active Sales',
+            ]));
+
+        $response->assertOk();
+
+        $csv = $response->streamedContent();
+
+        $this->assertStringContainsString('Name,Email,Role,Status,"Created At"', $csv);
+        $this->assertStringContainsString('Active Sales Export', $csv);
+        $this->assertStringContainsString($activeSales->email, $csv);
+        $this->assertStringNotContainsString('Inactive Sales Export', $csv);
+        $this->assertStringNotContainsString('Admin Exporter', $csv);
+    }
+
+    public function test_sales_user_cannot_export_users(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('exports.users'))
+            ->assertForbidden();
     }
 
     public function test_user_without_view_permission_cannot_export(): void
@@ -167,6 +213,7 @@ class CsvExportTest extends TestCase
         $this->actingAs($user)->get(route('exports.leads'))->assertForbidden();
         $this->actingAs($user)->get(route('exports.customers'))->assertForbidden();
         $this->actingAs($user)->get(route('exports.tasks'))->assertForbidden();
+        $this->actingAs($user)->get(route('exports.users'))->assertForbidden();
     }
 
     public function test_guest_is_redirected_from_exports(): void
@@ -174,6 +221,7 @@ class CsvExportTest extends TestCase
         $this->get(route('exports.leads'))->assertRedirect(route('login'));
         $this->get(route('exports.customers'))->assertRedirect(route('login'));
         $this->get(route('exports.tasks'))->assertRedirect(route('login'));
+        $this->get(route('exports.users'))->assertRedirect(route('login'));
     }
 
     public function test_empty_export_still_returns_headers(): void

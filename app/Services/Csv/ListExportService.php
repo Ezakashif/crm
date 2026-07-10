@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\CustomerListQueryService;
 use App\Services\LeadListQueryService;
 use App\Services\TaskListQueryService;
+use App\Services\UserListQueryService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ListExportService
@@ -18,6 +19,7 @@ class ListExportService
         protected LeadListQueryService $leads,
         protected CustomerListQueryService $customers,
         protected TaskListQueryService $tasks,
+        protected UserListQueryService $users,
     ) {}
 
     /**
@@ -88,6 +90,26 @@ class ListExportService
                     optional($task->created_at)?->toDateTimeString(),
                 ];
             }),
+        );
+    }
+
+    /**
+     * @param  array{search?: string|null, role?: string|null, status?: string|null}  $filters
+     */
+    public function users(array $filters): StreamedResponse
+    {
+        $query = $this->users->query($filters);
+
+        return $this->csv->download(
+            'users-'.now()->format('Y-m-d').'.csv',
+            ['Name', 'Email', 'Role', 'Status', 'Created At'],
+            $this->mapCursor($query, fn (User $user) => [
+                $user->name,
+                $user->email,
+                $user->roles->pluck('name')->implode(', '),
+                $user->status,
+                optional($user->created_at)?->toDateTimeString(),
+            ]),
         );
     }
 

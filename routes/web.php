@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/leads/export', [CsvExportController::class, 'leads'])->name('exports.leads');
     Route::get('/customers/export', [CsvExportController::class, 'customers'])->name('exports.customers');
     Route::get('/tasks/export', [CsvExportController::class, 'tasks'])->name('exports.tasks');
+    Route::get('/users/export', [CsvExportController::class, 'users'])->name('exports.users');
 });
 
 Route::middleware(['auth'])->group(function () {

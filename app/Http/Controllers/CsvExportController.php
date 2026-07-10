@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\Task;
+use App\Models\User;
 use App\Services\Csv\ListExportService;
 use App\Services\CustomerListQueryService;
 use App\Services\LeadListQueryService;
 use App\Services\TaskListQueryService;
+use App\Services\UserListQueryService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -19,6 +21,7 @@ class CsvExportController extends Controller
         protected LeadListQueryService $leads,
         protected CustomerListQueryService $customers,
         protected TaskListQueryService $tasks,
+        protected UserListQueryService $users,
     ) {}
 
     public function leads(Request $request): StreamedResponse
@@ -46,5 +49,14 @@ class CsvExportController extends Controller
         $filters = $request->validate($this->tasks->filterRules());
 
         return $this->exports->tasks($request->user(), $filters);
+    }
+
+    public function users(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', User::class);
+
+        $filters = $request->validate($this->users->filterRules());
+
+        return $this->exports->users($filters);
     }
 }

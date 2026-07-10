@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Notifications\UserStatusChanged;
 use App\Services\ActivityLogger;
+use App\Services\UserListQueryService;
 use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -20,24 +21,18 @@ class UserController extends Controller
         'suspended' => 'Suspended',
     ];
 
+    public function __construct(
+        protected UserListQueryService $userListQuery,
+    ) {}
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', User::class);
 
-        $roleSlugs = Role::query()->pluck('slug')->all();
+        $filters = $request->validate($this->userListQuery->filterRules());
 
-        $filters = $request->validate([
-            'search' => 'nullable|string|max:255',
-            'role' => ['nullable', Rule::in($roleSlugs)],
-            'status' => ['nullable', Rule::in(array_keys(self::STATUSES))],
-        ]);
-
-        $users = User::query()
-            ->with('roles')
-            ->search($filters['search'] ?? null)
-            ->role($filters['role'] ?? null)
-            ->status($filters['status'] ?? null)
-            ->latest()
+        $users = $this->userListQuery
+            ->query($filters)
             ->paginate(10)
             ->withQueryString();
 
