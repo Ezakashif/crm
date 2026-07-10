@@ -160,6 +160,11 @@ class CsvImportTest extends TestCase
             ->assertSee('Download sample CSV');
 
         $this->actingAs($user)
+            ->get(route('leads.index'))
+            ->assertOk()
+            ->assertSee('Import CSV');
+
+        $this->actingAs($user)
             ->get(route('imports.create', 'users'))
             ->assertForbidden();
     }
