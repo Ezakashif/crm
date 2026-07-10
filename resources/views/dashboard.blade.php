@@ -374,10 +374,15 @@
                     <div class="card-body p-0">
                         <ul class="list-group list-group-flush">
                             @forelse($recentActivities as $activity)
+                                @php $subjectUrl = $activity->subjectShowUrl(); @endphp
                                 <li class="list-group-item">
                                     <div class="font-weight-bold">{{ $activity->actionLabel() }}</div>
                                     <div class="small text-muted">
-                                        {{ $activity->description() }}
+                                        @if($subjectUrl)
+                                            <a href="{{ $subjectUrl }}">{{ $activity->description() }}</a>
+                                        @else
+                                            {{ $activity->description() }}
+                                        @endif
                                     </div>
                                     <div class="small text-muted">
                                         {{ $activity->actor?->name ?? 'System' }}

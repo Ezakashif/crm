@@ -74,7 +74,8 @@
                 </thead>
                 <tbody>
                     @forelse($logs as $log)
-                        <tr>
+                        @php $subjectUrl = $log->subjectShowUrl(); @endphp
+                        <tr @if($subjectUrl) class="activity-log-row" style="cursor: pointer;" data-href="{{ $subjectUrl }}" @endif>
                             <td>
                                 <small>{{ $log->created_at->format('M d, Y') }}<br>
                                 {{ $log->created_at->format('h:i A') }}</small>
@@ -92,7 +93,16 @@
                             <td>
                                 <span class="badge badge-secondary">{{ $log->actionLabel() }}</span>
                             </td>
-                            <td>{{ $log->description() }}</td>
+                            <td>
+                                @if($subjectUrl)
+                                    <a href="{{ $subjectUrl }}" class="text-dark">
+                                        {{ $log->description() }}
+                                        <i class="fas fa-external-link-alt text-muted ml-1" style="font-size: 0.7rem;"></i>
+                                    </a>
+                                @else
+                                    {{ $log->description() }}
+                                @endif
+                            </td>
                             <td><small class="text-muted">{{ $log->ip_address ?? '—' }}</small></td>
                         </tr>
                     @empty
@@ -109,4 +119,20 @@
             </div>
         @endif
     </div>
+
+    @push('js')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('tr.activity-log-row[data-href]').forEach(function (row) {
+                    row.addEventListener('click', function (event) {
+                        if (event.target.closest('a')) {
+                            return;
+                        }
+
+                        window.location = row.getAttribute('data-href');
+                    });
+                });
+            });
+        </script>
+    @endpush
 </x-app-layout>

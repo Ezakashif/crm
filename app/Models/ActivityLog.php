@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Gate;
 
 class ActivityLog extends Model
 {
@@ -50,6 +51,16 @@ class ActivityLog extends Model
         'task.status_changed' => 'Task status changed',
     ];
 
+    /**
+     * @var array<class-string<Model>, string>
+     */
+    private const SUBJECT_SHOW_ROUTES = [
+        Lead::class => 'leads.show',
+        Customer::class => 'customers.show',
+        Task::class => 'tasks.show',
+        User::class => 'users.show',
+    ];
+
     public function actor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -63,6 +74,37 @@ class ActivityLog extends Model
     public function actionLabel(): string
     {
         return self::ACTION_LABELS[$this->action] ?? ucfirst(str_replace('.', ' ', $this->action));
+    }
+
+    /**
+     * URL to the subject's detail page when it still exists and the viewer may open it.
+     */
+    public function subjectShowUrl(?User $viewer = null): ?string
+    {
+        $viewer ??= auth()->user();
+        $subject = $this->relationLoaded('subject') ? $this->getRelation('subject') : $this->subject;
+
+        if (! $viewer || ! $subject instanceof Model) {
+            return null;
+        }
+
+        if ($subject instanceof User && str_starts_with((string) $this->action, 'profile.')) {
+            if ($viewer->id === $subject->id) {
+                return route('profile.edit');
+            }
+
+            return Gate::forUser($viewer)->allows('view', $subject)
+                ? route('users.show', $subject)
+                : null;
+        }
+
+        $routeName = self::SUBJECT_SHOW_ROUTES[$subject::class] ?? null;
+
+        if (! $routeName || ! Gate::forUser($viewer)->allows('view', $subject)) {
+            return null;
+        }
+
+        return route($routeName, $subject);
     }
 
     public function description(): string
