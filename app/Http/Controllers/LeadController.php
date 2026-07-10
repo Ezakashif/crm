@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreLeadRequest;
 use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\LeadActivity;
@@ -27,7 +28,14 @@ class LeadController extends Controller
 
         $filters = $request->validate($this->leadListQuery->filterRules());
 
-        $leads = $this->leadListQuery->query($user, $filters)->get();
+        $leads = $this->leadListQuery->query($user, $filters)
+            ->limit(Lead::BOARD_CARD_LIMIT + 1)
+            ->get();
+
+        $boardTruncated = $leads->count() > Lead::BOARD_CARD_LIMIT;
+        if ($boardTruncated) {
+            $leads = $leads->take(Lead::BOARD_CARD_LIMIT);
+        }
 
         $statuses = Lead::STATUSES;
 
@@ -35,7 +43,7 @@ class LeadController extends Controller
             ? User::active()->orderBy('name')->get()
             : collect();
 
-        return view('leads.index', compact('leads', 'statuses', 'filters', 'users'));
+        return view('leads.index', compact('leads', 'statuses', 'filters', 'users', 'boardTruncated'));
     }
 
     public function create()
@@ -51,15 +59,10 @@ class LeadController extends Controller
         return view('leads.create', compact('users'));
     }
 
-    public function store(Request $request)
+    public function store(StoreLeadRequest $request)
     {
-        $this->authorize('create', Lead::class);
-
         $user = $request->user();
-
-        $rules = CrmValidation::leadStoreRules($user);
-
-        $validated = $request->validate($rules);
+        $validated = $request->validated();
 
         $assignedTo = $user->canAssignLeads()
             ? ($validated['assigned_to'] ?? null)
@@ -209,14 +212,27 @@ class LeadController extends Controller
     {
         $this->authorize('convert', $lead);
 
-        if ($lead->status === 'won' || Customer::query()->where('source_lead_id', $lead->id)->exists()) {
-            $existing = Customer::query()->where('source_lead_id', $lead->id)->first();
+        $existing = Customer::withTrashed()->where('source_lead_id', $lead->id)->first();
+
+        if ($existing) {
+            if ($existing->trashed()) {
+                $existing->restore();
+            }
+
+            if ($lead->status !== 'won') {
+                $lead->status = 'won';
+                $lead->save();
+            }
 
             return redirect()
-                ->route($existing ? 'customers.show' : 'leads.show', $existing ?? $lead)
-                ->with('success', $existing
-                    ? 'Lead was already converted to a customer.'
-                    : 'Lead is already marked as won.');
+                ->route('customers.show', $existing)
+                ->with('success', 'Lead was already converted to a customer.');
+        }
+
+        if ($lead->status === 'won') {
+            return redirect()
+                ->route('leads.show', $lead)
+                ->with('success', 'Lead is already marked as won.');
         }
 
         $customer = DB::transaction(function () use ($lead) {

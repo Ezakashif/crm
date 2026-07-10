@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Customer;
-use App\Models\Lead;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -31,15 +29,16 @@ return new class extends Migration
 
     /**
      * Best-effort link for existing conversions: unmatched won leads with the same email.
+     * Uses the query builder so later SoftDeletes model scopes cannot break migrate:fresh.
      */
     protected function backfillSourceLeads(): void
     {
-        $usedLeadIds = Customer::query()
+        $usedLeadIds = DB::table('customers')
             ->whereNotNull('source_lead_id')
             ->pluck('source_lead_id')
             ->all();
 
-        $customers = Customer::query()
+        $customers = DB::table('customers')
             ->whereNull('source_lead_id')
             ->whereNotNull('email')
             ->where('email', '!=', '')
@@ -53,7 +52,7 @@ return new class extends Migration
                 continue;
             }
 
-            $leadQuery = Lead::query()
+            $leadQuery = DB::table('leads')
                 ->where('status', 'won')
                 ->whereNotNull('email')
                 ->whereRaw('LOWER(email) = ?', [$email])

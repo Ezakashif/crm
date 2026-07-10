@@ -22,7 +22,14 @@ class TaskController extends Controller
 
         $filters = $request->validate($this->taskListQuery->filterRules());
 
-        $tasks = $this->taskListQuery->query($request->user(), $filters)->get();
+        $tasks = $this->taskListQuery->query($request->user(), $filters)
+            ->limit(Task::BOARD_CARD_LIMIT + 1)
+            ->get();
+
+        $boardTruncated = $tasks->count() > Task::BOARD_CARD_LIMIT;
+        if ($boardTruncated) {
+            $tasks = $tasks->take(Task::BOARD_CARD_LIMIT);
+        }
 
         $statuses = Task::STATUSES;
         $priorities = Task::PRIORITIES;
@@ -31,7 +38,7 @@ class TaskController extends Controller
             ? User::active()->orderBy('name')->get()
             : collect();
 
-        return view('tasks.index', compact('tasks', 'statuses', 'priorities', 'filters', 'users'));
+        return view('tasks.index', compact('tasks', 'statuses', 'priorities', 'filters', 'users', 'boardTruncated'));
     }
 
     public function create(Request $request)

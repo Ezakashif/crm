@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\Task;
 use App\Services\ActivityLogger;
 use App\Services\CustomerListQueryService;
 use App\Services\CustomerTimelineService;
-use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -38,11 +39,9 @@ class CustomerController extends Controller
         return view('customers.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreCustomerRequest $request)
     {
-        $this->authorize('create', Customer::class);
-
-        $validated = $request->validate(CrmValidation::customerStoreRules());
+        $validated = $request->validated();
 
         $customer = Customer::create([
             'created_by' => auth()->id(),
@@ -95,11 +94,9 @@ class CustomerController extends Controller
         return view('customers.edit', compact('customer'));
     }
 
-    public function update(Request $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        $this->authorize('update', $customer);
-
-        $validated = $request->validate(CrmValidation::customerUpdateRules());
+        $validated = $request->validated();
 
         $customer->update([
             'name' => $validated['name'],

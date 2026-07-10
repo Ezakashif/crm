@@ -6,8 +6,8 @@ use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\Analytics\CrmAnalytics;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 
 class ReportService
@@ -348,10 +348,7 @@ class ReportService
 
     protected function overdueTasksQuery(Builder $query): Builder
     {
-        return $query
-            ->whereNotIn('tasks.status', ['completed', 'cancelled'])
-            ->whereNotNull('tasks.due_date')
-            ->whereDate('tasks.due_date', '<', today());
+        return CrmAnalytics::applyOverdueTasks($query, 'tasks.status', 'tasks.due_date');
     }
 
     /**
@@ -364,11 +361,7 @@ class ReportService
      */
     protected function monthlyLeadGrowth(User $user, array $filters): array
     {
-        $start = now()->startOfMonth()->subMonths(5);
-        $end = now()->endOfMonth();
-
-        $query = Lead::visibleTo($user)
-            ->whereBetween('leads.created_at', [$start, $end]);
+        $query = Lead::visibleTo($user);
 
         $employeeId = $this->resolveEmployeeFilter($user, $filters['employee_id'] ?? null, 'leads');
 
@@ -380,27 +373,7 @@ class ReportService
             $query->where('leads.source', $filters['source']);
         }
 
-        $monthExpression = $this->monthExpression('leads.created_at');
-
-        $counts = $query
-            ->selectRaw("{$monthExpression} as month_key, COUNT(*) as aggregate")
-            ->groupBy('month_key')
-            ->pluck('aggregate', 'month_key');
-
-        $labels = [];
-        $data = [];
-
-        foreach (CarbonPeriod::create($start, '1 month', $end) as $month) {
-            /** @var Carbon $month */
-            $key = $month->format('Y-m');
-            $labels[] = $month->format('M Y');
-            $data[] = (int) ($counts[$key] ?? 0);
-        }
-
-        return [
-            'labels' => $labels,
-            'data' => $data,
-        ];
+        return CrmAnalytics::monthlyLeadGrowth($query, 6, 'leads.created_at');
     }
 
     /**
@@ -408,55 +381,16 @@ class ReportService
      */
     protected function leadSourceDistribution(Builder $leadQuery): array
     {
-        $rows = (clone $leadQuery)
-            ->selectRaw('leads.source, COUNT(*) as aggregate')
-            ->groupBy('leads.source')
-            ->get();
-
-        $counts = [];
-
-        foreach ($rows as $row) {
-            $key = filled($row->source) ? (string) $row->source : '__other__';
-            $counts[$key] = ($counts[$key] ?? 0) + (int) $row->aggregate;
-        }
-
-        $labels = [];
-        $data = [];
-
-        foreach (Lead::SOURCES as $source) {
-            $labels[] = ucfirst(str_replace('_', ' ', $source));
-            $data[] = (int) ($counts[$source] ?? 0);
-            unset($counts[$source]);
-        }
-
-        $other = (int) array_sum($counts);
-
-        if ($other > 0) {
-            $labels[] = 'Other / Unspecified';
-            $data[] = $other;
-        }
-
-        return [
-            'labels' => $labels,
-            'data' => $data,
-        ];
+        return CrmAnalytics::leadSourceDistribution($leadQuery, 'leads.source');
     }
 
     protected function dateExpression(string $column): string
     {
-        $driver = Lead::query()->getConnection()->getDriverName();
-
-        return $driver === 'sqlite'
-            ? "strftime('%Y-%m-%d', {$column})"
-            : "DATE({$column})";
+        return CrmAnalytics::dateExpression($column);
     }
 
     protected function monthExpression(string $column): string
     {
-        $driver = Lead::query()->getConnection()->getDriverName();
-
-        return $driver === 'sqlite'
-            ? "strftime('%Y-%m', {$column})"
-            : "DATE_FORMAT({$column}, '%Y-%m')";
+        return CrmAnalytics::monthExpression($column);
     }
 }

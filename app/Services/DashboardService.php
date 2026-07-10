@@ -7,8 +7,7 @@ use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\Task;
 use App\Models\User;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
+use App\Services\Analytics\CrmAnalytics;
 use Illuminate\Database\Eloquent\Builder;
 
 class DashboardService
@@ -142,10 +141,7 @@ class DashboardService
 
     protected function overdueTasksQuery(Builder $query): Builder
     {
-        return $query
-            ->whereNotIn('status', ['completed', 'cancelled'])
-            ->whereNotNull('due_date')
-            ->whereDate('due_date', '<', today());
+        return CrmAnalytics::applyOverdueTasks($query);
     }
 
     protected function recentActivitiesQuery(User $user, bool $canViewAll): Builder
@@ -164,34 +160,7 @@ class DashboardService
      */
     protected function monthlyLeadGrowth(Builder $leadQuery, int $months): array
     {
-        $start = now()->startOfMonth()->subMonths($months - 1);
-        $end = now()->endOfMonth();
-
-        $driver = $leadQuery->getConnection()->getDriverName();
-        $monthExpression = $driver === 'sqlite'
-            ? "strftime('%Y-%m', created_at)"
-            : "DATE_FORMAT(created_at, '%Y-%m')";
-
-        $counts = (clone $leadQuery)
-            ->where('created_at', '>=', $start)
-            ->selectRaw("{$monthExpression} as month_key, COUNT(*) as aggregate")
-            ->groupBy('month_key')
-            ->pluck('aggregate', 'month_key');
-
-        $labels = [];
-        $data = [];
-
-        foreach (CarbonPeriod::create($start, '1 month', $end) as $month) {
-            /** @var Carbon $month */
-            $key = $month->format('Y-m');
-            $labels[] = $month->format('M Y');
-            $data[] = (int) ($counts[$key] ?? 0);
-        }
-
-        return [
-            'labels' => $labels,
-            'data' => $data,
-        ];
+        return CrmAnalytics::monthlyLeadGrowth($leadQuery, $months);
     }
 
     /**
@@ -199,38 +168,7 @@ class DashboardService
      */
     protected function leadSourceDistribution(Builder $leadQuery): array
     {
-        $rows = (clone $leadQuery)
-            ->selectRaw('source, COUNT(*) as aggregate')
-            ->groupBy('source')
-            ->get();
-
-        $counts = [];
-
-        foreach ($rows as $row) {
-            $key = filled($row->source) ? (string) $row->source : '__other__';
-            $counts[$key] = ($counts[$key] ?? 0) + (int) $row->aggregate;
-        }
-
-        $labels = [];
-        $data = [];
-
-        foreach (Lead::SOURCES as $source) {
-            $labels[] = ucfirst(str_replace('_', ' ', $source));
-            $data[] = (int) ($counts[$source] ?? 0);
-            unset($counts[$source]);
-        }
-
-        $other = (int) array_sum($counts);
-
-        if ($other > 0) {
-            $labels[] = 'Other / Unspecified';
-            $data[] = $other;
-        }
-
-        return [
-            'labels' => $labels,
-            'data' => $data,
-        ];
+        return CrmAnalytics::leadSourceDistribution($leadQuery);
     }
 
     /**

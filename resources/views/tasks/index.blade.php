@@ -20,6 +20,12 @@
         </div>
     </x-slot>
 
+    @if(! empty($boardTruncated))
+        <div class="alert alert-warning">
+            Showing the first {{ \App\Models\Task::BOARD_CARD_LIMIT }} tasks. Narrow filters to see the rest.
+        </div>
+    @endif
+
     @php
         $statusColors = [
             'pending' => 'card-warning',

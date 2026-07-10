@@ -30,6 +30,12 @@
         </div>
     @endif
 
+    @if(! empty($boardTruncated))
+        <div class="alert alert-warning">
+            Showing the first {{ \App\Models\Lead::BOARD_CARD_LIMIT }} leads. Narrow filters to see the rest.
+        </div>
+    @endif
+
     @if(session('import_errors'))
         <div class="alert alert-warning alert-dismissible">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
