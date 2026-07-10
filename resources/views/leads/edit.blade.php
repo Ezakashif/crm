@@ -1,10 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="m-0">Edit Lead</h1>
-            <a href="{{ route('leads.show', $lead) }}" class="btn btn-default btn-sm">
-                <i class="fas fa-eye"></i> View Lead
-            </a>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="crm-page-title">Edit Lead</h1>
+                <span class="crm-page-subtitle">Update lead details and assignment.</span>
+            </div>
+            <div class="crm-header-actions mt-2 mt-md-0">
+                <a href="{{ route('leads.show', $lead) }}" class="btn btn-default btn-sm">
+                    <i class="fas fa-eye"></i> View Lead
+                </a>
+            </div>
         </div>
     </x-slot>
 

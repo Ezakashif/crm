@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h1 class="m-0">{{ $lead->name }}</h1>
-                <small class="text-muted">{{ $lead->company ?? 'No company' }}</small>
+                <h1 class="crm-page-title">{{ $lead->name }}</h1>
+                <span class="crm-page-subtitle">{{ $lead->company ?? 'No company' }}</span>
             </div>
             <div class="mt-2 mt-md-0 d-flex flex-wrap align-items-center">
                 <div class="mr-2 mb-1">

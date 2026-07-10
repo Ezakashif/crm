@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">Edit Role</h1>
+        <div>
+            <h1 class="crm-page-title">Edit Role</h1>
+            <span class="crm-page-subtitle">Update role name and permissions.</span>
+        </div>
     </x-slot>
 
     <div class="card card-primary">

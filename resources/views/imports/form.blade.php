@@ -2,12 +2,14 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h1 class="m-0">Import {{ $label }}</h1>
-                <small class="text-muted">Upload a CSV file to create multiple {{ strtolower($label) }}</small>
+                <h1 class="crm-page-title">Import {{ $label }}</h1>
+                <span class="crm-page-subtitle">Upload a CSV file to create multiple {{ strtolower($label) }}.</span>
             </div>
-            <a href="{{ route($indexRoute) }}" class="btn btn-default btn-sm mt-2 mt-md-0">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
+            <div class="crm-header-actions mt-2 mt-md-0">
+                <a href="{{ route($indexRoute) }}" class="btn btn-default btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
         </div>
     </x-slot>
 

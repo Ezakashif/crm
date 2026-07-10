@@ -1,0 +1,769 @@
+/* =========================================================
+   CRM App UI — global polish (AdminLTE-compatible)
+   Scoped primarily to body.crm-app / .content-wrapper
+   ========================================================= */
+
+body.crm-app {
+    font-family: var(--crm-font);
+    background: var(--crm-surface-muted);
+    color: var(--crm-text);
+}
+
+/* ----- Shell: sidebar / navbar / brand ----- */
+body.crm-app .main-sidebar {
+    background: var(--crm-sidebar) !important;
+    box-shadow: 1px 0 0 rgba(15, 23, 42, 0.08);
+}
+
+body.crm-app .brand-link {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16) !important;
+    padding: 0.9rem 1rem;
+}
+
+body.crm-app .brand-link .brand-text {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #f8fafc !important;
+}
+
+body.crm-app .brand-link .brand-image {
+    box-shadow: none !important;
+    opacity: 1;
+    margin-top: -2px;
+}
+
+body.crm-app .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+    background: var(--crm-accent) !important;
+    color: #fff !important;
+    box-shadow: none;
+}
+
+body.crm-app .nav-sidebar .nav-link {
+    border-radius: 0.5rem;
+    margin: 0.1rem 0.55rem;
+    color: #cbd5e1 !important;
+}
+
+body.crm-app .nav-sidebar .nav-link:hover {
+    background: var(--crm-sidebar-hover) !important;
+    color: #fff !important;
+}
+
+body.crm-app .nav-sidebar .nav-header {
+    color: #64748b !important;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    margin-top: 0.75rem;
+}
+
+body.crm-app .main-header.navbar {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--crm-border) !important;
+    box-shadow: none !important;
+}
+
+body.crm-app .content-wrapper {
+    background: var(--crm-surface-muted) !important;
+}
+
+body.crm-app .content-header {
+    padding: 1.1rem 0.5rem 0.35rem;
+}
+
+body.crm-app .content-header h1,
+body.crm-app .content-header .m-0 {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+    color: var(--crm-text) !important;
+}
+
+body.crm-app .content-header .text-muted,
+body.crm-app .content-header small {
+    color: var(--crm-text-muted) !important;
+    font-size: 0.875rem;
+}
+
+body.crm-app .content {
+    padding-top: 0.5rem;
+}
+
+/* ----- Cards ----- */
+body.crm-app .content .card {
+    border: 1px solid var(--crm-border);
+    border-radius: var(--crm-radius);
+    box-shadow: var(--crm-shadow);
+    background: var(--crm-surface);
+}
+
+body.crm-app .content .card.card-outline {
+    border-top: 1px solid var(--crm-border);
+}
+
+body.crm-app .content .card.card-primary.card-outline,
+body.crm-app .content .card.card-info.card-outline,
+body.crm-app .content .card.card-success.card-outline,
+body.crm-app .content .card.card-warning.card-outline,
+body.crm-app .content .card.card-danger.card-outline,
+body.crm-app .content .card.card-secondary.card-outline {
+    border-top: 1px solid var(--crm-border);
+}
+
+body.crm-app .content .card-header {
+    background: var(--crm-surface);
+    border-bottom: 1px solid var(--crm-border);
+    padding: 0.85rem 1rem;
+    border-radius: var(--crm-radius) var(--crm-radius) 0 0;
+}
+
+body.crm-app .content .card-title {
+    font-size: 0.8125rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--crm-text-secondary);
+    margin: 0;
+}
+
+body.crm-app .content .card-footer {
+    background: var(--crm-surface-muted);
+    border-top: 1px solid var(--crm-border);
+    border-radius: 0 0 var(--crm-radius) var(--crm-radius);
+}
+
+body.crm-app .content .card-body {
+    color: var(--crm-text-secondary);
+}
+
+/* ----- Buttons ----- */
+body.crm-app .btn {
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+body.crm-app .btn-primary {
+    background: var(--crm-accent);
+    border-color: var(--crm-accent);
+}
+
+body.crm-app .btn-primary:hover,
+body.crm-app .btn-primary:focus {
+    background: var(--crm-accent-hover);
+    border-color: var(--crm-accent-hover);
+}
+
+body.crm-app .btn-default,
+body.crm-app .btn-outline-secondary {
+    background: var(--crm-surface);
+    border-color: var(--crm-border-strong);
+    color: var(--crm-text-secondary);
+}
+
+body.crm-app .btn-default:hover,
+body.crm-app .btn-outline-secondary:hover {
+    background: var(--crm-surface-muted);
+    color: var(--crm-text);
+}
+
+body.crm-app .btn-xs {
+    border-radius: 999px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.72rem;
+}
+
+body.crm-app .btn-tool {
+    border-radius: 0.4rem;
+    color: var(--crm-accent);
+    font-weight: 600;
+}
+
+/* ----- Forms ----- */
+body.crm-app .form-control {
+    border-radius: var(--crm-radius-sm);
+    border-color: var(--crm-border-strong);
+    color: var(--crm-text);
+    box-shadow: none;
+}
+
+body.crm-app .form-control:focus {
+    border-color: var(--crm-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+body.crm-app .form-group > label,
+body.crm-app label.small {
+    font-weight: 600;
+    color: var(--crm-text-secondary);
+}
+
+body.crm-app .form-control-sm {
+    border-radius: 0.45rem;
+}
+
+body.crm-app .custom-file-label,
+body.crm-app .form-control-file {
+    border-radius: var(--crm-radius-sm);
+}
+
+body.crm-app .invalid-feedback {
+    font-weight: 500;
+}
+
+/* Filter cards */
+body.crm-app .crm-filter-card,
+body.crm-app .content .card.card-outline.card-secondary.mb-3 {
+    border: 1px solid var(--crm-border);
+    box-shadow: none;
+    background: var(--crm-surface);
+}
+
+body.crm-app .crm-filter-card .card-body,
+body.crm-app .content .card.card-outline.card-secondary.mb-3 .card-body {
+    padding-top: 0.85rem;
+    padding-bottom: 0.5rem;
+}
+
+/* ----- Tables ----- */
+body.crm-app .content .table {
+    color: var(--crm-text-secondary);
+    margin-bottom: 0;
+}
+
+body.crm-app .content .table thead th {
+    border-top: 0;
+    border-bottom: 1px solid var(--crm-border);
+    background: var(--crm-surface-muted);
+    color: var(--crm-text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+}
+
+body.crm-app .content .table td {
+    border-top: 0;
+    border-bottom: 1px solid var(--crm-border);
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+}
+
+body.crm-app .content .table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+body.crm-app .content .table-hover tbody tr:hover {
+    background: var(--crm-accent-soft);
+}
+
+body.crm-app .content .table a {
+    color: var(--crm-text);
+    font-weight: 600;
+}
+
+body.crm-app .content .table a:hover {
+    color: var(--crm-accent);
+}
+
+body.crm-app .content .card-body.table-responsive.p-0,
+body.crm-app .content .table-responsive.p-0 {
+    border-radius: 0 0 var(--crm-radius) var(--crm-radius);
+}
+
+/* ----- Badges / chips ----- */
+body.crm-app .badge {
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0.3em 0.65em;
+}
+
+body.crm-app .badge-primary { background: var(--crm-accent); }
+body.crm-app .badge-success { background: var(--crm-success); }
+body.crm-app .badge-warning { background: var(--crm-warning); color: #fff; }
+body.crm-app .badge-danger { background: var(--crm-danger); }
+body.crm-app .badge-info { background: var(--crm-info); }
+body.crm-app .badge-secondary { background: #64748b; }
+body.crm-app .badge-light {
+    background: var(--crm-surface-soft);
+    color: var(--crm-text-secondary);
+    border: 1px solid var(--crm-border);
+}
+
+/* ----- Alerts ----- */
+body.crm-app .alert {
+    border-radius: var(--crm-radius-sm);
+    border: 1px solid transparent;
+    box-shadow: none;
+}
+
+body.crm-app .alert-success {
+    background: var(--crm-success-soft);
+    border-color: #a7f3d0;
+    color: #065f46;
+}
+
+body.crm-app .alert-danger {
+    background: var(--crm-danger-soft);
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+body.crm-app .alert-warning {
+    background: var(--crm-warning-soft);
+    border-color: #fde68a;
+    color: #92400e;
+}
+
+body.crm-app .alert-info {
+    background: var(--crm-info-soft);
+    border-color: #a5f3fc;
+    color: #155e75;
+}
+
+/* ----- Definition lists (show pages) ----- */
+body.crm-app .content dl.row dt {
+    color: var(--crm-text-muted);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+body.crm-app .content dl.row dd {
+    color: var(--crm-text);
+    margin-bottom: 0.65rem;
+}
+
+/* ----- List groups ----- */
+body.crm-app .list-group-item {
+    border-color: var(--crm-border);
+    color: var(--crm-text-secondary);
+}
+
+body.crm-app .list-group-flush .list-group-item {
+    padding: 0.85rem 1rem;
+}
+
+body.crm-app .list-group-item:hover {
+    background: var(--crm-surface-muted);
+}
+
+/* ----- Pagination ----- */
+body.crm-app .pagination .page-link {
+    border-radius: 999px !important;
+    margin: 0 0.15rem;
+    border: 1px solid var(--crm-border);
+    color: var(--crm-text-secondary);
+}
+
+body.crm-app .pagination .page-item.active .page-link {
+    background: var(--crm-accent);
+    border-color: var(--crm-accent);
+}
+
+/* ----- Modals ----- */
+body.crm-app .modal-content {
+    border: 1px solid var(--crm-border);
+    border-radius: var(--crm-radius);
+    box-shadow: var(--crm-shadow-hover);
+}
+
+body.crm-app .modal-header,
+body.crm-app .modal-footer {
+    border-color: var(--crm-border);
+}
+
+/* ----- Info boxes / small boxes (reports) ----- */
+body.crm-app .info-box {
+    border: 1px solid var(--crm-border);
+    border-radius: var(--crm-radius);
+    box-shadow: var(--crm-shadow);
+    min-height: 80px;
+}
+
+body.crm-app .info-box .info-box-icon {
+    border-radius: var(--crm-radius) 0 0 var(--crm-radius);
+    width: 70px;
+}
+
+body.crm-app .small-box {
+    border-radius: var(--crm-radius);
+    box-shadow: var(--crm-shadow);
+    border: 1px solid transparent;
+}
+
+body.crm-app .small-box .inner h3 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body.crm-app .small-box > .small-box-footer {
+    background: rgba(15, 23, 42, 0.08);
+}
+
+body.crm-app .small-box.bg-info { background: var(--crm-accent) !important; }
+body.crm-app .small-box.bg-success { background: var(--crm-success) !important; }
+body.crm-app .small-box.bg-warning { background: var(--crm-warning) !important; }
+body.crm-app .small-box.bg-danger { background: var(--crm-danger) !important; }
+body.crm-app .small-box.bg-primary { background: var(--crm-accent) !important; }
+
+/* ----- Kanban boards ----- */
+body.crm-app .crm-board-column,
+body.crm-app .lead-column,
+body.crm-app .task-column {
+    min-height: 280px;
+}
+
+body.crm-app .content .card.card-outline.card-primary .card-header,
+body.crm-app .content .card.card-outline.card-info .card-header,
+body.crm-app .content .card.card-outline.card-warning .card-header,
+body.crm-app .content .card.card-outline.card-success .card-header,
+body.crm-app .content .card.card-outline.card-danger .card-header,
+body.crm-app .content .card.card-outline.card-secondary .card-header {
+    border-left: 3px solid var(--crm-accent);
+}
+
+body.crm-app .content .card.card-outline.card-info .card-header { border-left-color: var(--crm-info); }
+body.crm-app .content .card.card-outline.card-warning .card-header { border-left-color: var(--crm-warning); }
+body.crm-app .content .card.card-outline.card-success .card-header { border-left-color: var(--crm-success); }
+body.crm-app .content .card.card-outline.card-danger .card-header { border-left-color: var(--crm-danger); }
+body.crm-app .content .card.card-outline.card-secondary .card-header { border-left-color: #64748b; }
+
+body.crm-app .lead-card,
+body.crm-app .task-card,
+body.crm-app .card.card-sm {
+    border: 1px solid var(--crm-border) !important;
+    border-radius: var(--crm-radius-sm) !important;
+    box-shadow: none !important;
+    transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+
+body.crm-app .lead-card:hover,
+body.crm-app .task-card:hover,
+body.crm-app .card.card-sm:hover {
+    border-color: var(--crm-border-strong) !important;
+    box-shadow: var(--crm-shadow-hover) !important;
+    transform: translateY(-1px);
+}
+
+body.crm-app .lead-card .card-body,
+body.crm-app .task-card .card-body {
+    padding: 0.75rem 0.85rem;
+}
+
+/* ----- Empty / muted helpers ----- */
+body.crm-app .text-muted {
+    color: var(--crm-text-muted) !important;
+}
+
+body.crm-app .img-circle.elevation-1 {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--crm-border) !important;
+}
+
+/* ----- Auth screens ----- */
+body.login-page,
+body.register-page,
+body.lockscreen {
+    background: linear-gradient(160deg, #eff6ff 0%, #f8fafc 45%, #ecfeff 100%) !important;
+    font-family: var(--crm-font);
+}
+
+body.login-page .card,
+body.register-page .card,
+body.lockscreen .card {
+    border: 1px solid var(--crm-border);
+    border-radius: var(--crm-radius);
+    box-shadow: var(--crm-shadow-hover);
+}
+
+body.login-page .login-card-body,
+body.register-page .register-card-body {
+    border-radius: var(--crm-radius);
+}
+
+body.login-page .btn-primary,
+body.register-page .btn-primary {
+    background: var(--crm-accent);
+    border-color: var(--crm-accent);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+/* ----- Global search dropdown token alignment ----- */
+.global-search-dropdown {
+    border: 1px solid var(--crm-border) !important;
+    border-radius: var(--crm-radius-sm) !important;
+    box-shadow: var(--crm-shadow-hover) !important;
+    overflow: hidden;
+}
+
+.global-search-dropdown .gs-group {
+    color: var(--crm-text-muted) !important;
+    background: var(--crm-surface-muted) !important;
+}
+
+.global-search-dropdown .gs-item.active,
+.global-search-dropdown .gs-item:hover {
+    background: var(--crm-accent-soft) !important;
+}
+
+/* ----- Activity log clickable rows ----- */
+body.crm-app tr.activity-log-row:hover {
+    background: var(--crm-accent-soft);
+}
+
+/* ----- Customer timeline (token-aligned) ----- */
+.customer-timeline::before {
+    background: linear-gradient(180deg, var(--crm-border-strong) 0%, var(--crm-border) 100%) !important;
+}
+
+.customer-timeline-body {
+    background: var(--crm-surface-muted) !important;
+    border-color: var(--crm-border) !important;
+    border-radius: var(--crm-radius-sm) !important;
+}
+
+a.customer-timeline-link:hover .customer-timeline-body {
+    border-color: var(--crm-border-strong) !important;
+    box-shadow: var(--crm-shadow) !important;
+}
+
+/* ----- Page headers (shared with dashboard) ----- */
+body.crm-app .crm-page-title,
+body.crm-app .content-header .crm-page-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+    color: var(--crm-text) !important;
+    margin: 0;
+    line-height: 1.25;
+}
+
+body.crm-app .crm-page-subtitle {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--crm-text-muted);
+    font-weight: 400;
+}
+
+body.crm-app .crm-header-actions {
+    gap: 0.35rem;
+}
+
+body.crm-app .crm-header-actions .btn {
+    border-radius: 999px;
+    font-weight: 600;
+    padding: 0.35rem 0.9rem;
+}
+
+/* ----- Solid AdminLTE form cards → quiet SaaS cards ----- */
+body.crm-app .content .card.card-primary:not(.card-outline),
+body.crm-app .content .card.card-info:not(.card-outline),
+body.crm-app .content .card.card-success:not(.card-outline),
+body.crm-app .content .card.card-warning:not(.card-outline),
+body.crm-app .content .card.card-danger:not(.card-outline),
+body.crm-app .content .card.card-secondary:not(.card-outline) {
+    border: 1px solid var(--crm-border);
+}
+
+body.crm-app .content .card.card-primary:not(.card-outline) > .card-header,
+body.crm-app .content .card.card-info:not(.card-outline) > .card-header,
+body.crm-app .content .card.card-success:not(.card-outline) > .card-header,
+body.crm-app .content .card.card-warning:not(.card-outline) > .card-header,
+body.crm-app .content .card.card-danger:not(.card-outline) > .card-header,
+body.crm-app .content .card.card-secondary:not(.card-outline) > .card-header {
+    background: var(--crm-surface) !important;
+    color: var(--crm-text) !important;
+    border-bottom: 1px solid var(--crm-border);
+}
+
+body.crm-app .content .card.card-primary:not(.card-outline) > .card-header .card-title,
+body.crm-app .content .card.card-info:not(.card-outline) > .card-header .card-title,
+body.crm-app .content .card.card-success:not(.card-outline) > .card-header .card-title,
+body.crm-app .content .card.card-warning:not(.card-outline) > .card-header .card-title,
+body.crm-app .content .card.card-danger:not(.card-outline) > .card-header .card-title,
+body.crm-app .content .card.card-secondary:not(.card-outline) > .card-header .card-title {
+    color: var(--crm-text-secondary) !important;
+}
+
+/* ----- Selects / input groups ----- */
+body.crm-app select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+}
+
+body.crm-app .input-group .form-control {
+    border-radius: var(--crm-radius-sm) 0 0 var(--crm-radius-sm);
+}
+
+body.crm-app .input-group-append .btn {
+    border-radius: 0 var(--crm-radius-sm) var(--crm-radius-sm) 0;
+}
+
+body.crm-app .input-group-sm .form-control {
+    border-radius: 0.45rem 0 0 0.45rem;
+}
+
+body.crm-app .custom-control-label {
+    color: var(--crm-text-secondary);
+}
+
+/* ----- Empty states ----- */
+body.crm-app .crm-empty,
+body.crm-app .table td.text-center.text-muted {
+    padding: 2rem 1rem !important;
+    color: var(--crm-text-muted) !important;
+    font-size: 0.9rem;
+}
+
+body.crm-app .crm-empty {
+    text-align: center;
+    background: var(--crm-surface);
+    border: 1px dashed var(--crm-border-strong);
+    border-radius: var(--crm-radius);
+    padding: 2.5rem 1.25rem;
+    color: var(--crm-text-muted);
+}
+
+body.crm-app .crm-empty i {
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 0.65rem;
+    color: var(--crm-border-strong);
+}
+
+/* ----- Board columns ----- */
+body.crm-app .lead-column,
+body.crm-app .task-column {
+    background: var(--crm-surface-muted);
+    border-radius: 0 0 var(--crm-radius-sm) var(--crm-radius-sm);
+}
+
+body.crm-app .lead-card h6 a,
+body.crm-app .task-card h6 a,
+body.crm-app .lead-card a.text-dark,
+body.crm-app .task-card a.text-dark {
+    color: var(--crm-text) !important;
+    font-weight: 600;
+}
+
+body.crm-app .lead-card a.text-dark:hover,
+body.crm-app .task-card a.text-dark:hover {
+    color: var(--crm-accent) !important;
+}
+
+/* ----- Notifications ----- */
+body.crm-app .list-group-item.bg-light {
+    background: var(--crm-accent-soft) !important;
+    border-left: 3px solid var(--crm-accent);
+}
+
+/* ----- Navbar search ----- */
+body.crm-app .main-header .form-inline .form-control {
+    border-radius: 999px;
+    border-color: var(--crm-border-strong);
+    min-width: 220px;
+    background: var(--crm-surface-muted);
+}
+
+body.crm-app .main-header .form-inline .form-control:focus {
+    background: var(--crm-surface);
+    border-color: var(--crm-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+body.crm-app .navbar-badge {
+    border-radius: 999px;
+    font-size: 0.65rem;
+}
+
+/* ----- Breadcrumbs ----- */
+body.crm-app .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+body.crm-app .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--crm-text-muted);
+}
+
+/* ----- Action button row spacing ----- */
+body.crm-app .btn-group-xs > .btn,
+body.crm-app .btn-group-xs > form > .btn {
+    margin-right: 0.15rem;
+}
+
+body.crm-app .btn-info {
+    background: var(--crm-info);
+    border-color: var(--crm-info);
+}
+
+body.crm-app .btn-success {
+    background: var(--crm-success);
+    border-color: var(--crm-success);
+}
+
+body.crm-app .btn-danger {
+    background: var(--crm-danger);
+    border-color: var(--crm-danger);
+}
+
+body.crm-app .btn-warning {
+    background: var(--crm-warning);
+    border-color: var(--crm-warning);
+    color: #fff;
+}
+
+/* ----- Reports section titles ----- */
+body.crm-app .content > .d-flex > h4,
+body.crm-app .content h4.mb-0 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--crm-text);
+}
+
+/* ----- Auth screens (extra) ----- */
+body.login-page .login-logo a,
+body.register-page .register-logo a {
+    color: var(--crm-text) !important;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body.login-page .crm-auth-card,
+body.register-page .crm-auth-card {
+    border-top: 3px solid var(--crm-accent) !important;
+}
+
+body.login-page .input-group-text,
+body.register-page .input-group-text {
+    background: var(--crm-surface-muted);
+    border-color: var(--crm-border-strong);
+    color: var(--crm-text-muted);
+}
+
+body.login-page .form-control,
+body.register-page .form-control {
+    border-color: var(--crm-border-strong);
+}
+
+body.login-page .form-control:focus,
+body.register-page .form-control:focus {
+    border-color: var(--crm-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ----- Footer ----- */
+body.crm-app .main-footer {
+    background: var(--crm-surface);
+    border-top: 1px solid var(--crm-border);
+    color: var(--crm-text-muted);
+}

@@ -7,7 +7,7 @@
         ->isNotEmpty();
 @endphp
 
-<div class="card card-outline card-secondary mb-3">
+<div class="card card-outline card-secondary mb-3 crm-filter-card">
     <div class="card-body py-3">
         <form method="GET" action="{{ url()->current() }}">
             <div class="row align-items-end">

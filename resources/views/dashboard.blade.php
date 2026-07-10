@@ -18,9 +18,6 @@
         </div>
     </x-slot>
 
-    <link rel="stylesheet" href="{{ asset('css/crm-tokens.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-
     <div class="crm-dashboard">
         {{-- Attention strip --}}
         @if($canViewLeads || $canViewTasks)

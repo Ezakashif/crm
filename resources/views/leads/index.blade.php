@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="m-0">Leads</h1>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
+                <h1 class="crm-page-title">Leads</h1>
+                <span class="crm-page-subtitle">Track and move deals across your pipeline.</span>
+            </div>
+            <div class="crm-header-actions mt-2 mt-md-0">
                 @can('viewAny', App\Models\Lead::class)
                     <a href="{{ route('exports.leads', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-file-download"></i> Export CSV
@@ -94,8 +97,9 @@
     @endphp
 
     @if($leads->isEmpty())
-        <div class="alert alert-info">
-            {{ collect($filters ?? [])->filter(fn ($v) => filled($v))->isNotEmpty() ? 'No leads match your filters.' : 'No leads yet.' }}
+        <div class="crm-empty mb-3">
+            <i class="fas fa-funnel-dollar"></i>
+            {{ collect($filters ?? [])->filter(fn ($v) => filled($v))->isNotEmpty() ? 'No leads match your filters.' : 'No leads yet. Add your first lead to start the pipeline.' }}
         </div>
     @endif
 

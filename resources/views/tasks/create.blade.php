@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">Create Task</h1>
+        <div>
+            <h1 class="crm-page-title">Create Task</h1>
+            <span class="crm-page-subtitle">Assign work with a due date and priority.</span>
+        </div>
     </x-slot>
 
     <div class="card card-primary">

@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="m-0">Tasks</h1>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
+                <h1 class="crm-page-title">Tasks</h1>
+                <span class="crm-page-subtitle">Organize work across pending, active, and done.</span>
+            </div>
+            <div class="crm-header-actions mt-2 mt-md-0">
                 @can('viewAny', App\Models\Task::class)
                     <a href="{{ route('exports.tasks', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-file-download"></i> Export CSV

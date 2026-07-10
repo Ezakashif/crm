@@ -4,7 +4,7 @@
             <div class="d-flex align-items-center">
                 <x-user-avatar :user="$user" :size="56" class="mr-3" />
                 <div>
-                    <h1 class="m-0">
+                    <h1 class="crm-page-title">
                         {{ $user->name }}
                         @if($user->id === auth()->id())
                             <span class="badge badge-light ml-1">You</span>

@@ -4,6 +4,7 @@
     --crm-surface-soft: #f1f5f9;
     --crm-border: #e2e8f0;
     --crm-border-strong: #cbd5e1;
+    --crm-border-subtle: #f1f5f9;
     --crm-text: #0f172a;
     --crm-text-secondary: #334155;
     --crm-text-muted: #64748b;
@@ -16,6 +17,8 @@
     --crm-warning-soft: #fffbeb;
     --crm-danger: #dc2626;
     --crm-danger-soft: #fef2f2;
+    --crm-info: #0891b2;
+    --crm-info-soft: #ecfeff;
     --crm-purple: #7c3aed;
     --crm-radius: 0.625rem;
     --crm-radius-sm: 0.5rem;
@@ -29,4 +32,6 @@
     --crm-chart-5: #0891b2;
     --crm-chart-6: #ea580c;
     --crm-chart-7: #64748b;
+    --crm-sidebar: #0f172a;
+    --crm-sidebar-hover: #1e293b;
 }

@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">Edit User</h1>
+        <div>
+            <h1 class="crm-page-title">Edit User</h1>
+            <span class="crm-page-subtitle">Update account details and access.</span>
+        </div>
     </x-slot>
 
     <div class="card card-primary">

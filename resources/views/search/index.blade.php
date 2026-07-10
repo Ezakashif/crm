@@ -2,17 +2,17 @@
     <x-slot name="header">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <div>
-                <h1 class="m-0">Search</h1>
+                <h1 class="crm-page-title">Search</h1>
                 @if($term !== '')
-                    <small class="text-muted">Results for “{{ $term }}”</small>
+                    <span class="crm-page-subtitle">Results for “{{ $term }}”</span>
                 @else
-                    <small class="text-muted">Find leads, customers, tasks, users, and companies</small>
+                    <span class="crm-page-subtitle">Find leads, customers, tasks, users, and companies</span>
                 @endif
             </div>
         </div>
     </x-slot>
 
-    <div class="card card-outline card-secondary mb-3">
+    <div class="card card-outline card-secondary mb-3 crm-filter-card">
         <div class="card-body">
             <form method="GET" action="{{ route('search.index') }}" class="form-inline flex-wrap">
                 <div class="input-group input-group-sm mr-2 mb-2" style="min-width: 280px; max-width: 480px; width: 100%;">
@@ -34,7 +34,8 @@
     </div>
 
     @if($term === '')
-        <div class="alert alert-info mb-0">
+        <div class="crm-empty mb-0">
+            <i class="fas fa-search"></i>
             Type at least {{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }} characters to search leads, customers, tasks, users, and companies.
         </div>
     @elseif($too_short)
@@ -42,7 +43,8 @@
             Enter at least {{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }} characters to search.
         </div>
     @elseif($total === 0)
-        <div class="alert alert-info mb-0">
+        <div class="crm-empty mb-0">
+            <i class="fas fa-search"></i>
             No matches found for “{{ $term }}”.
         </div>
     @else

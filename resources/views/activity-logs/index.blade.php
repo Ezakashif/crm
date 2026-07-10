@@ -1,10 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">{{ $canViewAll ? 'Activity Log' : 'My Activity' }}</h1>
+        <div>
+            <h1 class="crm-page-title">{{ $canViewAll ? 'Activity Log' : 'My Activity' }}</h1>
+            <span class="crm-page-subtitle">
+                {{ $canViewAll ? 'Audit trail across leads, customers, tasks, and users.' : 'Your recent actions in the CRM.' }}
+            </span>
+        </div>
     </x-slot>
 
     @if($canViewAll)
-        <div class="card card-outline card-secondary mb-3">
+        <div class="card card-outline card-secondary mb-3 crm-filter-card">
             <div class="card-body">
                 <form method="GET" action="{{ route('activity-logs.index') }}" class="form-inline">
                     <div class="form-group mr-2 mb-2">
@@ -37,7 +42,7 @@
             </div>
         </div>
     @else
-        <div class="card card-outline card-secondary mb-3">
+        <div class="card card-outline card-secondary mb-3 crm-filter-card">
             <div class="card-body">
                 <form method="GET" action="{{ route('activity-logs.index') }}" class="form-inline">
                     <div class="form-group mr-2 mb-2">

@@ -2,12 +2,12 @@
     <x-slot name="header">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <div>
-                <h1 class="m-0">Reports</h1>
-                <small class="text-muted">
+                <h1 class="crm-page-title">Reports</h1>
+                <span class="crm-page-subtitle">
                     {{ \Carbon\Carbon::parse($filters['date_from'])->format('M j, Y') }}
                     –
                     {{ \Carbon\Carbon::parse($filters['date_to'])->format('M j, Y') }}
-                </small>
+                </span>
             </div>
         </div>
     </x-slot>

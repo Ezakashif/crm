@@ -1,11 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="m-0">Roles</h1>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="crm-page-title">Roles</h1>
+                <span class="crm-page-subtitle">Define permissions for each team role.</span>
+            </div>
             @can('create', App\Models\Role::class)
-                <a href="{{ route('roles.create') }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i> Add Role
-                </a>
+                <div class="crm-header-actions mt-2 mt-md-0">
+                    <a href="{{ route('roles.create') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Add Role
+                    </a>
+                </div>
             @endcan
         </div>
     </x-slot>

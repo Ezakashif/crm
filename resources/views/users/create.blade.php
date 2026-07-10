@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">Create User</h1>
+        <div>
+            <h1 class="crm-page-title">Create User</h1>
+            <span class="crm-page-subtitle">Invite a teammate and set their role.</span>
+        </div>
     </x-slot>
 
     <div class="card card-primary">

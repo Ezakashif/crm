@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="m-0">Customers</h1>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
+                <h1 class="crm-page-title">Customers</h1>
+                <span class="crm-page-subtitle">Accounts converted from won leads and direct adds.</span>
+            </div>
+            <div class="crm-header-actions mt-2 mt-md-0">
                 @can('viewAny', App\Models\Customer::class)
                     <a href="{{ route('exports.customers', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-file-download"></i> Export CSV

@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h1 class="m-0">{{ $customer->name }}</h1>
-                <small class="text-muted">{{ $customer->company_name ?? 'Customer profile' }}</small>
+                <h1 class="crm-page-title">{{ $customer->name }}</h1>
+                <span class="crm-page-subtitle">{{ $customer->company_name ?? 'Customer profile' }}</span>
             </div>
             <div class="mt-2 mt-md-0 d-flex flex-wrap align-items-center">
                 @can('update', $customer)

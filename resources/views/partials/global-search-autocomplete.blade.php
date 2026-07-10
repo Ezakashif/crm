@@ -6,10 +6,10 @@
         display: none;
         max-height: 22rem;
         overflow-y: auto;
-        background: #fff;
-        border: 1px solid rgba(0, 0, 0, 0.125);
-        border-radius: 0.25rem;
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+        background: var(--crm-surface, #fff);
+        border: 1px solid var(--crm-border, #e2e8f0);
+        border-radius: var(--crm-radius-sm, 0.5rem);
+        box-shadow: var(--crm-shadow-hover, 0 4px 12px rgba(15, 23, 42, 0.08));
     }
 
     .global-search-dropdown.is-open {
@@ -22,9 +22,9 @@
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        color: #6c757d;
-        background: #f8f9fa;
-        border-bottom: 1px solid #eee;
+        color: var(--crm-text-muted, #64748b);
+        background: var(--crm-surface-muted, #f8fafc);
+        border-bottom: 1px solid var(--crm-border-subtle, #f1f5f9);
     }
 
     .global-search-dropdown .gs-item {
@@ -32,18 +32,19 @@
         width: 100%;
         padding: 0.55rem 0.75rem;
         text-align: left;
-        color: #212529;
+        color: var(--crm-text, #0f172a);
         text-decoration: none;
         border: 0;
-        border-bottom: 1px solid #f1f1f1;
+        border-bottom: 1px solid var(--crm-border-subtle, #f1f5f9);
         background: transparent;
         cursor: pointer;
+        transition: background-color 0.12s ease;
     }
 
     .global-search-dropdown .gs-item:hover,
     .global-search-dropdown .gs-item.is-active {
-        background: #e9f2ff;
-        color: #212529;
+        background: var(--crm-accent-soft, #eff6ff);
+        color: var(--crm-text, #0f172a);
         text-decoration: none;
     }
 
@@ -58,7 +59,7 @@
         display: block;
         margin-top: 0.1rem;
         font-size: 0.75rem;
-        color: #6c757d;
+        color: var(--crm-text-muted, #64748b);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -68,12 +69,12 @@
     .global-search-dropdown .gs-footer {
         padding: 0.65rem 0.75rem;
         font-size: 0.8rem;
-        color: #6c757d;
+        color: var(--crm-text-muted, #64748b);
     }
 
     .global-search-dropdown .gs-footer {
-        border-top: 1px solid #eee;
-        background: #fafafa;
+        border-top: 1px solid var(--crm-border, #e2e8f0);
+        background: var(--crm-surface-muted, #f8fafc);
     }
 
     .global-search-dropdown .gs-footer a {

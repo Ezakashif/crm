@@ -1,14 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="m-0">Notifications</h1>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="crm-page-title">Notifications</h1>
+                <span class="crm-page-subtitle">Follow-up reminders and system alerts.</span>
+            </div>
             @if(auth()->user()->unreadNotifications->isNotEmpty())
-                <form method="POST" action="{{ route('notifications.read-all') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-default btn-sm">
-                        <i class="fas fa-check-double"></i> Mark all as read
-                    </button>
-                </form>
+                <div class="crm-header-actions mt-2 mt-md-0">
+                    <form method="POST" action="{{ route('notifications.read-all') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-default btn-sm">
+                            <i class="fas fa-check-double"></i> Mark all as read
+                        </button>
+                    </form>
+                </div>
             @endif
         </div>
     </x-slot>

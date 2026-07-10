@@ -13,6 +13,8 @@
 @stop
 
 @section('css')
+    {{-- tokens + app shell load via AdminLTE CrmUi plugin (also covers auth pages) --}}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     @stack('css')
 @stop
 

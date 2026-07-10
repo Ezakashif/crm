@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">Profile</h1>
+        <div>
+            <h1 class="crm-page-title">Profile</h1>
+            <span class="crm-page-subtitle">Your account details and security settings.</span>
+        </div>
     </x-slot>
 
     <div class="row">

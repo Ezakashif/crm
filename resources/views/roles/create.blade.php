@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="m-0">Create Role</h1>
+        <div>
+            <h1 class="crm-page-title">Create Role</h1>
+            <span class="crm-page-subtitle">Name a role and choose permissions.</span>
+        </div>
     </x-slot>
 
     <div class="card card-primary">
