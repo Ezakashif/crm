@@ -44,6 +44,22 @@
                            value="{{ old('due_date', $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('Y-m-d') : '') }}">
                 </div>
 
+                <div class="form-group">
+                    <label for="customer_id">Related Customer</label>
+                    <select id="customer_id" name="customer_id" class="form-control @error('customer_id') is-invalid @enderror">
+                        <option value="">— None —</option>
+                        @foreach($customers as $customer)
+                            <option value="{{ $customer->id }}" @selected((string) old('customer_id', $task->customer_id) === (string) $customer->id)>
+                                {{ $customer->name }}
+                                @if($customer->company_name)
+                                    ({{ $customer->company_name }})
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('customer_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+
                 @can('assign', $task)
                     <div class="form-group">
                         <label for="assigned_to">Assign To <span class="text-danger">*</span></label>
