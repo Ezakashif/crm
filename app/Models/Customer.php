@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
 {
@@ -12,6 +14,7 @@ class Customer extends Model
 
     protected $fillable = [
         'created_by',
+        'source_lead_id',
         'name',
         'email',
         'phone',
@@ -21,9 +24,19 @@ class Customer extends Model
         'status',
     ];
 
-      public function creator()
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function sourceLead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class, 'source_lead_id');
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 
     public function scopeSearch(Builder $query, ?string $term): Builder

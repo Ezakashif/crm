@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\LeadActivity;
+use App\Models\Task;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\LeadListQueryService;
@@ -84,6 +85,18 @@ class LeadController extends Controller
             'name' => $lead->name,
         ]);
 
+        if ($lead->assigned_to) {
+            $lead->loadMissing('assignee');
+
+            ActivityLogger::log('lead.assigned', $lead, [
+                'name' => $lead->name,
+                'from_user_id' => null,
+                'to_user_id' => $lead->assigned_to,
+                'from' => null,
+                'to' => $lead->assignee?->name ?? 'Unassigned',
+            ]);
+        }
+
         return redirect()->route('leads.show', $lead)->with('success', 'Lead created');
     }
 
@@ -142,8 +155,10 @@ class LeadController extends Controller
         }
 
         $previousStatus = $lead->status;
+        $previousAssigneeId = $lead->assigned_to;
 
         $lead->update($validated);
+        $lead->loadMissing('assignee');
 
         ActivityLogger::log('lead.updated', $lead, [
             'name' => $lead->name,
@@ -153,6 +168,21 @@ class LeadController extends Controller
             ActivityLogger::log('lead.status_changed', $lead, [
                 'from' => $previousStatus,
                 'to' => $lead->status,
+            ]);
+        }
+
+        if (array_key_exists('assigned_to', $validated)
+            && (int) $previousAssigneeId !== (int) $lead->assigned_to) {
+            $fromUser = $previousAssigneeId
+                ? User::query()->find($previousAssigneeId)
+                : null;
+
+            ActivityLogger::log('lead.assigned', $lead, [
+                'name' => $lead->name,
+                'from_user_id' => $previousAssigneeId,
+                'to_user_id' => $lead->assigned_to,
+                'from' => $fromUser?->name,
+                'to' => $lead->assignee?->name ?? 'Unassigned',
             ]);
         }
 
@@ -178,6 +208,7 @@ class LeadController extends Controller
 
         $customer = Customer::create([
             'created_by' => auth()->id(),
+            'source_lead_id' => $lead->id,
             'name' => $lead->name,
             'email' => $lead->email,
             'phone' => $lead->phone,
@@ -189,15 +220,21 @@ class LeadController extends Controller
         $lead->status = 'won';
         $lead->save();
 
+        Task::query()
+            ->where('lead_id', $lead->id)
+            ->whereNull('customer_id')
+            ->update(['customer_id' => $customer->id]);
+
         ActivityLogger::log('lead.converted', $lead, [
             'name' => $lead->name,
+            'customer_id' => $customer->id,
         ]);
 
         ActivityLogger::log('customer.created', $customer, [
             'name' => $customer->name,
         ]);
 
-        return redirect()->route('customers.edit', $customer->id)
+        return redirect()->route('customers.show', $customer)
             ->with('success', 'Lead converted to customer');
     }
 

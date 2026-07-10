@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Task;
 use App\Services\ActivityLogger;
 use App\Services\CustomerListQueryService;
+use App\Services\CustomerTimelineService;
 use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 
@@ -13,6 +14,7 @@ class CustomerController extends Controller
 {
     public function __construct(
         protected CustomerListQueryService $customerListQuery,
+        protected CustomerTimelineService $customerTimeline,
     ) {}
 
     public function index(Request $request)
@@ -65,16 +67,24 @@ class CustomerController extends Controller
     {
         $this->authorize('view', $customer);
 
-        $customer->load('creator');
+        $customer->load(['creator', 'sourceLead.assignee']);
 
         $tasks = Task::query()
-            ->where('customer_id', $customer->id)
+            ->where(function ($query) use ($customer) {
+                $query->where('customer_id', $customer->id);
+
+                if ($customer->source_lead_id) {
+                    $query->orWhere('lead_id', $customer->source_lead_id);
+                }
+            })
             ->with('assignee:id,name')
             ->latest('id')
             ->limit(10)
             ->get();
 
-        return view('customers.show', compact('customer', 'tasks'));
+        $timeline = $this->customerTimeline->forCustomer($customer, request()->user());
+
+        return view('customers.show', compact('customer', 'tasks', 'timeline'));
     }
 
     public function edit(Customer $customer)

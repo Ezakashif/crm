@@ -26,7 +26,7 @@
     @endif
 
     <div class="row">
-        <div class="col-lg-7">
+        <div class="col-lg-4">
             <div class="card card-outline card-success">
                 <div class="card-header">
                     <h3 class="card-title">Customer Details</h3>
@@ -64,6 +64,19 @@
                         <dt class="col-sm-4">Address</dt>
                         <dd class="col-sm-8" style="white-space: pre-wrap;">{{ $customer->address ?: '—' }}</dd>
 
+                        @if($customer->sourceLead)
+                            <dt class="col-sm-4">Source Lead</dt>
+                            <dd class="col-sm-8">
+                                @can('view', $customer->sourceLead)
+                                    <a href="{{ route('leads.show', $customer->sourceLead) }}">
+                                        {{ $customer->sourceLead->name }}
+                                    </a>
+                                @else
+                                    {{ $customer->sourceLead->name }}
+                                @endcan
+                            </dd>
+                        @endif
+
                         <dt class="col-sm-4">Created By</dt>
                         <dd class="col-sm-8">{{ $customer->creator?->name ?? '—' }}</dd>
 
@@ -80,9 +93,7 @@
                     @endif
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-5">
             <div class="card card-outline card-primary">
                 <div class="card-header">
                     <h3 class="card-title">Related Tasks</h3>
@@ -124,6 +135,10 @@
                     </div>
                 </div>
             @endcan
+        </div>
+
+        <div class="col-lg-8">
+            @include('customers.partials.timeline', ['timeline' => $timeline])
         </div>
     </div>
 </x-app-layout>

@@ -41,6 +41,7 @@ class ActivityLog extends Model
         'lead.created' => 'Lead created',
         'lead.updated' => 'Lead updated',
         'lead.deleted' => 'Lead deleted',
+        'lead.assigned' => 'Lead assigned',
         'lead.converted' => 'Lead converted',
         'lead.status_changed' => 'Lead status changed',
         'lead.created_via_website' => 'Lead created via website',
@@ -140,6 +141,11 @@ class ActivityLog extends Model
             'lead.created' => sprintf('Created lead %s', $properties['name'] ?? 'unknown'),
             'lead.updated' => sprintf('Updated lead %s', $properties['name'] ?? ($this->subject?->name ?? 'unknown')),
             'lead.deleted' => sprintf('Deleted lead %s', $properties['name'] ?? 'unknown'),
+            'lead.assigned' => sprintf(
+                'Assigned lead %s to %s',
+                $properties['name'] ?? ($this->subject?->name ?? 'unknown'),
+                $properties['to'] ?? 'Unassigned'
+            ),
             'lead.converted' => sprintf('Converted lead %s to customer', $properties['name'] ?? 'unknown'),
             'lead.status_changed' => sprintf(
                 'Lead status changed from %s to %s',
