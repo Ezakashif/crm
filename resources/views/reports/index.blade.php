@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex flex-wrap justify-content-between align-items-center">
+        <div class="crm-dashboard d-flex flex-wrap justify-content-between align-items-center">
             <div>
                 <h1 class="crm-page-title">Reports</h1>
                 <span class="crm-page-subtitle">
@@ -12,505 +12,652 @@
         </div>
     </x-slot>
 
-    <x-list-filters :reset-url="route('reports.index')">
-        <div class="col-md-2 mb-2">
-            <label for="date_from" class="small text-muted mb-1">From</label>
-            <input id="date_from" name="date_from" type="date" class="form-control form-control-sm"
-                   value="{{ $filters['date_from'] }}">
-        </div>
-        <div class="col-md-2 mb-2">
-            <label for="date_to" class="small text-muted mb-1">To</label>
-            <input id="date_to" name="date_to" type="date" class="form-control form-control-sm"
-                   value="{{ $filters['date_to'] }}">
-        </div>
-        @if($canFilterEmployees)
+    <div class="crm-dashboard crm-reports">
+        <x-list-filters :reset-url="route('reports.index')">
             <div class="col-md-2 mb-2">
-                <label for="employee_id" class="small text-muted mb-1">Employee</label>
-                <select id="employee_id" name="employee_id" class="form-control form-control-sm">
-                    <option value="">All employees</option>
-                    @foreach($employees as $employee)
-                        <option value="{{ $employee->id }}" @selected(($filters['employee_id'] ?? null) == $employee->id)>
-                            {{ $employee->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        @endif
-        @if($canViewLeads)
-            <div class="col-md-2 mb-2">
-                <label for="source" class="small text-muted mb-1">Lead Source</label>
-                <select id="source" name="source" class="form-control form-control-sm">
-                    <option value="">All sources</option>
-                    @foreach($leadSources as $source)
-                        <option value="{{ $source }}" @selected(($filters['source'] ?? '') === $source)>
-                            {{ ucfirst(str_replace('_', ' ', $source)) }}
-                        </option>
-                    @endforeach
-                </select>
+                <label for="date_from" class="small text-muted mb-1">From</label>
+                <input id="date_from" name="date_from" type="date" class="form-control form-control-sm"
+                       value="{{ $filters['date_from'] }}">
             </div>
             <div class="col-md-2 mb-2">
-                <label for="status" class="small text-muted mb-1">Lead Status</label>
-                <select id="status" name="status" class="form-control form-control-sm">
-                    <option value="">All statuses</option>
-                    @foreach($leadStatuses as $value => $label)
-                        <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
-                    @endforeach
-                </select>
+                <label for="date_to" class="small text-muted mb-1">To</label>
+                <input id="date_to" name="date_to" type="date" class="form-control form-control-sm"
+                       value="{{ $filters['date_to'] }}">
             </div>
-        @endif
-    </x-list-filters>
-
-    @if($canViewLeads && $leads)
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h4 class="mb-0">Leads</h4>
-            @if($canExport)
-                <a href="{{ route('reports.export', ['type' => 'leads'] + $filters) }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="fas fa-file-csv"></i> Export CSV
-                </a>
-            @endif
-        </div>
-
-        <div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>{{ $leads['total'] }}</h3>
-                        <p>Total Leads</p>
-                    </div>
-                    <div class="icon"><i class="fas fa-funnel-dollar"></i></div>
+            @if($canFilterEmployees)
+                <div class="col-md-2 mb-2">
+                    <label for="employee_id" class="small text-muted mb-1">Employee</label>
+                    <select id="employee_id" name="employee_id" class="form-control form-control-sm">
+                        <option value="">All employees</option>
+                        @foreach($employees as $employee)
+                            <option value="{{ $employee->id }}" @selected(($filters['employee_id'] ?? null) == $employee->id)>
+                                {{ $employee->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
+            @endif
+            @if($canViewLeads)
+                <div class="col-md-2 mb-2">
+                    <label for="source" class="small text-muted mb-1">Lead Source</label>
+                    <select id="source" name="source" class="form-control form-control-sm">
+                        <option value="">All sources</option>
+                        @foreach($leadSources as $source)
+                            <option value="{{ $source }}" @selected(($filters['source'] ?? '') === $source)>
+                                {{ ucfirst(str_replace('_', ' ', $source)) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <label for="status" class="small text-muted mb-1">Lead Status</label>
+                    <select id="status" name="status" class="form-control form-control-sm">
+                        <option value="">All statuses</option>
+                        @foreach($leadStatuses as $value => $label)
+                            <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+        </x-list-filters>
+
+        @if($canViewLeads || $canViewCustomers || $canViewTasks)
+            <div class="crm-attention crm-attention--reports">
+                @if($canViewLeads && $leads)
+                    <x-dashboard.kpi-stat
+                        label="Total Leads"
+                        :value="$leads['total']"
+                        :href="route('leads.index')"
+                        meta="View pipeline"
+                        tone="accent"
+                    />
+                @endif
+
+                @if($canViewLeads && $performance)
+                    <x-dashboard.kpi-stat
+                        label="Conversion Rate"
+                        :value="number_format($performance['conversion_rate'], 1).'<sup>%</sup>'"
+                        meta="Won ÷ assigned"
+                        tone="success"
+                    />
+                @endif
+
+                @if($canViewCustomers && $customers)
+                    <x-dashboard.kpi-stat
+                        label="Customers"
+                        :value="$customers['total']"
+                        :href="route('customers.index')"
+                        meta="In range"
+                        tone="accent"
+                    />
+                @endif
+
+                @if($canViewTasks && $tasks)
+                    <x-dashboard.kpi-stat
+                        label="Overdue Tasks"
+                        :value="$tasks['overdue']"
+                        :href="route('tasks.index')"
+                        meta="Needs attention"
+                        tone="danger"
+                    />
+                @endif
             </div>
-            @foreach(array_slice($leads['by_status'], 0, 3) as $statusRow)
-                <div class="col-lg-3 col-6">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-{{ $statusRow['status'] === 'won' ? 'success' : ($statusRow['status'] === 'lost' ? 'danger' : 'secondary') }}">
-                            <i class="fas fa-circle"></i>
-                        </span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">{{ $statusRow['label'] }}</span>
-                            <span class="info-box-number">{{ $statusRow['count'] }}</span>
+        @endif
+
+        @if($canViewLeads && $leads)
+            <div class="crm-section-heading">
+                <div>
+                    <h2 class="crm-section-heading__title">Leads</h2>
+                    <p class="crm-section-heading__meta">Pipeline volume, sources, and growth for the selected range.</p>
+                </div>
+                @if($canExport)
+                    <a href="{{ route('reports.export', ['type' => 'leads'] + $filters) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </a>
+                @endif
+            </div>
+
+            <div class="crm-insight-grid crm-insight-grid--4 mb-3">
+                <div class="crm-insight">
+                    <div class="crm-insight__label">Total</div>
+                    <div class="crm-insight__value">{{ $leads['total'] }}</div>
+                </div>
+                @foreach(array_slice($leads['by_status'], 0, 3) as $statusRow)
+                    <div class="crm-insight">
+                        <div class="crm-insight__label">{{ $statusRow['label'] }}</div>
+                        <div class="crm-insight__value">{{ $statusRow['count'] }}</div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <x-dashboard.section-card title="Leads by Status" :padded="true">
+                        <div id="leads-by-status-shell" class="crm-chart-shell crm-chart-shell--sm is-loading">
+                            <div class="crm-chart-skeleton"></div>
+                            <canvas id="leadsByStatusChart"></canvas>
                         </div>
-                    </div>
+                    </x-dashboard.section-card>
                 </div>
-            @endforeach
-        </div>
+                <div class="col-lg-6">
+                    <x-dashboard.section-card title="Leads by Source" :padded="true">
+                        <div id="leads-by-source-shell" class="crm-chart-shell crm-chart-shell--sm is-loading">
+                            <div class="crm-chart-skeleton"></div>
+                            <canvas id="leadsBySourceChart"></canvas>
+                        </div>
+                    </x-dashboard.section-card>
+                </div>
+            </div>
 
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="card card-outline card-primary">
-                    <div class="card-header"><h3 class="card-title">Leads by Status</h3></div>
-                    <div class="card-body"><canvas id="leadsByStatusChart" height="160"></canvas></div>
+            <div class="row">
+                <div class="col-lg-7">
+                    <x-dashboard.section-card title="Monthly Lead Growth" :padded="true">
+                        <div id="monthly-lead-growth-shell" class="crm-chart-shell is-loading">
+                            <div class="crm-chart-skeleton"></div>
+                            <canvas id="monthlyLeadGrowthChart"></canvas>
+                        </div>
+                    </x-dashboard.section-card>
                 </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card card-outline card-info">
-                    <div class="card-header"><h3 class="card-title">Leads by Source</h3></div>
-                    <div class="card-body"><canvas id="leadsBySourceChart" height="160"></canvas></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-lg-7">
-                <div class="card card-outline card-success">
-                    <div class="card-header"><h3 class="card-title">Monthly Lead Growth</h3></div>
-                    <div class="card-body"><canvas id="monthlyLeadGrowthChart" height="120"></canvas></div>
-                </div>
-            </div>
-            <div class="col-lg-5">
-                <div class="card">
-                    <div class="card-header"><h3 class="card-title">Leads by Assigned Employee</h3></div>
-                    <div class="card-body table-responsive p-0">
-                        <table class="table table-hover text-nowrap mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Employee</th>
-                                    <th>Leads</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($leads['by_assignee'] as $row)
+                <div class="col-lg-5">
+                    <x-dashboard.section-card title="Leads by Assigned Employee">
+                        <div class="table-responsive crm-table-scroll">
+                            <table class="table crm-table mb-0">
+                                <thead>
                                     <tr>
-                                        <td>{{ $row['employee'] }}</td>
-                                        <td>{{ $row['count'] }}</td>
+                                        <th>Employee</th>
+                                        <th>Leads</th>
                                     </tr>
-                                @empty
-                                    <tr><td colspan="2" class="text-muted">No leads in this range.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @forelse($leads['by_assignee'] as $row)
+                                        <tr>
+                                            <td>{{ $row['employee'] }}</td>
+                                            <td class="crm-table__num">{{ $row['count'] }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="2">
+                                                <x-dashboard.empty-state
+                                                    icon="fas fa-user-friends"
+                                                    title="No leads in this range."
+                                                    description="Try widening the date range or clearing filters."
+                                                />
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </x-dashboard.section-card>
                 </div>
             </div>
-        </div>
 
-        <div class="card mb-4">
-            <div class="card-header"><h3 class="card-title">Leads by Date</h3></div>
-            <div class="card-body table-responsive p-0" style="max-height: 260px;">
-                <table class="table table-sm table-hover text-nowrap mb-0">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Leads</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($leads['by_date'] as $day => $count)
+            <x-dashboard.section-card title="Leads by Date">
+                <div class="table-responsive crm-table-scroll">
+                    <table class="table crm-table mb-0">
+                        <thead>
                             <tr>
-                                <td>{{ $day }}</td>
-                                <td>{{ $count }}</td>
+                                <th>Date</th>
+                                <th>Leads</th>
                             </tr>
-                        @empty
-                            <tr><td colspan="2" class="text-muted">No daily lead data.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @endif
-
-    @if($canViewCustomers && $customers)
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h4 class="mb-0">Customers</h4>
-            @if($canExport)
-                <a href="{{ route('reports.export', ['type' => 'customers'] + $filters) }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="fas fa-file-csv"></i> Export CSV
-                </a>
-            @endif
-        </div>
-
-        <div class="row">
-            <div class="col-md-4">
-                <div class="info-box">
-                    <span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Total Customers (range)</span>
-                        <span class="info-box-number">{{ $customers['total'] }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="info-box">
-                    <span class="info-box-icon bg-primary"><i class="fas fa-user-plus"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">New This Month</span>
-                        <span class="info-box-number">{{ $customers['new_this_month'] }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="info-box">
-                    <span class="info-box-icon bg-success"><i class="fas fa-trophy"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Converted (Won Leads)</span>
-                        <span class="info-box-number">{{ $customers['converted'] }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card mb-4">
-            <div class="card-header"><h3 class="card-title">Customers by Date</h3></div>
-            <div class="card-body table-responsive p-0" style="max-height: 260px;">
-                <table class="table table-sm table-hover text-nowrap mb-0">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Customers</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($customers['by_date'] as $row)
-                            <tr>
-                                <td>{{ $row['date'] }}</td>
-                                <td>{{ $row['count'] }}</td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="2" class="text-muted">No customers in this range.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @endif
-
-    @if($canViewTasks && $tasks)
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h4 class="mb-0">Tasks</h4>
-            @if($canExport)
-                <a href="{{ route('reports.export', ['type' => 'tasks'] + $filters) }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="fas fa-file-csv"></i> Export CSV
-                </a>
-            @endif
-        </div>
-
-        <div class="row">
-            <div class="col-md-4">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h3>{{ $tasks['pending'] }}</h3>
-                        <p>Pending Tasks</p>
-                    </div>
-                    <div class="icon"><i class="fas fa-clock"></i></div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3>{{ $tasks['completed'] }}</h3>
-                        <p>Completed Tasks</p>
-                    </div>
-                    <div class="icon"><i class="fas fa-check"></i></div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="small-box bg-danger">
-                    <div class="inner">
-                        <h3>{{ $tasks['overdue'] }}</h3>
-                        <p>Overdue Tasks</p>
-                    </div>
-                    <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-lg-5">
-                <div class="card card-outline card-warning">
-                    <div class="card-header"><h3 class="card-title">Tasks by Status</h3></div>
-                    <div class="card-body"><canvas id="tasksByStatusChart" height="180"></canvas></div>
-                </div>
-            </div>
-            <div class="col-lg-7">
-                <div class="card">
-                    <div class="card-header"><h3 class="card-title">Tasks by Employee</h3></div>
-                    <div class="card-body table-responsive p-0">
-                        <table class="table table-hover text-nowrap mb-0">
-                            <thead>
+                        </thead>
+                        <tbody>
+                            @forelse($leads['by_date'] as $day => $count)
                                 <tr>
-                                    <th>Employee</th>
-                                    <th>Tasks</th>
+                                    <td>{{ $day }}</td>
+                                    <td class="crm-table__num">{{ $count }}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($tasks['by_employee'] as $row)
+                            @empty
+                                <tr>
+                                    <td colspan="2">
+                                        <x-dashboard.empty-state
+                                            icon="fas fa-calendar"
+                                            title="No daily lead data."
+                                            description="Lead activity will appear here once records exist."
+                                        />
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </x-dashboard.section-card>
+        @endif
+
+        @if($canViewCustomers && $customers)
+            <div class="crm-section-heading">
+                <div>
+                    <h2 class="crm-section-heading__title">Customers</h2>
+                    <p class="crm-section-heading__meta">New accounts and conversions in the selected window.</p>
+                </div>
+                @if($canExport)
+                    <a href="{{ route('reports.export', ['type' => 'customers'] + $filters) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </a>
+                @endif
+            </div>
+
+            <div class="crm-insight-grid crm-insight-grid--3 mb-3">
+                <div class="crm-insight">
+                    <div class="crm-insight__label">Total (range)</div>
+                    <div class="crm-insight__value">{{ $customers['total'] }}</div>
+                </div>
+                <div class="crm-insight">
+                    <div class="crm-insight__label">New This Month</div>
+                    <div class="crm-insight__value">{{ $customers['new_this_month'] }}</div>
+                </div>
+                <div class="crm-insight">
+                    <div class="crm-insight__label">Converted (Won)</div>
+                    <div class="crm-insight__value">{{ $customers['converted'] }}</div>
+                </div>
+            </div>
+
+            <x-dashboard.section-card title="Customers by Date">
+                <div class="table-responsive crm-table-scroll">
+                    <table class="table crm-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Customers</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($customers['by_date'] as $row)
+                                <tr>
+                                    <td>{{ $row['date'] }}</td>
+                                    <td class="crm-table__num">{{ $row['count'] }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="2">
+                                        <x-dashboard.empty-state
+                                            icon="fas fa-building"
+                                            title="No customers in this range."
+                                            description="Converted or created customers will show up here."
+                                        />
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </x-dashboard.section-card>
+        @endif
+
+        @if($canViewTasks && $tasks)
+            <div class="crm-section-heading">
+                <div>
+                    <h2 class="crm-section-heading__title">Tasks</h2>
+                    <p class="crm-section-heading__meta">Workload, completion, and overdue pressure.</p>
+                </div>
+                @if($canExport)
+                    <a href="{{ route('reports.export', ['type' => 'tasks'] + $filters) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </a>
+                @endif
+            </div>
+
+            <div class="crm-attention crm-attention--3 mb-3">
+                <x-dashboard.kpi-stat
+                    label="Pending Tasks"
+                    :value="$tasks['pending']"
+                    :href="route('tasks.index', ['status' => 'pending'])"
+                    meta="View tasks"
+                    tone="warning"
+                />
+                <x-dashboard.kpi-stat
+                    label="Completed Tasks"
+                    :value="$tasks['completed']"
+                    :href="route('tasks.index', ['status' => 'completed'])"
+                    meta="View tasks"
+                    tone="success"
+                />
+                <x-dashboard.kpi-stat
+                    label="Overdue Tasks"
+                    :value="$tasks['overdue']"
+                    :href="route('tasks.index')"
+                    meta="Needs attention"
+                    tone="danger"
+                />
+            </div>
+
+            <div class="row">
+                <div class="col-lg-5">
+                    <x-dashboard.section-card title="Tasks by Status" :padded="true">
+                        <div id="tasks-by-status-shell" class="crm-chart-shell crm-chart-shell--sm is-loading">
+                            <div class="crm-chart-skeleton"></div>
+                            <canvas id="tasksByStatusChart"></canvas>
+                        </div>
+                    </x-dashboard.section-card>
+                </div>
+                <div class="col-lg-7">
+                    <x-dashboard.section-card title="Tasks by Employee">
+                        <div class="table-responsive crm-table-scroll">
+                            <table class="table crm-table mb-0">
+                                <thead>
                                     <tr>
-                                        <td>{{ $row['employee'] }}</td>
-                                        <td>{{ $row['count'] }}</td>
+                                        <th>Employee</th>
+                                        <th>Tasks</th>
                                     </tr>
-                                @empty
-                                    <tr><td colspan="2" class="text-muted">No tasks in this range.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @forelse($tasks['by_employee'] as $row)
+                                        <tr>
+                                            <td>{{ $row['employee'] }}</td>
+                                            <td class="crm-table__num">{{ $row['count'] }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="2">
+                                                <x-dashboard.empty-state
+                                                    icon="fas fa-tasks"
+                                                    title="No tasks in this range."
+                                                    description="Assigned work will appear once tasks are created."
+                                                />
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </x-dashboard.section-card>
                 </div>
             </div>
-        </div>
 
-        <div class="card mb-4">
-            <div class="card-header"><h3 class="card-title">Tasks by Date</h3></div>
-            <div class="card-body table-responsive p-0" style="max-height: 260px;">
-                <table class="table table-sm table-hover text-nowrap mb-0">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Tasks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($tasks['by_date'] as $row)
+            <x-dashboard.section-card title="Tasks by Date">
+                <div class="table-responsive crm-table-scroll">
+                    <table class="table crm-table mb-0">
+                        <thead>
                             <tr>
-                                <td>{{ $row['date'] }}</td>
-                                <td>{{ $row['count'] }}</td>
+                                <th>Date</th>
+                                <th>Tasks</th>
                             </tr>
-                        @empty
-                            <tr><td colspan="2" class="text-muted">No daily task data.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @endif
-
-    @if($canViewLeads && $performance)
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h4 class="mb-0">Sales Performance</h4>
-            @if($canExport)
-                <a href="{{ route('reports.export', ['type' => 'performance'] + $filters) }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="fas fa-file-csv"></i> Export CSV
-                </a>
-            @endif
-        </div>
-
-        <div class="row">
-            <div class="col-md-4">
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-primary"><i class="fas fa-user-check"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Leads Assigned</span>
-                        <span class="info-box-number">{{ $performance['leads_assigned'] }}</span>
-                    </div>
+                        </thead>
+                        <tbody>
+                            @forelse($tasks['by_date'] as $row)
+                                <tr>
+                                    <td>{{ $row['date'] }}</td>
+                                    <td class="crm-table__num">{{ $row['count'] }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="2">
+                                        <x-dashboard.empty-state
+                                            icon="fas fa-calendar"
+                                            title="No daily task data."
+                                            description="Task activity will appear here for the selected dates."
+                                        />
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-success"><i class="fas fa-handshake"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Leads Converted</span>
-                        <span class="info-box-number">{{ $performance['leads_converted'] }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-warning"><i class="fas fa-percentage"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Conversion Rate</span>
-                        <span class="info-box-number">{{ number_format($performance['conversion_rate'], 1) }}%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+            </x-dashboard.section-card>
+        @endif
 
-        <div class="card mb-4">
-            <div class="card-header"><h3 class="card-title">Top Performing Employees</h3></div>
-            <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap mb-0">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Employee</th>
-                            <th>Assigned</th>
-                            <th>Converted</th>
-                            <th>Conversion Rate</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($performance['top_performers'] as $index => $row)
+        @if($canViewLeads && $performance)
+            <div class="crm-section-heading">
+                <div>
+                    <h2 class="crm-section-heading__title">Sales Performance</h2>
+                    <p class="crm-section-heading__meta">Assignment volume and conversion outcomes.</p>
+                </div>
+                @if($canExport)
+                    <a href="{{ route('reports.export', ['type' => 'performance'] + $filters) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </a>
+                @endif
+            </div>
+
+            <div class="crm-attention crm-attention--3 mb-3">
+                <x-dashboard.kpi-stat
+                    label="Leads Assigned"
+                    :value="$performance['leads_assigned']"
+                    meta="In range"
+                    tone="accent"
+                />
+                <x-dashboard.kpi-stat
+                    label="Leads Converted"
+                    :value="$performance['leads_converted']"
+                    meta="Won outcomes"
+                    tone="success"
+                />
+                <x-dashboard.kpi-stat
+                    label="Conversion Rate"
+                    :value="number_format($performance['conversion_rate'], 1).'<sup>%</sup>'"
+                    meta="Won ÷ assigned"
+                    tone="warning"
+                />
+            </div>
+
+            <x-dashboard.section-card title="Top Performing Employees">
+                <div class="table-responsive">
+                    <table class="table crm-table mb-0">
+                        <thead>
                             <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $row['employee'] }}</td>
-                                <td>{{ $row['assigned'] }}</td>
-                                <td>{{ $row['converted'] }}</td>
-                                <td>{{ number_format($row['conversion_rate'], 1) }}%</td>
+                                <th>#</th>
+                                <th>Employee</th>
+                                <th>Assigned</th>
+                                <th>Converted</th>
+                                <th>Conversion Rate</th>
                             </tr>
-                        @empty
-                            <tr><td colspan="5" class="text-muted">No performance data in this range.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @endif
+                        </thead>
+                        <tbody>
+                            @forelse($performance['top_performers'] as $index => $row)
+                                <tr>
+                                    <td class="crm-table__num">{{ $index + 1 }}</td>
+                                    <td>
+                                        <span class="crm-feed__title">{{ $row['employee'] }}</span>
+                                    </td>
+                                    <td class="crm-table__num">{{ $row['assigned'] }}</td>
+                                    <td class="crm-table__num">{{ $row['converted'] }}</td>
+                                    <td>
+                                        <span class="crm-chip {{ $row['conversion_rate'] >= 30 ? 'crm-chip--success' : '' }}">
+                                            {{ number_format($row['conversion_rate'], 1) }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5">
+                                        <x-dashboard.empty-state
+                                            icon="fas fa-chart-line"
+                                            title="No performance data in this range."
+                                            description="Assign and convert leads to populate this leaderboard."
+                                        />
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </x-dashboard.section-card>
+        @endif
 
-    @if(! $canViewLeads && ! $canViewCustomers && ! $canViewTasks)
-        <div class="alert alert-info mb-0">
-            You do not have permission to view lead, customer, or task reports.
-        </div>
-    @endif
+        @if(! $canViewLeads && ! $canViewCustomers && ! $canViewTasks)
+            <x-dashboard.section-card title="Reports" :padded="true">
+                <x-dashboard.empty-state
+                    icon="fas fa-chart-bar"
+                    title="No report access"
+                    description="You do not have permission to view lead, customer, or task reports."
+                />
+            </x-dashboard.section-card>
+        @endif
+    </div>
 
     @push('js')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                var styles = getComputedStyle(document.documentElement);
+                var accent = (styles.getPropertyValue('--crm-chart-1') || '#2563eb').trim();
+                var palette = [
+                    (styles.getPropertyValue('--crm-chart-1') || '#2563eb').trim(),
+                    (styles.getPropertyValue('--crm-chart-2') || '#059669').trim(),
+                    (styles.getPropertyValue('--crm-chart-3') || '#d97706').trim(),
+                    (styles.getPropertyValue('--crm-chart-4') || '#7c3aed').trim(),
+                    (styles.getPropertyValue('--crm-chart-5') || '#0891b2').trim(),
+                    (styles.getPropertyValue('--crm-chart-6') || '#ea580c').trim(),
+                    (styles.getPropertyValue('--crm-chart-7') || '#64748b').trim()
+                ];
+
                 function hasChartData(data) {
                     return (data || []).some(function (value) {
                         return Number(value) > 0;
                     });
                 }
 
-                function showEmptyChart(canvas) {
-                    if (! canvas || ! canvas.parentNode) return;
-                    canvas.parentNode.innerHTML = '<p class="text-muted text-center mb-0 py-5">No data for the selected filters.</p>';
+                function markReady(shellId) {
+                    var shell = document.getElementById(shellId);
+                    if (shell) {
+                        shell.classList.remove('is-loading');
+                        shell.classList.add('is-ready');
+                    }
                 }
 
-                function makeChart(id, type, labels, data, options) {
+                function showEmptyChart(shellId, canvas) {
+                    var shell = document.getElementById(shellId);
+                    if (shell) {
+                        shell.classList.remove('is-loading');
+                        shell.classList.add('is-ready');
+                        shell.innerHTML = '<div class="crm-empty"><div class="crm-empty__icon"><i class="fas fa-chart-pie"></i></div><p class="crm-empty__title">No data for the selected filters.</p><p class="crm-empty__desc">Try a wider date range or clear filters.</p></div>';
+                        return;
+                    }
+                    if (canvas && canvas.parentNode) {
+                        canvas.parentNode.innerHTML = '<p class="text-muted text-center mb-0 py-5">No data for the selected filters.</p>';
+                    }
+                }
+
+                function makeDoughnut(id, shellId, labels, data) {
                     var canvas = document.getElementById(id);
                     if (! canvas || typeof Chart === 'undefined') return;
 
                     if (! hasChartData(data)) {
-                        showEmptyChart(canvas);
+                        showEmptyChart(shellId, canvas);
                         return;
                     }
 
-                    var chartOptions = {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        legend: {
-                            display: options.showLegend !== false,
-                            position: 'bottom'
-                        }
-                    };
-
-                    if (options.scales) {
-                        chartOptions.scales = options.scales;
-                    }
-
                     new Chart(canvas.getContext('2d'), {
-                        type: type,
+                        type: 'doughnut',
                         data: {
                             labels: labels,
                             datasets: [{
-                                label: options.label || '',
                                 data: data,
-                                backgroundColor: options.backgroundColor || [
-                                    '#007bff', '#28a745', '#ffc107', '#17a2b8',
-                                    '#6f42c1', '#fd7e14', '#6c757d', '#dc3545'
-                                ],
-                                borderColor: options.borderColor || '#007bff',
-                                borderWidth: options.borderWidth || 1,
-                                fill: options.fill || false,
-                                lineTension: 0.25
+                                backgroundColor: palette,
+                                borderWidth: 2,
+                                borderColor: '#ffffff'
                             }]
                         },
-                        options: chartOptions
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutoutPercentage: 68,
+                            legend: {
+                                position: window.innerWidth < 992 ? 'bottom' : 'right',
+                                labels: {
+                                    boxWidth: 10,
+                                    fontColor: '#64748b',
+                                    fontSize: 11,
+                                    padding: 12
+                                }
+                            },
+                            tooltips: {
+                                backgroundColor: '#0f172a',
+                                cornerRadius: 6,
+                                xPadding: 10,
+                                yPadding: 8
+                            }
+                        }
                     });
+                    markReady(shellId);
+                }
+
+                function makeLine(id, shellId, labels, data) {
+                    var canvas = document.getElementById(id);
+                    if (! canvas || typeof Chart === 'undefined') return;
+
+                    if (! hasChartData(data)) {
+                        showEmptyChart(shellId, canvas);
+                        return;
+                    }
+
+                    new Chart(canvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Leads',
+                                data: data,
+                                borderColor: accent,
+                                backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                                borderWidth: 2,
+                                pointRadius: 2.5,
+                                pointHoverRadius: 4,
+                                pointBackgroundColor: accent,
+                                lineTension: 0.3,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            legend: { display: false },
+                            tooltips: {
+                                backgroundColor: '#0f172a',
+                                cornerRadius: 6,
+                                xPadding: 10,
+                                yPadding: 8
+                            },
+                            scales: {
+                                xAxes: [{
+                                    gridLines: { display: false, drawBorder: false },
+                                    ticks: { fontColor: '#94a3b8', fontSize: 11 }
+                                }],
+                                yAxes: [{
+                                    gridLines: { color: '#e2e8f0', zeroLineColor: '#e2e8f0', drawBorder: false },
+                                    ticks: {
+                                        beginAtZero: true,
+                                        precision: 0,
+                                        fontColor: '#94a3b8',
+                                        fontSize: 11,
+                                        padding: 8
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                    markReady(shellId);
                 }
 
                 @if($canViewLeads && $leads)
-                    makeChart(
+                    makeDoughnut(
                         'leadsByStatusChart',
-                        'doughnut',
+                        'leads-by-status-shell',
                         @json($leads['by_status_chart']['labels']),
-                        @json($leads['by_status_chart']['data']),
-                        { showLegend: true }
+                        @json($leads['by_status_chart']['data'])
                     );
 
-                    makeChart(
+                    makeDoughnut(
                         'leadsBySourceChart',
-                        'doughnut',
+                        'leads-by-source-shell',
                         @json($leads['by_source_chart']['labels']),
-                        @json($leads['by_source_chart']['data']),
-                        { showLegend: true }
+                        @json($leads['by_source_chart']['data'])
                     );
 
-                    makeChart(
+                    makeLine(
                         'monthlyLeadGrowthChart',
-                        'line',
+                        'monthly-lead-growth-shell',
                         @json($leads['monthly_growth']['labels']),
-                        @json($leads['monthly_growth']['data']),
-                        {
-                            label: 'Leads',
-                            showLegend: false,
-                            fill: true,
-                            backgroundColor: 'rgba(0, 123, 255, 0.15)',
-                            borderColor: '#007bff',
-                            borderWidth: 2,
-                            scales: {
-                                yAxes: [{ ticks: { beginAtZero: true, precision: 0 } }]
-                            }
-                        }
+                        @json($leads['monthly_growth']['data'])
                     );
                 @endif
 
                 @if($canViewTasks && $tasks)
-                    makeChart(
+                    makeDoughnut(
                         'tasksByStatusChart',
-                        'doughnut',
+                        'tasks-by-status-shell',
                         @json($tasks['by_status_chart']['labels']),
-                        @json($tasks['by_status_chart']['data']),
-                        { showLegend: true }
+                        @json($tasks['by_status_chart']['data'])
                     );
                 @endif
             });

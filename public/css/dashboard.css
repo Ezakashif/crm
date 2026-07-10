@@ -488,3 +488,95 @@
 .crm-dashboard .crm-section-gap {
     margin-bottom: 0.25rem;
 }
+
+/* Reports page extensions */
+.crm-dashboard .crm-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 0.35rem 0 1rem;
+}
+
+.crm-dashboard .crm-section-heading__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--crm-text);
+}
+
+.crm-dashboard .crm-section-heading__meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: var(--crm-text-muted);
+}
+
+.crm-dashboard .crm-section-heading .btn {
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.crm-dashboard .crm-attention--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.crm-dashboard .crm-attention--reports {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 991.98px) {
+    .crm-dashboard .crm-attention--3,
+    .crm-dashboard .crm-attention--reports {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-dashboard .crm-attention--3,
+    .crm-dashboard .crm-attention--reports {
+        grid-template-columns: 1fr;
+    }
+}
+
+.crm-dashboard .crm-insight-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.crm-dashboard .crm-insight-grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 991.98px) {
+    .crm-dashboard .crm-insight-grid--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-dashboard .crm-insight-grid--3,
+    .crm-dashboard .crm-insight-grid--4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.crm-dashboard .crm-table-scroll {
+    max-height: 280px;
+    overflow: auto;
+}
+
+.crm-dashboard .crm-table__num {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--crm-text);
+}
+
+.crm-dashboard .crm-chip--success {
+    background: var(--crm-success-soft);
+    color: var(--crm-success);
+}
+
+.crm-reports .crm-filter-card {
+    margin-bottom: 1.25rem;
+}
