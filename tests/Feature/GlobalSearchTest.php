@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\Task;
 use App\Models\User;
 use Database\Seeders\RbacSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -208,5 +209,60 @@ class GlobalSearchTest extends TestCase
             ->assertOk()
             ->assertJsonPath('too_short', true)
             ->assertJsonPath('groups', []);
+    }
+
+    public function test_sales_user_can_search_assigned_tasks_by_title_and_description(): void
+    {
+        $viewer = User::factory()->create();
+        $other = User::factory()->create();
+
+        Task::factory()->assignedTo($viewer)->create([
+            'created_by' => $viewer->id,
+            'title' => 'Follow up with Acme',
+            'description' => 'Call about proposal',
+        ]);
+
+        Task::factory()->assignedTo($other)->create([
+            'created_by' => $other->id,
+            'title' => 'Hidden Acme Task',
+            'description' => 'Should not appear',
+        ]);
+
+        $this->actingAs($viewer)
+            ->get(route('search.index', ['q' => 'Acme']))
+            ->assertOk()
+            ->assertSee('Follow up with Acme')
+            ->assertDontSee('Hidden Acme Task')
+            ->assertSee('Tasks');
+
+        $this->actingAs($viewer)
+            ->get(route('search.index', ['q' => 'proposal']))
+            ->assertOk()
+            ->assertSee('Follow up with Acme');
+    }
+
+    public function test_suggest_includes_visible_tasks(): void
+    {
+        $viewer = User::factory()->create();
+        $other = User::factory()->create();
+
+        $task = Task::factory()->assignedTo($viewer)->create([
+            'created_by' => $viewer->id,
+            'title' => 'Prepare demo deck',
+            'description' => 'Slide outline for Q3',
+        ]);
+
+        Task::factory()->assignedTo($other)->create([
+            'created_by' => $other->id,
+            'title' => 'Prepare other deck',
+            'description' => 'Not visible',
+        ]);
+
+        $response = $this->actingAs($viewer)->getJson(route('search.suggest', ['q' => 'demo']));
+
+        $response->assertOk();
+        $response->assertJsonFragment(['title' => 'Prepare demo deck']);
+        $response->assertJsonMissing(['title' => 'Prepare other deck']);
+        $response->assertJsonFragment(['url' => route('tasks.edit', $task)]);
     }
 }

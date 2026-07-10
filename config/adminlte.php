@@ -301,7 +301,7 @@ return [
     'menu' => [
         [
             'type' => 'navbar-search',
-            'text' => 'Search leads, customers, companies...',
+            'text' => 'Search leads, customers, tasks...',
             'route' => 'search.index',
             'input_name' => 'q',
             'method' => 'get',

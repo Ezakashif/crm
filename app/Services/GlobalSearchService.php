@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Models\Lead;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -16,17 +17,19 @@ class GlobalSearchService
     public const SUGGEST_LIMIT = 5;
 
     /**
-     * Run a permission-aware global search across leads, customers, and companies.
+     * Run a permission-aware global search across leads, customers, tasks, and companies.
      *
-     * Reuses Lead::visibleTo / Lead::search and Customer::search — no duplicated match logic.
+     * Reuses Lead/Task::visibleTo and Lead/Customer/Task::search — no duplicated match logic.
      *
      * @return array{
      *     term: string,
      *     too_short: bool,
      *     can_view_leads: bool,
      *     can_view_customers: bool,
+     *     can_view_tasks: bool,
      *     leads: Collection<int, Lead>,
      *     customers: Collection<int, Customer>,
+     *     tasks: Collection<int, Task>,
      *     companies: list<array{name: string, sources: list<string>}>,
      *     total: int
      * }
@@ -37,19 +40,22 @@ class GlobalSearchService
         $limit = $limit ?? self::PER_CATEGORY_LIMIT;
         $canViewLeads = $user->hasPermission('view.leads');
         $canViewCustomers = $user->hasPermission('view.customers');
+        $canViewTasks = $user->hasPermission('view.tasks');
 
         $empty = [
             'term' => $term,
             'too_short' => mb_strlen($term) < self::MIN_TERM_LENGTH,
             'can_view_leads' => $canViewLeads,
             'can_view_customers' => $canViewCustomers,
+            'can_view_tasks' => $canViewTasks,
             'leads' => collect(),
             'customers' => collect(),
+            'tasks' => collect(),
             'companies' => [],
             'total' => 0,
         ];
 
-        if ($empty['too_short'] || (! $canViewLeads && ! $canViewCustomers)) {
+        if ($empty['too_short'] || (! $canViewLeads && ! $canViewCustomers && ! $canViewTasks)) {
             return $empty;
         }
 
@@ -70,6 +76,25 @@ class GlobalSearchService
                 ->get(['id', 'name', 'email', 'phone', 'company_name', 'status'])
             : collect();
 
+        $tasks = $canViewTasks
+            ? Task::visibleTo($user)
+                ->search($term)
+                ->with(['assignee:id,name', 'customer:id,name', 'lead:id,name'])
+                ->latest('id')
+                ->limit($limit)
+                ->get([
+                    'id',
+                    'title',
+                    'description',
+                    'status',
+                    'priority',
+                    'due_date',
+                    'assigned_to',
+                    'customer_id',
+                    'lead_id',
+                ])
+            : collect();
+
         $companies = $this->searchCompanies($user, $term, $canViewLeads, $canViewCustomers, $limit);
 
         return [
@@ -77,10 +102,12 @@ class GlobalSearchService
             'too_short' => false,
             'can_view_leads' => $canViewLeads,
             'can_view_customers' => $canViewCustomers,
+            'can_view_tasks' => $canViewTasks,
             'leads' => $leads,
             'customers' => $customers,
+            'tasks' => $tasks,
             'companies' => $companies,
-            'total' => $leads->count() + $customers->count() + count($companies),
+            'total' => $leads->count() + $customers->count() + $tasks->count() + count($companies),
         ];
     }
 
@@ -130,6 +157,25 @@ class GlobalSearchService
                     'url' => $user->hasPermission('update.customers')
                         ? route('customers.edit', $customer)
                         : route('customers.index', ['search' => $customer->name]),
+                ])->values()->all(),
+            ];
+        }
+
+        if ($payload['can_view_tasks'] && $payload['tasks']->isNotEmpty()) {
+            $groups[] = [
+                'type' => 'tasks',
+                'label' => 'Tasks',
+                'items' => $payload['tasks']->map(fn (Task $task) => [
+                    'id' => $task->id,
+                    'title' => $task->title,
+                    'subtitle' => $this->joinSubtitle([
+                        ucfirst(str_replace('_', ' ', $task->status)),
+                        $task->assignee?->name,
+                        $task->customer?->name ?? $task->lead?->name,
+                    ]),
+                    'url' => $user->can('update', $task)
+                        ? route('tasks.edit', $task)
+                        : route('tasks.index', ['search' => $task->title]),
                 ])->values()->all(),
             ];
         }

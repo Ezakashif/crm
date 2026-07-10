@@ -6,7 +6,7 @@
                 @if($term !== '')
                     <small class="text-muted">Results for “{{ $term }}”</small>
                 @else
-                    <small class="text-muted">Find leads, customers, and companies</small>
+                    <small class="text-muted">Find leads, customers, tasks, and companies</small>
                 @endif
             </div>
         </div>
@@ -18,7 +18,7 @@
                 <div class="input-group input-group-sm mr-2 mb-2" style="min-width: 280px; max-width: 480px; width: 100%;">
                     <input type="search" name="q" value="{{ $term }}"
                            class="form-control js-global-search"
-                           placeholder="Name, email, phone, company..."
+                           placeholder="Name, email, phone, company, task..."
                            minlength="{{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }}"
                            maxlength="100"
                            autocomplete="off"
@@ -35,7 +35,7 @@
 
     @if($term === '')
         <div class="alert alert-info mb-0">
-            Type at least {{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }} characters to search leads, customers, and companies.
+            Type at least {{ \App\Services\GlobalSearchService::MIN_TERM_LENGTH }} characters to search leads, customers, tasks, and companies.
         </div>
     @elseif($too_short)
         <div class="alert alert-warning mb-0">
@@ -147,6 +147,70 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-muted">No matching customers.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
+        @if($can_view_tasks)
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-tasks text-primary mr-1"></i>
+                        Tasks
+                        <span class="badge badge-primary">{{ $tasks->count() }}</span>
+                    </h3>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover text-nowrap mb-0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Assignee</th>
+                                <th>Related</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($tasks as $task)
+                                <tr>
+                                    <td>
+                                        <div>{{ $task->title }}</div>
+                                        @if(filled($task->description))
+                                            <small class="text-muted">
+                                                {{ \Illuminate\Support\Str::limit($task->description, 80) }}
+                                            </small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-secondary">
+                                            {{ ucfirst(str_replace('_', ' ', $task->status)) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ ucfirst($task->priority) }}</td>
+                                    <td>{{ $task->assignee?->name ?? '—' }}</td>
+                                    <td>{{ $task->customer?->name ?? $task->lead?->name ?? '—' }}</td>
+                                    <td class="text-right">
+                                        @can('update', $task)
+                                            <a href="{{ route('tasks.edit', $task) }}" class="btn btn-xs btn-outline-primary">
+                                                Edit
+                                            </a>
+                                        @else
+                                            <a href="{{ route('tasks.index', ['search' => $task->title]) }}"
+                                               class="btn btn-xs btn-outline-secondary">
+                                                Board
+                                            </a>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-muted">No matching tasks.</td>
                                 </tr>
                             @endforelse
                         </tbody>
