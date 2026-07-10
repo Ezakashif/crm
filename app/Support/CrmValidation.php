@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Http\Controllers\UserController;
 use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Validation\Rule;
@@ -44,19 +43,31 @@ class CrmValidation
      */
     public static function customerStoreRules(bool $forImport = false): array
     {
-        $rules = [
+        return [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
+            'company_name' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'notes' => 'nullable|string',
         ];
+    }
 
-        if ($forImport) {
-            $rules['company_name'] = 'nullable|string|max:255';
-            $rules['address'] = 'nullable|string';
-            $rules['notes'] = 'nullable|string';
-        }
-
-        return $rules;
+    /**
+     * Validation rules for updating a customer.
+     *
+     * @return array<string, mixed>
+     */
+    public static function customerUpdateRules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'company_name' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ];
     }
 
     /**
@@ -72,7 +83,7 @@ class CrmValidation
                 'email' => 'required|email|max:255',
                 'password' => ['required', 'string', Password::defaults()],
                 'roles' => ['required', 'string', 'max:255'],
-                'status' => ['required', Rule::in(array_keys(UserController::STATUSES))],
+                'status' => ['required', Rule::in(array_keys(User::STATUSES))],
             ];
         }
 
@@ -82,7 +93,7 @@ class CrmValidation
             'password' => ['required', 'confirmed', Password::defaults()],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['integer', 'exists:roles,id'],
-            'status' => ['required', Rule::in(array_keys(UserController::STATUSES))],
+            'status' => ['required', Rule::in(array_keys(User::STATUSES))],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
     }

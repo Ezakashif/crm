@@ -10,6 +10,20 @@ class Task extends Model
 {
     use HasFactory;
 
+    public const STATUSES = [
+        'pending' => 'Pending',
+        'in_progress' => 'In Progress',
+        'completed' => 'Completed',
+        'cancelled' => 'Cancelled',
+    ];
+
+    public const PRIORITIES = [
+        'low' => 'Low',
+        'medium' => 'Medium',
+        'high' => 'High',
+        'urgent' => 'Urgent',
+    ];
+
     protected $fillable = [
         'created_by',
         'assigned_to',
@@ -23,6 +37,14 @@ class Task extends Model
         'due_date',
         'completed_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'due_date' => 'datetime',
+            'completed_at' => 'datetime',
+        ];
+    }
 
     public function creator()
     {

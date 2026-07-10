@@ -42,16 +42,16 @@ class CustomerController extends Controller
     {
         $this->authorize('create', Customer::class);
 
-        $request->validate(CrmValidation::customerStoreRules());
+        $validated = $request->validate(CrmValidation::customerStoreRules());
 
         $customer = Customer::create([
             'created_by' => auth()->id(),
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'notes' => $request->notes,
-            'company_name' => $request->company_name,
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'company_name' => $validated['company_name'] ?? null,
             'status' => 'active',
         ]);
 
@@ -70,6 +70,7 @@ class CustomerController extends Controller
         $customer->load(['creator', 'sourceLead.assignee']);
 
         $tasks = Task::query()
+            ->visibleTo(request()->user())
             ->where(function ($query) use ($customer) {
                 $query->where('customer_id', $customer->id);
 
@@ -98,11 +99,16 @@ class CustomerController extends Controller
     {
         $this->authorize('update', $customer);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $validated = $request->validate(CrmValidation::customerUpdateRules());
 
-        $customer->update($request->all());
+        $customer->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'company_name' => $validated['company_name'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+        ]);
 
         ActivityLogger::log('customer.updated', $customer, [
             'name' => $customer->name,

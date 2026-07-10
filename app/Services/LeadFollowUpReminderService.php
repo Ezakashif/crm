@@ -40,14 +40,6 @@ class LeadFollowUpReminderService
     }
 
     /**
-     * @deprecated Use dispatchReminders() — kept for backward-compatible callers.
-     */
-    public function sendDueReminders(): int
-    {
-        return $this->dispatchReminders('due');
-    }
-
-    /**
      * Deliver a single reminder synchronously (called by the queued job).
      * Marks the tier sent only after successful notification delivery.
      */

@@ -20,7 +20,6 @@ class PermissionRegistrar
             Gate::define($slug, fn (User $user) => $user->hasPermission($slug));
         }
 
-        Gate::define('manage-users', fn (User $user) => $user->hasPermission('view.users'));
         Gate::define('access-reports', fn (User $user) => $user->canAccessReports());
     }
 

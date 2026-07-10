@@ -15,11 +15,8 @@ use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
-    public const STATUSES = [
-        'active' => 'Active',
-        'inactive' => 'Inactive',
-        'suspended' => 'Suspended',
-    ];
+    /** @deprecated Use User::STATUSES */
+    public const STATUSES = User::STATUSES;
 
     public function __construct(
         protected UserListQueryService $userListQuery,
@@ -41,7 +38,7 @@ class UserController extends Controller
         return view('users.index', [
             'users' => $users,
             'roles' => $roles,
-            'statuses' => self::STATUSES,
+            'statuses' => User::STATUSES,
             'filters' => $filters,
         ]);
     }

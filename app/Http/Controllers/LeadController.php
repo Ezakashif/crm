@@ -11,6 +11,7 @@ use App\Services\ActivityLogger;
 use App\Services\LeadListQueryService;
 use App\Support\CrmValidation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LeadController extends Controller
 {
@@ -119,6 +120,8 @@ class LeadController extends Controller
 
         $user = auth()->user();
 
+        $lead->loadMissing('assignee');
+
         $users = ($user->canViewAllLeads() || $user->can('assign', $lead))
             ? User::active()->orderBy('name')->get()
             : collect();
@@ -206,33 +209,47 @@ class LeadController extends Controller
     {
         $this->authorize('convert', $lead);
 
-        $customer = Customer::create([
-            'created_by' => auth()->id(),
-            'source_lead_id' => $lead->id,
-            'name' => $lead->name,
-            'email' => $lead->email,
-            'phone' => $lead->phone,
-            'company_name' => $lead->company,
-            'address' => null,
-            'notes' => $lead->notes,
-        ]);
+        if ($lead->status === 'won' || Customer::query()->where('source_lead_id', $lead->id)->exists()) {
+            $existing = Customer::query()->where('source_lead_id', $lead->id)->first();
 
-        $lead->status = 'won';
-        $lead->save();
+            return redirect()
+                ->route($existing ? 'customers.show' : 'leads.show', $existing ?? $lead)
+                ->with('success', $existing
+                    ? 'Lead was already converted to a customer.'
+                    : 'Lead is already marked as won.');
+        }
 
-        Task::query()
-            ->where('lead_id', $lead->id)
-            ->whereNull('customer_id')
-            ->update(['customer_id' => $customer->id]);
+        $customer = DB::transaction(function () use ($lead) {
+            $customer = Customer::create([
+                'created_by' => auth()->id(),
+                'source_lead_id' => $lead->id,
+                'name' => $lead->name,
+                'email' => $lead->email,
+                'phone' => $lead->phone,
+                'company_name' => $lead->company,
+                'address' => null,
+                'notes' => $lead->notes,
+            ]);
 
-        ActivityLogger::log('lead.converted', $lead, [
-            'name' => $lead->name,
-            'customer_id' => $customer->id,
-        ]);
+            $lead->status = 'won';
+            $lead->save();
 
-        ActivityLogger::log('customer.created', $customer, [
-            'name' => $customer->name,
-        ]);
+            Task::query()
+                ->where('lead_id', $lead->id)
+                ->whereNull('customer_id')
+                ->update(['customer_id' => $customer->id]);
+
+            ActivityLogger::log('lead.converted', $lead, [
+                'name' => $lead->name,
+                'customer_id' => $customer->id,
+            ]);
+
+            ActivityLogger::log('customer.created', $customer, [
+                'name' => $customer->name,
+            ]);
+
+            return $customer;
+        });
 
         return redirect()->route('customers.show', $customer)
             ->with('success', 'Lead converted to customer');

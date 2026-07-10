@@ -26,6 +26,10 @@ class NotificationController extends Controller
 
         $url = $notification->data['url'] ?? route('notifications.index');
 
+        if (! is_string($url) || ! $this->isSafeInternalUrl($url)) {
+            $url = route('notifications.index');
+        }
+
         return redirect($url);
     }
 
@@ -34,5 +38,19 @@ class NotificationController extends Controller
         $request->user()->unreadNotifications->markAsRead();
 
         return back()->with('success', 'All notifications marked as read.');
+    }
+
+    protected function isSafeInternalUrl(string $url): bool
+    {
+        if (str_starts_with($url, '/')) {
+            return ! str_starts_with($url, '//');
+        }
+
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+        $urlHost = parse_url($url, PHP_URL_HOST);
+
+        return is_string($appHost)
+            && is_string($urlHost)
+            && strcasecmp($appHost, $urlHost) === 0;
     }
 }

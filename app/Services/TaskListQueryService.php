@@ -32,7 +32,10 @@ class TaskListQueryService
             ->search($filters['search'] ?? null)
             ->status($filters['status'] ?? null)
             ->priority($filters['priority'] ?? null)
-            ->assignedTo($filters['assigned_to'] ?? null)
+            ->when(
+                $user->canViewAllTasks(),
+                fn (Builder $query) => $query->assignedTo($filters['assigned_to'] ?? null)
+            )
             ->orderBy('status')
             ->orderBy('sort_order');
     }

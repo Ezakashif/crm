@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ActivityLogController extends Controller
 {
@@ -18,18 +19,23 @@ class ActivityLogController extends Controller
 
         $canViewAll = $user->hasPermission('view.activity_logs');
 
+        $filters = $request->validate([
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'action' => ['nullable', 'string', Rule::in(array_keys(ActivityLog::ACTION_LABELS))],
+        ]);
+
         $query = ActivityLog::with(['actor', 'subject'])->latest();
 
         if ($canViewAll) {
-            if ($request->filled('user_id')) {
-                $query->where('user_id', $request->user_id);
+            if (! empty($filters['user_id'])) {
+                $query->where('user_id', $filters['user_id']);
             }
         } else {
             $query->where('user_id', $user->id);
         }
 
-        if ($request->filled('action')) {
-            $query->where('action', $request->action);
+        if (! empty($filters['action'])) {
+            $query->where('action', $filters['action']);
         }
 
         $logs = $query->paginate(20)->withQueryString();

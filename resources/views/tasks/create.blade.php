@@ -25,10 +25,9 @@
                 <div class="form-group">
                     <label for="priority">Priority</label>
                     <select id="priority" name="priority" class="form-control">
-                        <option value="low" @selected(old('priority') === 'low')>Low</option>
-                        <option value="medium" @selected(old('priority', 'medium') === 'medium')>Medium</option>
-                        <option value="high" @selected(old('priority') === 'high')>High</option>
-                        <option value="urgent" @selected(old('priority') === 'urgent')>Urgent</option>
+                        @foreach(\App\Models\Task::PRIORITIES as $value => $label)
+                            <option value="{{ $value }}" @selected(old('priority', 'medium') === $value)>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -53,18 +52,26 @@
                     @error('customer_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
-                <div class="form-group">
-                    <label for="assigned_to">Assign To <span class="text-danger">*</span></label>
-                    <select id="assigned_to" name="assigned_to" class="form-control @error('assigned_to') is-invalid @enderror" required>
-                        <option value="">— Select user —</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}" @selected(old('assigned_to') == $user->id)>
-                                {{ $user->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('assigned_to')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                </div>
+                @if(auth()->user()->canAssignTasks())
+                    <div class="form-group">
+                        <label for="assigned_to">Assign To <span class="text-danger">*</span></label>
+                        <select id="assigned_to" name="assigned_to" class="form-control @error('assigned_to') is-invalid @enderror" required>
+                            <option value="">— Select user —</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" @selected(old('assigned_to') == $user->id)>
+                                    {{ $user->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('assigned_to')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    </div>
+                @else
+                    <div class="form-group">
+                        <label>Assign To</label>
+                        <input type="text" class="form-control" value="{{ auth()->user()->name }} (you)" disabled>
+                        <small class="form-text text-muted">Tasks you create are assigned to you.</small>
+                    </div>
+                @endif
             </div>
 
             <div class="card-footer">

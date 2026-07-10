@@ -284,7 +284,7 @@ class ReportService
      * @param  array<string, mixed>  $filters
      * @return array<string, mixed>
      */
-    protected function performanceReport(User $user, array $filters, Carbon $dateFrom, Carbon $dateTo): array
+    public function performanceReport(User $user, array $filters, Carbon $dateFrom, Carbon $dateTo): array
     {
         $base = Lead::visibleTo($user)
             ->whereBetween('leads.created_at', [$dateFrom, $dateTo]);

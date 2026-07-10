@@ -44,15 +44,14 @@ class ReportExportService
         $dateFrom = Carbon::parse($filters['date_from'])->startOfDay();
         $dateTo = Carbon::parse($filters['date_to'])->endOfDay();
 
-        $rows = $this->reports
+        $query = $this->reports
             ->filteredLeadsQuery($user, $filters, $dateFrom, $dateTo)
             ->with('assignee')
-            ->orderBy('created_at')
-            ->get();
+            ->orderBy('created_at');
 
         return $this->csv->download('leads-report.csv', [
             'Name', 'Email', 'Phone', 'Company', 'Source', 'Status', 'Assigned To', 'Estimated Value', 'Created At',
-        ], $rows->map(fn ($lead) => [
+        ], $this->mapCursor($query->cursor(), fn ($lead) => [
             $lead->name,
             $lead->email,
             $lead->phone,
@@ -75,14 +74,13 @@ class ReportExportService
         $dateFrom = Carbon::parse($filters['date_from'])->startOfDay();
         $dateTo = Carbon::parse($filters['date_to'])->endOfDay();
 
-        $rows = $this->reports
+        $query = $this->reports
             ->filteredCustomersQuery($dateFrom, $dateTo)
-            ->orderBy('created_at')
-            ->get();
+            ->orderBy('created_at');
 
         return $this->csv->download('customers-report.csv', [
             'Name', 'Email', 'Phone', 'Company', 'Status', 'Created At',
-        ], $rows->map(fn ($customer) => [
+        ], $this->mapCursor($query->cursor(), fn ($customer) => [
             $customer->name,
             $customer->email,
             $customer->phone,
@@ -102,20 +100,19 @@ class ReportExportService
         $dateFrom = Carbon::parse($filters['date_from'])->startOfDay();
         $dateTo = Carbon::parse($filters['date_to'])->endOfDay();
 
-        $rows = $this->reports
+        $query = $this->reports
             ->filteredTasksQuery($user, $filters, $dateFrom, $dateTo)
             ->with('assignee')
-            ->orderBy('created_at')
-            ->get();
+            ->orderBy('created_at');
 
         return $this->csv->download('tasks-report.csv', [
             'Title', 'Status', 'Priority', 'Assigned To', 'Due Date', 'Created At',
-        ], $rows->map(fn ($task) => [
+        ], $this->mapCursor($query->cursor(), fn ($task) => [
             $task->title,
             $task->status,
             $task->priority,
             $task->assignee?->name,
-            $task->due_date,
+            optional($task->due_date)?->toDateString() ?? $task->due_date,
             optional($task->created_at)?->toDateTimeString(),
         ]));
     }
@@ -127,8 +124,11 @@ class ReportExportService
     {
         abort_unless($user->hasPermission('view.leads'), 403);
 
-        $payload = $this->reports->forUser($user, $filters);
-        $rows = collect($payload['performance']['by_employee'] ?? []);
+        $dateFrom = Carbon::parse($filters['date_from'])->startOfDay();
+        $dateTo = Carbon::parse($filters['date_to'])->endOfDay();
+
+        $performance = $this->reports->performanceReport($user, $filters, $dateFrom, $dateTo);
+        $rows = collect($performance['by_employee'] ?? []);
 
         return $this->csv->download('sales-performance-report.csv', [
             'Employee', 'Leads Assigned', 'Leads Converted', 'Conversion Rate %',
@@ -138,5 +138,18 @@ class ReportExportService
             $row['converted'],
             $row['conversion_rate'],
         ]));
+    }
+
+    /**
+     * @template TModel
+     * @param  \Illuminate\Support\LazyCollection<int, TModel>|\Traversable<int, TModel>  $cursor
+     * @param  callable(TModel): array<int|string, mixed>  $mapper
+     * @return \Generator<int, array<int|string, mixed>>
+     */
+    protected function mapCursor(iterable $cursor, callable $mapper): \Generator
+    {
+        foreach ($cursor as $item) {
+            yield $mapper($item);
+        }
     }
 }

@@ -12,8 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
+            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'website-lead-webhook' => \App\Http\Middleware\VerifyWebsiteLeadWebhook::class,
         ]);
 

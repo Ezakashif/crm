@@ -29,10 +29,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'active'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
@@ -47,11 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-});
 
-require __DIR__.'/auth.php';
-
-Route::middleware(['auth'])->group(function () {
     Route::get('/imports/{type}', [CsvImportController::class, 'create'])
         ->whereIn('type', ['leads', 'customers', 'users'])
         ->name('imports.create');
@@ -62,64 +58,55 @@ Route::middleware(['auth'])->group(function () {
         ->whereIn('type', ['leads', 'customers', 'users'])
         ->name('imports.sample');
 
-    Route::get('/leads/export', [CsvExportController::class, 'leads'])->name('exports.leads');
-    Route::get('/customers/export', [CsvExportController::class, 'customers'])->name('exports.customers');
-    Route::get('/tasks/export', [CsvExportController::class, 'tasks'])->name('exports.tasks');
-    Route::get('/users/export', [CsvExportController::class, 'users'])->name('exports.users');
-});
+    Route::get('/leads/export', [CsvExportController::class, 'leads'])
+        ->middleware('throttle:30,1')
+        ->name('exports.leads');
+    Route::get('/customers/export', [CsvExportController::class, 'customers'])
+        ->middleware('throttle:30,1')
+        ->name('exports.customers');
+    Route::get('/tasks/export', [CsvExportController::class, 'tasks'])
+        ->middleware('throttle:30,1')
+        ->name('exports.tasks');
+    Route::get('/users/export', [CsvExportController::class, 'users'])
+        ->middleware('throttle:30,1')
+        ->name('exports.users');
 
-Route::middleware(['auth'])->group(function () {
     Route::resource('customers', CustomerController::class);
-});
-Route::middleware(['auth'])->group(function () {
+
     Route::resource('leads', LeadController::class);
-
-    Route::post('/leads/{lead}/convert', 
-        [LeadController::class, 'convertToCustomer']
-    )->name('leads.convert');
-
+    Route::post('/leads/{lead}/convert', [LeadController::class, 'convertToCustomer'])
+        ->name('leads.convert');
     Route::post('/leads/board/update', [LeadController::class, 'updateBoard'])
-    ->name('leads.board.update');
-
+        ->name('leads.board.update');
     Route::post('/leads/{lead}/activities', [LeadActivityController::class, 'store'])
         ->name('leads.activities.store');
-});
 
-
-Route::middleware(['auth'])->group(function () {
     Route::resource('tasks', TaskController::class);
-
     Route::post('/tasks/{task}/status', [TaskController::class, 'changeStatus'])
         ->name('tasks.status');
-
     Route::post('/tasks/board/update', [TaskController::class, 'updateBoard'])
         ->name('tasks.board.update');
+
+    Route::resource('users', UserController::class);
+    Route::post('/users/{user}/status', [UserController::class, 'changeStatus'])
+        ->name('users.status');
+
+    Route::resource('roles', RoleController::class)->except(['show']);
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export/{type}', [ReportController::class, 'export'])
+        ->middleware('throttle:30,1')
+        ->name('reports.export');
+
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])
+        ->name('activity-logs.index');
 });
 
-Route::middleware(['auth', 'permission:website_lead.demo'])->group(function () {
+require __DIR__.'/auth.php';
+
+Route::middleware(['auth', 'active', 'permission:website_lead.demo'])->group(function () {
     Route::get('/demo/website-lead', [WebsiteLeadDemoController::class, 'index'])
         ->name('demo.website-lead');
     Route::post('/demo/website-lead', [WebsiteLeadDemoController::class, 'store'])
         ->name('demo.website-lead.store');
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::resource('users', UserController::class);
-
-    Route::post('/users/{user}/status', [UserController::class, 'changeStatus'])
-        ->name('users.status');
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::resource('roles', RoleController::class)->except(['show']);
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export/{type}', [ReportController::class, 'export'])->name('reports.export');
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/activity-logs', [ActivityLogController::class, 'index'])
-        ->name('activity-logs.index');
 });

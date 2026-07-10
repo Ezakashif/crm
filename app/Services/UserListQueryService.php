@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\UserController;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +19,7 @@ class UserListQueryService
         return [
             'search' => 'nullable|string|max:255',
             'role' => ['nullable', Rule::in($roleSlugs)],
-            'status' => ['nullable', Rule::in(array_keys(UserController::STATUSES))],
+            'status' => ['nullable', Rule::in(array_keys(User::STATUSES))],
         ];
     }
 
