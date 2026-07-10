@@ -59,7 +59,7 @@ class ReportService
                 : collect(),
             'leadStatuses' => Lead::STATUSES,
             'leadSources' => Lead::SOURCES,
-            'leads' => $canViewLeads ? $this->leadReport($leadQuery) : null,
+            'leads' => $canViewLeads ? $this->leadReport($leadQuery, $user, $filters) : null,
             'customers' => $canViewCustomers ? $this->customerReport($customerQuery, $leadQuery) : null,
             'tasks' => $canViewTasks ? $this->taskReport($taskQuery) : null,
             'performance' => $canViewLeads ? $this->performanceReport($user, $filters, $dateFrom, $dateTo) : null,
@@ -130,9 +130,10 @@ class ReportService
     }
 
     /**
+     * @param  array<string, mixed>  $filters
      * @return array<string, mixed>
      */
-    protected function leadReport(Builder $leadQuery): array
+    protected function leadReport(Builder $leadQuery, User $user, array $filters): array
     {
         $statusCounts = (clone $leadQuery)
             ->selectRaw('leads.status, COUNT(*) as aggregate')
@@ -179,7 +180,7 @@ class ReportService
             'by_source_chart' => $this->leadSourceDistribution(clone $leadQuery),
             'by_assignee' => $byAssignee,
             'by_date' => $byDate,
-            'monthly_growth' => $this->monthlyLeadGrowth(clone $leadQuery),
+            'monthly_growth' => $this->monthlyLeadGrowth($user, $filters),
         ];
     }
 
@@ -354,17 +355,34 @@ class ReportService
     }
 
     /**
+     * Last 6 calendar months of visible leads.
+     * Uses employee/source filters only — not the report date range or status —
+     * so the growth chart stays meaningful when the hub is filtered to a short window.
+     *
+     * @param  array<string, mixed>  $filters
      * @return array{labels: list<string>, data: list<int>}
      */
-    protected function monthlyLeadGrowth(Builder $leadQuery): array
+    protected function monthlyLeadGrowth(User $user, array $filters): array
     {
         $start = now()->startOfMonth()->subMonths(5);
         $end = now()->endOfMonth();
 
+        $query = Lead::visibleTo($user)
+            ->whereBetween('leads.created_at', [$start, $end]);
+
+        $employeeId = $this->resolveEmployeeFilter($user, $filters['employee_id'] ?? null, 'leads');
+
+        if ($employeeId !== null) {
+            $query->where('leads.assigned_to', $employeeId);
+        }
+
+        if (filled($filters['source'] ?? null)) {
+            $query->where('leads.source', $filters['source']);
+        }
+
         $monthExpression = $this->monthExpression('leads.created_at');
 
-        $counts = (clone $leadQuery)
-            ->where('leads.created_at', '>=', $start)
+        $counts = $query
             ->selectRaw("{$monthExpression} as month_key, COUNT(*) as aggregate")
             ->groupBy('month_key')
             ->pluck('aggregate', 'month_key');

@@ -414,9 +414,39 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                function hasChartData(data) {
+                    return (data || []).some(function (value) {
+                        return Number(value) > 0;
+                    });
+                }
+
+                function showEmptyChart(canvas) {
+                    if (! canvas || ! canvas.parentNode) return;
+                    canvas.parentNode.innerHTML = '<p class="text-muted text-center mb-0 py-5">No data for the selected filters.</p>';
+                }
+
                 function makeChart(id, type, labels, data, options) {
                     var canvas = document.getElementById(id);
-                    if (! canvas) return;
+                    if (! canvas || typeof Chart === 'undefined') return;
+
+                    if (! hasChartData(data)) {
+                        showEmptyChart(canvas);
+                        return;
+                    }
+
+                    var chartOptions = {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: options.showLegend !== false,
+                            position: 'bottom'
+                        }
+                    };
+
+                    if (options.scales) {
+                        chartOptions.scales = options.scales;
+                    }
+
                     new Chart(canvas.getContext('2d'), {
                         type: type,
                         data: {
@@ -434,12 +464,7 @@
                                 lineTension: 0.25
                             }]
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true,
-                            legend: { display: options.showLegend !== false, position: 'bottom' },
-                            scales: options.scales || undefined
-                        }
+                        options: chartOptions
                     });
                 }
 
