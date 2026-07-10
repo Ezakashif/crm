@@ -3,6 +3,11 @@
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="m-0">Customers</h1>
             <div>
+                @can('viewAny', App\Models\Customer::class)
+                    <a href="{{ route('exports.customers', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-file-download"></i> Export CSV
+                    </a>
+                @endcan
                 @can('create', App\Models\Customer::class)
                     <a href="{{ route('imports.create', 'customers') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-file-upload"></i> Import CSV

@@ -2,11 +2,18 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="m-0">Tasks</h1>
-            @can('create', App\Models\Task::class)
-                <a href="{{ route('tasks.create') }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i> Add Task
-                </a>
-            @endcan
+            <div>
+                @can('viewAny', App\Models\Task::class)
+                    <a href="{{ route('exports.tasks', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-file-download"></i> Export CSV
+                    </a>
+                @endcan
+                @can('create', App\Models\Task::class)
+                    <a href="{{ route('tasks.create') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Add Task
+                    </a>
+                @endcan
+            </div>
         </div>
     </x-slot>
 

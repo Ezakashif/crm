@@ -5,30 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\TaskListQueryService;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+    public function __construct(
+        protected TaskListQueryService $taskListQuery,
+    ) {}
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', Task::class);
 
-        $filters = $request->validate([
-            'search' => 'nullable|string|max:255',
-            'status' => 'nullable|in:pending,in_progress,completed,cancelled',
-            'priority' => 'nullable|in:low,medium,high,urgent',
-            'assigned_to' => 'nullable|string',
-        ]);
+        $filters = $request->validate($this->taskListQuery->filterRules());
 
-        $tasks = Task::visibleTo(auth()->user())
-            ->with(['assignee', 'customer', 'lead'])
-            ->search($filters['search'] ?? null)
-            ->status($filters['status'] ?? null)
-            ->priority($filters['priority'] ?? null)
-            ->assignedTo($filters['assigned_to'] ?? null)
-            ->orderBy('status')
-            ->orderBy('sort_order')
-            ->get();
+        $tasks = $this->taskListQuery->query($request->user(), $filters)->get();
 
         $statuses = [
             'pending' => 'Pending',
@@ -44,7 +36,7 @@ class TaskController extends Controller
             'urgent' => 'Urgent',
         ];
 
-        $users = auth()->user()->canViewAllTasks()
+        $users = $request->user()->canViewAllTasks()
             ? User::active()->orderBy('name')->get()
             : collect();
 

@@ -4,7 +4,6 @@ namespace App\Services\Csv;
 
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -16,6 +15,7 @@ class CsvImportService
         protected LeadCsvImporter $leads,
         protected CustomerCsvImporter $customers,
         protected UserCsvImporter $users,
+        protected CsvStreamer $csv,
     ) {}
 
     public function import(User $actor, string $type, UploadedFile $file): CsvImportResult
@@ -82,7 +82,7 @@ class CsvImportService
         $headers = $this->headersFor($type);
         $rows = collect($this->sampleRowsFor($type));
 
-        return $this->streamCsv("{$type}-import-sample.csv", $headers, $rows);
+        return $this->csv->download("{$type}-import-sample.csv", $headers, $rows);
     }
 
     public function permissionSlug(string $type): string
@@ -108,25 +108,5 @@ class CsvImportService
             'users' => 'Users',
             default => ucfirst($type),
         };
-    }
-
-    /**
-     * @param  list<string>  $headers
-     * @param  Collection<int, list<string|int|float|null>>  $rows
-     */
-    protected function streamCsv(string $filename, array $headers, Collection $rows): StreamedResponse
-    {
-        return response()->streamDownload(function () use ($headers, $rows) {
-            $handle = fopen('php://output', 'w');
-            fputcsv($handle, $headers);
-
-            foreach ($rows as $row) {
-                fputcsv($handle, $row);
-            }
-
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
     }
 }

@@ -7,33 +7,25 @@ use App\Models\Lead;
 use App\Models\LeadActivity;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\LeadListQueryService;
 use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 
 class LeadController extends Controller
 {
+    public function __construct(
+        protected LeadListQueryService $leadListQuery,
+    ) {}
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', Lead::class);
 
         $user = $request->user();
 
-        $filters = $request->validate([
-            'search' => 'nullable|string|max:255',
-            'status' => 'nullable|in:new,contacted,qualified,proposal_sent,won,lost',
-            'assigned_to' => 'nullable|string',
-            'source' => 'nullable|in:'.implode(',', Lead::SOURCES),
-        ]);
+        $filters = $request->validate($this->leadListQuery->filterRules());
 
-        $leads = Lead::visibleTo($user)
-            ->with('assignee')
-            ->search($filters['search'] ?? null)
-            ->status($filters['status'] ?? null)
-            ->when($user->canViewAllLeads(), fn ($query) => $query->assignedTo($filters['assigned_to'] ?? null))
-            ->source($filters['source'] ?? null)
-            ->orderBy('status')
-            ->orderBy('sort_order')
-            ->get();
+        $leads = $this->leadListQuery->query($user, $filters)->get();
 
         $statuses = Lead::STATUSES;
 

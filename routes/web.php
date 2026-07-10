@@ -15,6 +15,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WebsiteLeadDemoController;
 use App\Http\Controllers\CsvImportController;
+use App\Http\Controllers\CsvExportController;
 use App\Http\Controllers\WebsiteLeadWebhookController;
 
 Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'store'])
@@ -60,6 +61,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/imports/{type}/sample', [CsvImportController::class, 'sample'])
         ->whereIn('type', ['leads', 'customers', 'users'])
         ->name('imports.sample');
+
+    Route::get('/leads/export', [CsvExportController::class, 'leads'])->name('exports.leads');
+    Route::get('/customers/export', [CsvExportController::class, 'customers'])->name('exports.customers');
+    Route::get('/tasks/export', [CsvExportController::class, 'tasks'])->name('exports.tasks');
 });
 
 Route::middleware(['auth'])->group(function () {

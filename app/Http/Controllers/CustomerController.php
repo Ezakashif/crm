@@ -5,24 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Task;
 use App\Services\ActivityLogger;
+use App\Services\CustomerListQueryService;
 use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
+    public function __construct(
+        protected CustomerListQueryService $customerListQuery,
+    ) {}
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', Customer::class);
 
-        $filters = $request->validate([
-            'search' => 'nullable|string|max:255',
-            'status' => 'nullable|in:active,inactive',
-        ]);
+        $filters = $request->validate($this->customerListQuery->filterRules());
 
-        $customers = Customer::query()
-            ->search($filters['search'] ?? null)
-            ->status($filters['status'] ?? null)
-            ->latest()
+        $customers = $this->customerListQuery
+            ->query($filters)
             ->paginate(10)
             ->withQueryString();
 

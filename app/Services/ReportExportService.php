@@ -3,14 +3,15 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Services\Csv\CsvStreamer;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportExportService
 {
     public function __construct(
         protected ReportService $reports,
+        protected CsvStreamer $csv,
     ) {}
 
     /**
@@ -49,7 +50,7 @@ class ReportExportService
             ->orderBy('created_at')
             ->get();
 
-        return $this->streamCsv('leads-report.csv', [
+        return $this->csv->download('leads-report.csv', [
             'Name', 'Email', 'Phone', 'Company', 'Source', 'Status', 'Assigned To', 'Estimated Value', 'Created At',
         ], $rows->map(fn ($lead) => [
             $lead->name,
@@ -79,7 +80,7 @@ class ReportExportService
             ->orderBy('created_at')
             ->get();
 
-        return $this->streamCsv('customers-report.csv', [
+        return $this->csv->download('customers-report.csv', [
             'Name', 'Email', 'Phone', 'Company', 'Status', 'Created At',
         ], $rows->map(fn ($customer) => [
             $customer->name,
@@ -107,7 +108,7 @@ class ReportExportService
             ->orderBy('created_at')
             ->get();
 
-        return $this->streamCsv('tasks-report.csv', [
+        return $this->csv->download('tasks-report.csv', [
             'Title', 'Status', 'Priority', 'Assigned To', 'Due Date', 'Created At',
         ], $rows->map(fn ($task) => [
             $task->title,
@@ -129,7 +130,7 @@ class ReportExportService
         $payload = $this->reports->forUser($user, $filters);
         $rows = collect($payload['performance']['by_employee'] ?? []);
 
-        return $this->streamCsv('sales-performance-report.csv', [
+        return $this->csv->download('sales-performance-report.csv', [
             'Employee', 'Leads Assigned', 'Leads Converted', 'Conversion Rate %',
         ], $rows->map(fn (array $row) => [
             $row['employee'],
@@ -137,25 +138,5 @@ class ReportExportService
             $row['converted'],
             $row['conversion_rate'],
         ]));
-    }
-
-    /**
-     * @param  list<string>  $headers
-     * @param  Collection<int, array<int, mixed>>  $rows
-     */
-    protected function streamCsv(string $filename, array $headers, Collection $rows): StreamedResponse
-    {
-        return response()->streamDownload(function () use ($headers, $rows) {
-            $handle = fopen('php://output', 'w');
-            fputcsv($handle, $headers);
-
-            foreach ($rows as $row) {
-                fputcsv($handle, $row);
-            }
-
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
     }
 }
