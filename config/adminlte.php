@@ -328,6 +328,12 @@ return [
             'can' => 'view.tasks',
         ],
         [
+            'text' => 'Reports',
+            'route' => 'reports.index',
+            'icon' => 'fas fa-fw fa-chart-bar',
+            'can' => 'view.reports',
+        ],
+        [
             'text' => 'Notifications',
             'route' => 'notifications.index',
             'icon' => 'fas fa-fw fa-bell',

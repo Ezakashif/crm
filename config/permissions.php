@@ -69,6 +69,13 @@ return [
                 'view_own' => 'View Own',
             ],
         ],
+        'reports' => [
+            'label' => 'Reports',
+            'actions' => [
+                'view' => 'View',
+                'export' => 'Export',
+            ],
+        ],
         'demo' => [
             'label' => 'Demo',
             'actions' => [
