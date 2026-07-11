@@ -123,6 +123,8 @@ class TenancyPhase1BFoundationTest extends TestCase
 
         $user = User::factory()->create([
             'email' => 'tenant-user@example.com',
+            // Allow BelongsToCompany to fill from CurrentCompany.
+            'company_id' => null,
         ]);
 
         $this->assertSame($company->id, $user->company_id);

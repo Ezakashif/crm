@@ -29,10 +29,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified', 'active'])
+    ->middleware(['auth', 'verified', 'active', 'company'])
     ->name('dashboard');
 
-Route::middleware(['auth', 'active'])->group(function () {
+Route::middleware(['auth', 'active', 'company'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
@@ -104,7 +104,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::middleware(['auth', 'active', 'permission:website_lead.demo'])->group(function () {
+Route::middleware(['auth', 'active', 'company', 'permission:website_lead.demo'])->group(function () {
     Route::get('/demo/website-lead', [WebsiteLeadDemoController::class, 'index'])
         ->name('demo.website-lead');
     Route::post('/demo/website-lead', [WebsiteLeadDemoController::class, 'store'])
