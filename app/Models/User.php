@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasRoles;
+use App\Models\Concerns\BelongsToCompany;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use BelongsToCompany, HasFactory, HasRoles, Notifiable;
 
     public const STATUSES = [
         'active' => 'Active',

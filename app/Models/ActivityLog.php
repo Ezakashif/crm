@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Gate;
 
 class ActivityLog extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'user_id',
         'action',
