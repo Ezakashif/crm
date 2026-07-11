@@ -4,33 +4,28 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Services\CompanyListQueryService;
 use App\Services\CompanyProvisioner;
+use App\Services\SuperAdmin\CompanyExportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class CompanyController extends Controller
 {
+    public function __construct(
+        protected CompanyListQueryService $listQuery,
+    ) {}
+
     public function index(Request $request): View
     {
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', Rule::in(array_keys(Company::STATUSES))],
-        ]);
+        $filters = $request->validate($this->listQuery->filterRules());
 
-        $companies = Company::query()
-            ->withCount(['users', 'leads', 'customers', 'tasks'])
-            ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
-                $term = $filters['search'];
-                $query->where(function ($builder) use ($term) {
-                    $builder->where('name', 'like', "%{$term}%")
-                        ->orWhere('slug', 'like', "%{$term}%");
-                });
-            })
-            ->when(filled($filters['status'] ?? null), fn ($query) => $query->where('status', $filters['status']))
-            ->latest()
+        $companies = $this->listQuery
+            ->query($filters)
             ->paginate(15)
             ->withQueryString();
 
@@ -127,5 +122,10 @@ class CompanyController extends Controller
         $label = Company::STATUSES[$validated['status']];
 
         return back()->with('success', "Company marked as {$label}.");
+    }
+
+    public function pdf(Company $company, CompanyExportService $exports): Response
+    {
+        return $exports->pdfShow($company);
     }
 }

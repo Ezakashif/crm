@@ -19,6 +19,7 @@
 
             <div class="d-flex flex-wrap">
                 <a href="{{ route('superadmin.companies.edit', $company) }}" class="btn btn-sm btn-outline-light mr-2 mb-2">Edit</a>
+                <a href="{{ route('superadmin.companies.pdf', $company) }}" class="btn btn-sm btn-outline-light mr-2 mb-2">Export PDF</a>
 
                 @if ($company->status === 'active')
                     <form method="POST" action="{{ route('superadmin.companies.status', $company) }}">

@@ -5,13 +5,24 @@
 @section('subheading', 'Manage tenant organizations')
 
 @section('content')
+@if (session('import_errors'))
+    <div class="alert alert-warning">
+        <strong>Import notes:</strong>
+        <ul class="mb-0 pl-3">
+            @foreach (session('import_errors') as $error)
+                <li>Row {{ $error['row'] }}: {{ $error['message'] }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="sa-card">
     <form method="GET" class="form-row align-items-end">
-        <div class="form-group col-md-5 mb-md-0">
+        <div class="form-group col-md-4 mb-md-0">
             <label class="sa-muted">Search</label>
             <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" class="form-control" placeholder="Name or slug">
         </div>
-        <div class="form-group col-md-3 mb-md-0">
+        <div class="form-group col-md-2 mb-md-0">
             <label class="sa-muted">Status</label>
             <select name="status" class="custom-select">
                 <option value="">All</option>
@@ -20,9 +31,12 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group col-md-4 mb-0 d-flex">
-            <button class="btn btn-outline-light mr-2">Filter</button>
-            <a href="{{ route('superadmin.companies.create') }}" class="btn btn-info">New company</a>
+        <div class="form-group col-md-6 mb-0 d-flex flex-wrap">
+            <button class="btn btn-outline-light mr-2 mb-2">Filter</button>
+            <a href="{{ route('superadmin.companies.create') }}" class="btn btn-info mr-2 mb-2">New company</a>
+            <a href="{{ route('superadmin.companies.import.create') }}" class="btn btn-outline-light mr-2 mb-2">Import CSV</a>
+            <a href="{{ route('superadmin.companies.export', request()->query()) }}" class="btn btn-outline-light mr-2 mb-2">Export CSV</a>
+            <a href="{{ route('superadmin.companies.export.pdf', request()->query()) }}" class="btn btn-outline-light mb-2">Export PDF</a>
         </div>
     </form>
 </div>
