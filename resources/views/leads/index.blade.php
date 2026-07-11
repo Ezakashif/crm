@@ -109,19 +109,19 @@
         </div>
     @endif
 
-    <div class="row">
+    <div class="row crm-kanban">
         @foreach($statuses as $statusKey => $statusTitle)
             <div class="col-lg-4 col-md-6 mb-3">
-                <div class="card {{ $statusColors[$statusKey] ?? 'card-secondary' }} card-outline">
+                <div class="card {{ $statusColors[$statusKey] ?? 'card-secondary' }} card-outline crm-kanban-column">
                     <div class="card-header">
                         <h3 class="card-title">{{ $statusTitle }}</h3>
                         <div class="card-tools">
-                            <span class="badge badge-light">
+                            <span class="badge badge-light column-count">
                                 {{ $leads->where('status', $statusKey)->count() }}
                             </span>
                         </div>
                     </div>
-                    <div class="card-body lead-column p-2" data-status="{{ $statusKey }}" style="min-height: 300px;">
+                    <div class="card-body lead-column p-2" data-status="{{ $statusKey }}">
                         @foreach($leads->where('status', $statusKey) as $lead)
                             <div class="card card-sm mb-2 lead-card" data-lead-id="{{ $lead->id }}" style="cursor: move;">
                                 <div class="card-body p-2">
@@ -173,13 +173,38 @@
         @can('update.leads')
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
-                    document.querySelectorAll('.lead-column').forEach(column => {
+                    function refreshColumnCounts() {
+                        document.querySelectorAll('.lead-column').forEach(function (column) {
+                            var badge = column.closest('.card')?.querySelector('.column-count');
+                            if (badge) {
+                                badge.textContent = column.querySelectorAll('.lead-card').length;
+                            }
+                        });
+                    }
+
+                    document.querySelectorAll('.lead-column').forEach(function (column) {
                         new Sortable(column, {
                             group: 'leads-kanban',
                             animation: 200,
                             draggable: '.lead-card',
                             ghostClass: 'opacity-50',
+                            scroll: true,
+                            bubbleScroll: true,
+                            scrollSensitivity: 80,
+                            scrollSpeed: 18,
+                            emptyInsertThreshold: 48,
+                            onStart: function () {
+                                document.querySelectorAll('.lead-column').forEach(function (target) {
+                                    target.classList.add('is-drop-target');
+                                });
+                            },
                             onEnd: function (evt) {
+                                document.querySelectorAll('.lead-column').forEach(function (target) {
+                                    target.classList.remove('is-drop-target');
+                                });
+
+                                refreshColumnCounts();
+
                                 fetch("{{ route('leads.board.update') }}", {
                                     method: "POST",
                                     headers: {

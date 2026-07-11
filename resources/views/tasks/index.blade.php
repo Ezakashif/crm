@@ -84,10 +84,10 @@
         </div>
     @endif
 
-    <div class="row">
+    <div class="row crm-kanban">
         @foreach($statuses as $statusKey => $statusTitle)
-            <div class="col-lg-3 col-md-6">
-                <div class="card {{ $statusColors[$statusKey] ?? 'card-secondary' }} card-outline">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card {{ $statusColors[$statusKey] ?? 'card-secondary' }} card-outline crm-kanban-column">
                     <div class="card-header">
                         <h3 class="card-title">{{ $statusTitle }}</h3>
                         <div class="card-tools">
@@ -96,7 +96,7 @@
                             </span>
                         </div>
                     </div>
-                    <div class="card-body task-column p-2" data-status="{{ $statusKey }}" style="min-height: 350px;">
+                    <div class="card-body task-column p-2" data-status="{{ $statusKey }}">
                         @foreach($tasks->where('status', $statusKey) as $task)
                             @php($canChangeStatus = auth()->user()->can('changeStatus', $task))
                             <div class="card card-sm mb-2 task-card"
@@ -174,7 +174,21 @@
                             animation: 200,
                             draggable: '.task-card[data-draggable="1"]',
                             ghostClass: 'opacity-50',
+                            scroll: true,
+                            bubbleScroll: true,
+                            scrollSensitivity: 80,
+                            scrollSpeed: 18,
+                            emptyInsertThreshold: 48,
+                            onStart: function () {
+                                document.querySelectorAll('.task-column').forEach(function (target) {
+                                    target.classList.add('is-drop-target');
+                                });
+                            },
                             onEnd: function (evt) {
+                                document.querySelectorAll('.task-column').forEach(function (target) {
+                                    target.classList.remove('is-drop-target');
+                                });
+
                                 const taskId = evt.item.dataset.taskId;
                                 const status = evt.to.dataset.status;
                                 const sortOrder = evt.newIndex + 1;

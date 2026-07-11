@@ -410,10 +410,40 @@ body.crm-app .small-box.bg-danger { background: var(--crm-danger) !important; }
 body.crm-app .small-box.bg-primary { background: var(--crm-accent) !important; }
 
 /* ----- Kanban boards ----- */
+body.crm-app .crm-kanban > [class*="col-"] {
+    display: flex;
+}
+
+body.crm-app .crm-kanban-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 22rem;
+    max-height: calc(100vh - 13.5rem);
+}
+
+body.crm-app .crm-kanban-column > .card-header {
+    flex: 0 0 auto;
+}
+
 body.crm-app .crm-board-column,
 body.crm-app .lead-column,
 body.crm-app .task-column {
-    min-height: 280px;
+    flex: 1 1 auto;
+    min-height: 16rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--crm-surface-muted);
+    border-radius: 0 0 var(--crm-radius-sm) var(--crm-radius-sm);
+}
+
+body.crm-app .lead-column.is-drop-target,
+body.crm-app .task-column.is-drop-target {
+    outline: 2px dashed var(--crm-accent);
+    outline-offset: -2px;
+    background: var(--crm-accent-soft);
 }
 
 body.crm-app .content .card.card-outline.card-primary .card-header,
@@ -639,12 +669,6 @@ body.crm-app .crm-empty i {
 }
 
 /* ----- Board columns ----- */
-body.crm-app .lead-column,
-body.crm-app .task-column {
-    background: var(--crm-surface-muted);
-    border-radius: 0 0 var(--crm-radius-sm) var(--crm-radius-sm);
-}
-
 body.crm-app .lead-card h6 a,
 body.crm-app .task-card h6 a,
 body.crm-app .lead-card a.text-dark,
