@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -11,12 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            Route::middleware('web')
+                ->group(base_path('routes/superadmin.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'company' => \App\Http\Middleware\EnsureCompanyContext::class,
+            'superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'website-lead-webhook' => \App\Http\Middleware\VerifyWebsiteLeadWebhook::class,
         ]);
 

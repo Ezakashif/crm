@@ -19,6 +19,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RbacSeeder::class);
 
+        User::factory()->superAdmin()->create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@example.com',
+        ]);
+
         $admin = User::factory()->admin()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',

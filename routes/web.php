@@ -23,9 +23,15 @@ Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'st
     ->name('webhooks.leads.website');
 
 Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
+    if (! auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    if (auth()->user()->isSuperAdmin()) {
+        return redirect()->route('superadmin.dashboard');
+    }
+
+    return redirect()->route('dashboard');
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])

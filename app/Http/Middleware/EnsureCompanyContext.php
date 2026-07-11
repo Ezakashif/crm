@@ -30,7 +30,11 @@ class EnsureCompanyContext
             return $next($request);
         }
 
-        // Platform / Super Admin users (null company_id) are not supported on CRM routes yet.
+        // Platform Super Admins use /superadmin, not tenant CRM routes.
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('superadmin.dashboard');
+        }
+
         if ($user->company_id === null) {
             return $this->deny($request, 'Your account is not assigned to a company. Please contact support.');
         }

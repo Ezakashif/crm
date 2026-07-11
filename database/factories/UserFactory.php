@@ -21,6 +21,10 @@ class UserFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function (User $user) {
+            if ($user->isSuperAdmin()) {
+                return;
+            }
+
             $user->syncRolesFromLegacyColumn();
         });
     }
@@ -58,6 +62,15 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => 'admin',
+        ]);
+    }
+
+    public function superAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+            'is_super_admin' => true,
+            'company_id' => null,
         ]);
     }
 

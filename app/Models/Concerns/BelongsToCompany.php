@@ -24,6 +24,11 @@ trait BelongsToCompany
                 return;
             }
 
+            // Platform Super Admins intentionally have no company.
+            if ($model instanceof \App\Models\User && $model->getAttribute('is_super_admin')) {
+                return;
+            }
+
             $companyId = app(CurrentCompany::class)->id();
 
             if (

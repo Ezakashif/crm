@@ -147,6 +147,10 @@ trait HasRoles
 
     public function syncRolesFromLegacyColumn(): void
     {
+        if ($this->isSuperAdmin()) {
+            return;
+        }
+
         $slug = match ($this->role) {
             'admin' => 'admin',
             default => 'sales',
