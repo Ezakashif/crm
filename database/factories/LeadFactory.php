@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Lead;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -49,5 +50,17 @@ class LeadFactory extends Factory
     public function assignedTo(User $user): static
     {
         return $this->state(fn () => ['assigned_to' => $user->id]);
+    }
+
+    public function createdAt(Carbon|\DateTimeInterface|string $timestamp): static
+    {
+        $value = $timestamp instanceof Carbon
+            ? $timestamp
+            : Carbon::parse($timestamp);
+
+        return $this->state(fn () => [
+            'created_at' => $value,
+            'updated_at' => $value,
+        ]);
     }
 }
