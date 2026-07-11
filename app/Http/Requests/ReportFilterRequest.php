@@ -21,7 +21,11 @@ class ReportFilterRequest extends FormRequest
         return [
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
-            'employee_id' => ['nullable', 'integer', 'exists:users,id'],
+            'employee_id' => [
+                'nullable',
+                'integer',
+                \App\Support\CrmValidation::existsInCompany('users', 'id', $this->user()?->company_id),
+            ],
             'source' => ['nullable', Rule::in(Lead::SOURCES)],
             'status' => ['nullable', Rule::in(array_keys(Lead::STATUSES))],
         ];

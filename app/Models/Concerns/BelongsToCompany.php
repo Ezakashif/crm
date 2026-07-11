@@ -8,6 +8,7 @@ use App\Support\CurrentCompany;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * @mixin Model
@@ -25,7 +26,15 @@ trait BelongsToCompany
 
             $companyId = app(CurrentCompany::class)->id();
 
-            if ($companyId !== null) {
+            if (
+                $companyId === null
+                && Schema::hasTable('companies')
+                && Schema::hasColumn($model->getTable(), 'company_id')
+            ) {
+                $companyId = Company::default()?->id;
+            }
+
+            if ($companyId !== null && Schema::hasColumn($model->getTable(), 'company_id')) {
                 $model->setAttribute('company_id', $companyId);
             }
         });

@@ -4,9 +4,12 @@ namespace App\Policies;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Policies\Concerns\ChecksSameCompany;
 
 class RolePolicy
 {
+    use ChecksSameCompany;
+
     public function viewAny(User $user): bool
     {
         return $user->hasPermission('view.roles');
@@ -14,7 +17,8 @@ class RolePolicy
 
     public function view(User $user, Role $role): bool
     {
-        return $user->hasPermission('view.roles');
+        return $this->sameCompany($user, $role)
+            && $user->hasPermission('view.roles');
     }
 
     public function create(User $user): bool
@@ -24,11 +28,13 @@ class RolePolicy
 
     public function update(User $user, Role $role): bool
     {
-        return $user->hasPermission('update.roles');
+        return $this->sameCompany($user, $role)
+            && $user->hasPermission('update.roles');
     }
 
     public function delete(User $user, Role $role): bool
     {
-        return $user->hasPermission('delete.roles');
+        return $this->sameCompany($user, $role)
+            && $user->hasPermission('delete.roles');
     }
 }

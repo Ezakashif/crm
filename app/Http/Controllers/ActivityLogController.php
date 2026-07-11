@@ -20,7 +20,11 @@ class ActivityLogController extends Controller
         $canViewAll = $user->hasPermission('view.activity_logs');
 
         $filters = $request->validate([
-            'user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'user_id' => [
+                'nullable',
+                'integer',
+                \App\Support\CrmValidation::existsInCompany('users', 'id', $user->company_id),
+            ],
             'action' => ['nullable', 'string', Rule::in(array_keys(ActivityLog::ACTION_LABELS))],
         ]);
 

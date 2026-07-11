@@ -4,9 +4,12 @@ namespace App\Policies;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Policies\Concerns\ChecksSameCompany;
 
 class LeadPolicy
 {
+    use ChecksSameCompany;
+
     public function viewAny(User $user): bool
     {
         return $user->hasPermission('view.leads');
@@ -14,7 +17,7 @@ class LeadPolicy
 
     public function view(User $user, Lead $lead): bool
     {
-        if (! $user->hasPermission('view.leads')) {
+        if (! $this->sameCompany($user, $lead) || ! $user->hasPermission('view.leads')) {
             return false;
         }
 
@@ -28,7 +31,7 @@ class LeadPolicy
 
     public function update(User $user, Lead $lead): bool
     {
-        if (! $user->hasPermission('update.leads')) {
+        if (! $this->sameCompany($user, $lead) || ! $user->hasPermission('update.leads')) {
             return false;
         }
 
@@ -37,7 +40,7 @@ class LeadPolicy
 
     public function delete(User $user, Lead $lead): bool
     {
-        if (! $user->hasPermission('delete.leads')) {
+        if (! $this->sameCompany($user, $lead) || ! $user->hasPermission('delete.leads')) {
             return false;
         }
 
@@ -46,7 +49,7 @@ class LeadPolicy
 
     public function assign(User $user, Lead $lead): bool
     {
-        if (! $user->hasPermission('assign.leads')) {
+        if (! $this->sameCompany($user, $lead) || ! $user->hasPermission('assign.leads')) {
             return false;
         }
 
@@ -55,7 +58,7 @@ class LeadPolicy
 
     public function convert(User $user, Lead $lead): bool
     {
-        if (! $user->hasPermission('convert.leads')) {
+        if (! $this->sameCompany($user, $lead) || ! $user->hasPermission('convert.leads')) {
             return false;
         }
 
@@ -64,7 +67,7 @@ class LeadPolicy
 
     public function createActivity(User $user, Lead $lead): bool
     {
-        if (! $user->hasPermission('log.leads')) {
+        if (! $this->sameCompany($user, $lead) || ! $user->hasPermission('log.leads')) {
             return false;
         }
 

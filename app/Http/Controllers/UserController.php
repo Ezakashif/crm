@@ -111,12 +111,12 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'email' => ['required', 'email', 'max:255', \App\Support\CrmValidation::uniqueInCompany('users', 'email', $request->user()->company_id, $user->id)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => [
                 'integer',
-                Rule::exists('roles', 'id')->where(fn ($query) => $query->where('company_id', $request->user()->company_id)),
+                \App\Support\CrmValidation::existsInCompany('roles', 'id', $request->user()->company_id),
             ],
             'status' => ['required', Rule::in(array_keys(self::STATUSES))],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],

@@ -49,7 +49,11 @@ class LeadFactory extends Factory
 
     public function assignedTo(User $user): static
     {
-        return $this->state(fn () => ['assigned_to' => $user->id]);
+        return $this->state(fn () => [
+            'assigned_to' => $user->id,
+            'company_id' => $user->company_id,
+            'created_by' => $user->id,
+        ]);
     }
 
     public function createdAt(Carbon|\DateTimeInterface|string $timestamp): static

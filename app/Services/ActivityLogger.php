@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ActivityLog;
+use App\Support\CurrentCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class ActivityLogger
@@ -13,7 +14,10 @@ class ActivityLogger
         array $properties = [],
         ?int $userId = null,
     ): ActivityLog {
-        return ActivityLog::create([
+        $companyId = $subject?->getAttribute('company_id')
+            ?? app(CurrentCompany::class)->id();
+
+        $log = new ActivityLog([
             'user_id' => $userId ?? auth()->id(),
             'action' => $action,
             'subject_type' => $subject ? $subject::class : null,
@@ -21,5 +25,13 @@ class ActivityLogger
             'properties' => $properties ?: null,
             'ip_address' => request()->ip(),
         ]);
+
+        if ($companyId !== null) {
+            $log->company_id = $companyId;
+        }
+
+        $log->save();
+
+        return $log;
     }
 }

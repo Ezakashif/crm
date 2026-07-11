@@ -4,9 +4,12 @@ namespace App\Policies;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Policies\Concerns\ChecksSameCompany;
 
 class CustomerPolicy
 {
+    use ChecksSameCompany;
+
     public function viewAny(User $user): bool
     {
         return $user->hasPermission('view.customers');
@@ -14,7 +17,8 @@ class CustomerPolicy
 
     public function view(User $user, Customer $customer): bool
     {
-        return $user->hasPermission('view.customers');
+        return $this->sameCompany($user, $customer)
+            && $user->hasPermission('view.customers');
     }
 
     public function create(User $user): bool
@@ -24,11 +28,13 @@ class CustomerPolicy
 
     public function update(User $user, Customer $customer): bool
     {
-        return $user->hasPermission('update.customers');
+        return $this->sameCompany($user, $customer)
+            && $user->hasPermission('update.customers');
     }
 
     public function delete(User $user, Customer $customer): bool
     {
-        return $user->hasPermission('delete.customers');
+        return $this->sameCompany($user, $customer)
+            && $user->hasPermission('delete.customers');
     }
 }

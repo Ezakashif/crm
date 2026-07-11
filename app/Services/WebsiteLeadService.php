@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\Lead;
 use App\Models\LeadActivity;
 use App\Models\User;
+use App\Support\CurrentCompany;
 use Illuminate\Support\Facades\Validator;
 
 class WebsiteLeadService
@@ -23,47 +25,64 @@ class WebsiteLeadService
             'message' => 'nullable|string|max:5000',
         ])->validate();
 
-        $createdById = $this->resolveCreatedByUserId();
+        $company = $this->resolveTargetCompany();
+        $currentCompany = app(CurrentCompany::class);
+        $previousCompanyId = $currentCompany->id();
+        $currentCompany->set($company);
 
-        $sortOrder = Lead::where('status', 'new')->max('sort_order') + 1;
+        try {
+            $createdById = $this->resolveCreatedByUserId($company->id);
 
-        $lead = Lead::create([
-            'created_by' => $createdById,
-            'assigned_to' => null,
-            'name' => $validated['name'],
-            'email' => $validated['email'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'company' => $validated['company'] ?? null,
-            'source' => 'website',
-            'status' => 'new',
-            'sort_order' => $sortOrder,
-            'notes' => $validated['notes'] ?? $validated['message'] ?? null,
-        ]);
+            $sortOrder = Lead::query()->where('status', 'new')->max('sort_order') + 1;
 
-        ActivityLogger::log('lead.created_via_website', $lead, [
-            'name' => $lead->name,
-        ], $createdById);
+            $lead = new Lead([
+                'created_by' => $createdById,
+                'assigned_to' => null,
+                'name' => $validated['name'],
+                'email' => $validated['email'] ?? null,
+                'phone' => $validated['phone'] ?? null,
+                'company' => $validated['company'] ?? null,
+                'source' => 'website',
+                'status' => 'new',
+                'sort_order' => $sortOrder,
+                'notes' => $validated['notes'] ?? $validated['message'] ?? null,
+            ]);
+            $lead->company_id = $company->id;
+            $lead->save();
 
-        $initialMessage = $validated['notes'] ?? $validated['message'] ?? null;
+            ActivityLogger::log('lead.created_via_website', $lead, [
+                'name' => $lead->name,
+            ], $createdById);
 
-        if (filled($initialMessage)) {
-            LeadActivity::log(
-                $lead,
-                'note',
-                $initialMessage,
-                userId: $createdById,
-            );
+            $initialMessage = $validated['notes'] ?? $validated['message'] ?? null;
+
+            if (filled($initialMessage)) {
+                LeadActivity::log(
+                    $lead,
+                    'note',
+                    $initialMessage,
+                    userId: $createdById,
+                );
+            }
+
+            return $lead;
+        } finally {
+            if ($previousCompanyId !== null) {
+                $currentCompany->set($previousCompanyId);
+            } else {
+                $currentCompany->clear();
+            }
         }
-
-        return $lead;
     }
 
-    public function resolveCreatedByUserId(): int
+    public function resolveCreatedByUserId(?int $companyId = null): int
     {
+        $companyId ??= $this->resolveTargetCompany()->id;
         $email = config('website_leads.created_by_email');
 
         if (filled($email)) {
-            $user = User::query()
+            $user = User::withoutCompanyScope()
+                ->where('company_id', $companyId)
                 ->where('email', $email)
                 ->where('status', 'active')
                 ->first();
@@ -73,7 +92,8 @@ class WebsiteLeadService
             }
         }
 
-        $admin = User::query()
+        $admin = User::withoutCompanyScope()
+            ->where('company_id', $companyId)
             ->where('status', 'active')
             ->whereHas('roles', fn ($query) => $query->where('slug', 'admin'))
             ->orderBy('id')
@@ -84,5 +104,30 @@ class WebsiteLeadService
         }
 
         abort(503, 'Website lead webhook has no active admin user to own new leads.');
+    }
+
+    protected function resolveTargetCompany(): Company
+    {
+        $email = config('website_leads.created_by_email');
+
+        if (filled($email)) {
+            $user = User::withoutCompanyScope()
+                ->where('email', $email)
+                ->where('status', 'active')
+                ->whereNotNull('company_id')
+                ->first();
+
+            if ($user) {
+                return Company::query()->findOrFail($user->company_id);
+            }
+        }
+
+        $company = Company::default();
+
+        if ($company) {
+            return $company;
+        }
+
+        abort(503, 'Website lead webhook has no company to attach new leads to.');
     }
 }

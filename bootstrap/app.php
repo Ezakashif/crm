@@ -20,6 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'website-lead-webhook' => \App\Http\Middleware\VerifyWebsiteLeadWebhook::class,
         ]);
 
+        // Resolve tenant context before route-model binding so CompanyScope applies.
+        $middleware->prependToPriorityList(
+            before: \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            prepend: \App\Http\Middleware\EnsureCompanyContext::class,
+        );
+
         $middleware->validateCsrfTokens(except: [
             'webhooks/leads/website',
             'logout',

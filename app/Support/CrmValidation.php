@@ -10,6 +10,28 @@ use Illuminate\Validation\Rules\Password;
 class CrmValidation
 {
     /**
+     * @return \Illuminate\Validation\Rules\Exists
+     */
+    public static function existsInCompany(string $table, string $column, ?int $companyId)
+    {
+        return Rule::exists($table, $column)->where(fn ($query) => $query->where('company_id', $companyId));
+    }
+
+    /**
+     * @return \Illuminate\Validation\Rules\Unique
+     */
+    public static function uniqueInCompany(string $table, string $column, ?int $companyId, mixed $ignore = null)
+    {
+        $rule = Rule::unique($table, $column)->where(fn ($query) => $query->where('company_id', $companyId));
+
+        if ($ignore !== null) {
+            $rule->ignore($ignore);
+        }
+
+        return $rule;
+    }
+
+    /**
      * Validation rules for creating a lead (manual create + CSV import).
      *
      * @return array<string, mixed>
@@ -29,8 +51,8 @@ class CrmValidation
 
         if ($user->canAssignLeads()) {
             $rules['assigned_to'] = $forImport
-                ? ['nullable', 'email', 'max:255', 'exists:users,email']
-                : ['nullable', 'exists:users,id'];
+                ? ['nullable', 'email', 'max:255', self::existsInCompany('users', 'email', $user->company_id)]
+                : ['nullable', self::existsInCompany('users', 'id', $user->company_id)];
         }
 
         return $rules;
@@ -77,30 +99,29 @@ class CrmValidation
      */
     public static function userStoreRules(bool $forImport = false): array
     {
+        $companyId = auth()->user()?->company_id;
+
         if ($forImport) {
             return [
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|max:255',
+                'email' => ['required', 'email', 'max:255', self::uniqueInCompany('users', 'email', $companyId)],
                 'password' => ['required', 'string', Password::defaults()],
                 'roles' => ['required', 'string', 'max:255'],
                 'status' => ['required', Rule::in(array_keys(User::STATUSES))],
             ];
         }
 
-        $companyId = auth()->user()?->company_id;
-
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
+            'email' => ['required', 'email', 'max:255', self::uniqueInCompany('users', 'email', $companyId)],
             'password' => ['required', 'confirmed', Password::defaults()],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => [
                 'integer',
-                Rule::exists('roles', 'id')->where(fn ($query) => $query->where('company_id', $companyId)),
+                self::existsInCompany('roles', 'id', $companyId),
             ],
             'status' => ['required', Rule::in(array_keys(User::STATUSES))],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
     }
 }
-

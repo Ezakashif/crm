@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Jobs\SendLeadFollowUpReminderJob;
+use App\Models\Company;
 use App\Models\Lead;
 use App\Notifications\LeadFollowUpDue;
+use App\Support\CurrentCompany;
 use Carbon\Carbon;
 use InvalidArgumentException;
 
@@ -13,7 +15,7 @@ class LeadFollowUpReminderService
     public const TIERS = ['day_before', 'hours_before', 'due'];
 
     /**
-     * Dispatch reminder jobs for one tier (or all enabled tiers).
+     * Dispatch reminder jobs for one tier (or all enabled tiers), per company.
      *
      * @return int Number of jobs dispatched
      */
@@ -25,16 +27,27 @@ class LeadFollowUpReminderService
 
         $tiers = $tier ? [$tier] : self::TIERS;
         $dispatched = 0;
+        $currentCompany = app(CurrentCompany::class);
 
-        foreach ($tiers as $tierKey) {
-            $this->assertValidTier($tierKey);
+        Company::query()
+            ->orderBy('id')
+            ->each(function (Company $company) use ($tiers, $currentCompany, &$dispatched): void {
+                $currentCompany->set($company);
 
-            if (! config("lead_reminders.tiers.{$tierKey}.enabled", true)) {
-                continue;
-            }
+                try {
+                    foreach ($tiers as $tierKey) {
+                        $this->assertValidTier($tierKey);
 
-            $dispatched += $this->dispatchTier($tierKey);
-        }
+                        if (! config("lead_reminders.tiers.{$tierKey}.enabled", true)) {
+                            continue;
+                        }
+
+                        $dispatched += $this->dispatchTier($tierKey);
+                    }
+                } finally {
+                    $currentCompany->clear();
+                }
+            });
 
         return $dispatched;
     }
@@ -51,7 +64,7 @@ class LeadFollowUpReminderService
             return false;
         }
 
-        $lead = Lead::query()
+        $lead = Lead::withoutCompanyScope()
             ->with('assignee')
             ->find($leadId);
 

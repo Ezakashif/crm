@@ -4,9 +4,12 @@ namespace App\Policies;
 
 use App\Models\Task;
 use App\Models\User;
+use App\Policies\Concerns\ChecksSameCompany;
 
 class TaskPolicy
 {
+    use ChecksSameCompany;
+
     public function viewAny(User $user): bool
     {
         return $user->hasPermission('view.tasks');
@@ -14,7 +17,7 @@ class TaskPolicy
 
     public function view(User $user, Task $task): bool
     {
-        if (! $user->hasPermission('view.tasks')) {
+        if (! $this->sameCompany($user, $task) || ! $user->hasPermission('view.tasks')) {
             return false;
         }
 
@@ -28,7 +31,7 @@ class TaskPolicy
 
     public function update(User $user, Task $task): bool
     {
-        if (! $user->hasPermission('update.tasks')) {
+        if (! $this->sameCompany($user, $task) || ! $user->hasPermission('update.tasks')) {
             return false;
         }
 
@@ -41,15 +44,13 @@ class TaskPolicy
             return false;
         }
 
-        // Anyone who can see the task and has update or change_status may
-        // move it across the kanban columns (pending, in_progress, completed, cancelled).
         return $user->hasPermission('update.tasks')
             || $user->hasPermission('change_status.tasks');
     }
 
     public function delete(User $user, Task $task): bool
     {
-        if (! $user->hasPermission('delete.tasks')) {
+        if (! $this->sameCompany($user, $task) || ! $user->hasPermission('delete.tasks')) {
             return false;
         }
 
@@ -58,7 +59,7 @@ class TaskPolicy
 
     public function assign(User $user, Task $task): bool
     {
-        if (! $user->hasPermission('assign.tasks')) {
+        if (! $this->sameCompany($user, $task) || ! $user->hasPermission('assign.tasks')) {
             return false;
         }
 

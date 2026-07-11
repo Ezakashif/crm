@@ -61,7 +61,7 @@ class ReportService
             'leadSources' => Lead::SOURCES,
             'leads' => $canViewLeads ? $this->leadReport($leadQuery, $user, $filters) : null,
             'customers' => $canViewCustomers ? $this->customerReport($customerQuery, $leadQuery) : null,
-            'tasks' => $canViewTasks ? $this->taskReport($taskQuery) : null,
+            'tasks' => $canViewTasks ? $this->taskReport($taskQuery, $user) : null,
             'performance' => $canViewLeads ? $this->performanceReport($user, $filters, $dateFrom, $dateTo) : null,
         ];
     }
@@ -122,11 +122,16 @@ class ReportService
             ? $user->canViewAllLeads()
             : $user->canViewAllTasks();
 
-        if (! $canViewAll) {
+        if (! $canViewAll || $employeeId === null) {
             return null;
         }
 
-        return $employeeId;
+        $exists = User::query()
+            ->whereKey($employeeId)
+            ->where('company_id', $user->company_id)
+            ->exists();
+
+        return $exists ? $employeeId : null;
     }
 
     /**
@@ -150,7 +155,10 @@ class ReportService
         }
 
         $byAssignee = (clone $leadQuery)
-            ->leftJoin('users', 'leads.assigned_to', '=', 'users.id')
+            ->leftJoin('users', function ($join) use ($user) {
+                $join->on('leads.assigned_to', '=', 'users.id')
+                    ->where('users.company_id', '=', $user->company_id);
+            })
             ->selectRaw('leads.assigned_to, COALESCE(users.name, ?) as employee_name, COUNT(*) as aggregate', ['Unassigned'])
             ->groupBy('leads.assigned_to', 'users.name')
             ->orderByDesc('aggregate')
@@ -224,7 +232,7 @@ class ReportService
     /**
      * @return array<string, mixed>
      */
-    protected function taskReport(Builder $taskQuery): array
+    protected function taskReport(Builder $taskQuery, User $user): array
     {
         $statusCounts = (clone $taskQuery)
             ->selectRaw('tasks.status, COUNT(*) as aggregate')
@@ -236,7 +244,10 @@ class ReportService
         $overdue = $this->overdueTasksQuery(clone $taskQuery)->count();
 
         $byEmployee = (clone $taskQuery)
-            ->leftJoin('users', 'tasks.assigned_to', '=', 'users.id')
+            ->leftJoin('users', function ($join) use ($user) {
+                $join->on('tasks.assigned_to', '=', 'users.id')
+                    ->where('users.company_id', '=', $user->company_id);
+            })
             ->selectRaw('tasks.assigned_to, COALESCE(users.name, ?) as employee_name, COUNT(*) as aggregate', ['Unassigned'])
             ->groupBy('tasks.assigned_to', 'users.name')
             ->orderByDesc('aggregate')
@@ -301,7 +312,10 @@ class ReportService
 
         // Performance ignores lead status filter so conversion stays meaningful.
         $rows = (clone $base)
-            ->leftJoin('users', 'leads.assigned_to', '=', 'users.id')
+            ->leftJoin('users', function ($join) use ($user) {
+                $join->on('leads.assigned_to', '=', 'users.id')
+                    ->where('users.company_id', '=', $user->company_id);
+            })
             ->selectRaw('
                 leads.assigned_to,
                 COALESCE(users.name, ?) as employee_name,

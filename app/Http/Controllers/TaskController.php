@@ -67,11 +67,11 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'priority' => 'required|in:'.implode(',', array_keys(Task::PRIORITIES)),
             'due_date' => 'nullable|date',
-            'customer_id' => 'nullable|exists:customers,id',
+            'customer_id' => ['nullable', \App\Support\CrmValidation::existsInCompany('customers', 'id', $user->company_id)],
         ];
 
         if ($user->canAssignTasks()) {
-            $rules['assigned_to'] = 'required|exists:users,id';
+            $rules['assigned_to'] = ['required', \App\Support\CrmValidation::existsInCompany('users', 'id', $user->company_id)];
         }
 
         $validated = $request->validate($rules);
@@ -137,11 +137,11 @@ class TaskController extends Controller
             'priority' => 'required|in:'.implode(',', array_keys(Task::PRIORITIES)),
             'status' => 'required|in:'.implode(',', array_keys(Task::STATUSES)),
             'due_date' => 'nullable|date',
-            'customer_id' => 'nullable|exists:customers,id',
+            'customer_id' => ['nullable', \App\Support\CrmValidation::existsInCompany('customers', 'id', auth()->user()->company_id)],
         ];
 
         if (auth()->user()->can('assign', $task)) {
-            $rules['assigned_to'] = 'required|exists:users,id';
+            $rules['assigned_to'] = ['required', \App\Support\CrmValidation::existsInCompany('users', 'id', auth()->user()->company_id)];
         }
 
         $validated = $request->validate($rules);
@@ -180,7 +180,7 @@ class TaskController extends Controller
     public function updateBoard(Request $request)
     {
         $request->validate([
-            'task_id' => 'required|exists:tasks,id',
+            'task_id' => ['required', \App\Support\CrmValidation::existsInCompany('tasks', 'id', $request->user()->company_id)],
             'status' => 'required|in:'.implode(',', array_keys(Task::STATUSES)),
             'sort_order' => 'required|integer|min:0',
         ]);

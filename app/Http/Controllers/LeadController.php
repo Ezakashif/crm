@@ -151,7 +151,7 @@ class LeadController extends Controller
         ];
 
         if ($user->can('assign', $lead)) {
-            $rules['assigned_to'] = 'nullable|exists:users,id';
+            $rules['assigned_to'] = ['nullable', \App\Support\CrmValidation::existsInCompany('users', 'id', $user->company_id)];
         }
 
         $validated = $request->validate($rules);
@@ -274,7 +274,7 @@ class LeadController extends Controller
     public function updateBoard(Request $request)
     {
         $request->validate([
-            'lead_id' => 'required|exists:leads,id',
+            'lead_id' => ['required', \App\Support\CrmValidation::existsInCompany('leads', 'id', $request->user()->company_id)],
             'status' => 'required|in:new,contacted,qualified,proposal_sent,won,lost',
             'sort_order' => 'required|integer|min:0',
         ]);

@@ -107,6 +107,11 @@ class LeadActivity extends Model
             'next_follow_up_date' => $nextFollowUp,
         ]);
 
+        if ($activity->company_id === null && $lead->company_id !== null) {
+            $activity->company_id = $lead->company_id;
+            $activity->save();
+        }
+
         if ($nextFollowUp !== null) {
             $lead->update(['follow_up_date' => $nextFollowUp]);
         }
