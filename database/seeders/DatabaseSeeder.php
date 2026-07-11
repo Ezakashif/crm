@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
-use App\Models\Lead;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -24,30 +24,28 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@example.com',
         ]);
 
-        $salesRep = User::factory()->create([
+        User::factory()->create([
             'name' => 'Sales Rep',
             'email' => 'sales@example.com',
         ]);
 
-        $users = collect([$admin, $salesRep]);
+        // Spread customers across recent months so reports charts stay realistic.
+        foreach (range(0, 19) as $index) {
+            $createdAt = Carbon::now()
+                ->subMonths(fake()->numberBetween(0, 5))
+                ->subDays(fake()->numberBetween(0, 25))
+                ->setTime(fake()->numberBetween(8, 18), fake()->numberBetween(0, 59));
 
-        Customer::factory(15)
-            ->active()
-            ->create(['created_by' => $admin->id]);
-
-        $leadStatuses = ['new', 'contacted', 'qualified', 'proposal_sent', 'won', 'lost'];
-
-        foreach ($leadStatuses as $status) {
-            $count = fake()->numberBetween(2, 5);
-
-            for ($i = 0; $i < $count; $i++) {
-                Lead::factory()
-                    ->status($status, $i)
-                    ->assignedTo($users->random())
-                    ->create(['created_by' => $admin->id]);
-            }
+            Customer::factory()
+                ->active()
+                ->create([
+                    'created_by' => $admin->id,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
         }
 
+        $this->call(LeadSeeder::class);
         $this->call(TaskSeeder::class);
     }
 }
