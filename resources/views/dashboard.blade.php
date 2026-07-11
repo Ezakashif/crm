@@ -19,6 +19,13 @@
     </x-slot>
 
     <div class="crm-dashboard">
+        @php
+            $announcement = app(\App\Services\SuperAdmin\PlatformSettingsService::class)->announcement();
+        @endphp
+        @if ($announcement)
+            <div class="alert alert-info">{{ $announcement }}</div>
+        @endif
+
         {{-- Attention strip --}}
         @if($canViewLeads || $canViewTasks)
             <div class="crm-attention">

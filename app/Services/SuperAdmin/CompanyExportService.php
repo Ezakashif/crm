@@ -27,17 +27,21 @@ class CompanyExportService
             ->map(fn (Company $company) => [
                 $company->name,
                 $company->slug,
+                $company->owner?->name,
+                $company->owner?->email ?? $company->email,
+                $company->plan?->name,
                 $company->status,
+                $company->subscription_status,
                 $company->users_count,
                 $company->leads_count,
                 $company->customers_count,
-                $company->tasks_count,
+                optional($company->last_active_at)?->toDateTimeString(),
                 optional($company->created_at)?->toDateTimeString(),
             ]);
 
         return $this->csvStreamer->download(
             'companies-'.now()->format('Y-m-d').'.csv',
-            ['Name', 'Slug', 'Status', 'Users', 'Leads', 'Customers', 'Tasks', 'Created At'],
+            ['Name', 'Slug', 'Owner', 'Owner Email', 'Plan', 'Status', 'Subscription', 'Users', 'Leads', 'Customers', 'Last Active', 'Created At'],
             $rows,
         );
     }

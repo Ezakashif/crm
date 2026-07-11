@@ -29,9 +29,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        ActivityLogger::log('user.login', auth()->user());
-
         $user = auth()->user();
+
+        if ($user) {
+            $user->forceFill(['last_login_at' => now()])->save();
+            ActivityLogger::log('user.login', $user);
+        }
 
         if ($user?->isSuperAdmin()) {
             return redirect()->intended(route('superadmin.dashboard', absolute: false));

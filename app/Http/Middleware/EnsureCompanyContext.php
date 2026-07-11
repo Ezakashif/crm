@@ -51,12 +51,29 @@ class EnsureCompanyContext
 
         $this->currentCompany->set($company);
 
+        $this->touchLastActive($company);
+
         return $next($request);
     }
 
     public function terminate(Request $request, Response $response): void
     {
         $this->currentCompany->clear();
+    }
+
+    private function touchLastActive(Company $company): void
+    {
+        $cacheKey = "company:last_active:{$company->id}";
+
+        if (cache()->has($cacheKey)) {
+            return;
+        }
+
+        cache()->put($cacheKey, true, now()->addMinutes(15));
+
+        Company::query()->whereKey($company->id)->update([
+            'last_active_at' => now(),
+        ]);
     }
 
     private function deny(Request $request, string $message): Response

@@ -53,6 +53,15 @@ class ActivityLog extends Model
         'task.updated' => 'Task updated',
         'task.deleted' => 'Task deleted',
         'task.status_changed' => 'Task status changed',
+        'company.created' => 'Company created',
+        'company.updated' => 'Company updated',
+        'company.status_changed' => 'Company status changed',
+        'company.deleted' => 'Company deleted',
+        'impersonation.started' => 'Impersonation started',
+        'impersonation.ended' => 'Impersonation ended',
+        'platform.settings_updated' => 'Platform settings updated',
+        'platform.announcement_updated' => 'Announcement updated',
+        'platform.super_admin_created' => 'Super Admin created',
     ];
 
     /**
@@ -73,6 +82,11 @@ class ActivityLog extends Model
     public function subject(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function module(): string
+    {
+        return explode('.', (string) $this->action)[0] ?: 'system';
     }
 
     public function actionLabel(): string
@@ -168,6 +182,26 @@ class ActivityLog extends Model
                 'Task status changed from %s to %s',
                 $properties['from'] ?? 'unknown',
                 $properties['to'] ?? 'unknown'
+            ),
+            'company.created' => sprintf('Created company %s', $properties['name'] ?? ($this->subject?->name ?? 'unknown')),
+            'company.updated' => sprintf('Updated company %s', $properties['name'] ?? ($this->subject?->name ?? 'unknown')),
+            'company.status_changed' => sprintf(
+                'Company status changed from %s to %s',
+                $properties['from'] ?? 'unknown',
+                $properties['to'] ?? 'unknown'
+            ),
+            'company.deleted' => sprintf('Deleted company %s', $properties['name'] ?? 'unknown'),
+            'impersonation.started' => sprintf(
+                'Started impersonating %s at %s',
+                $this->subject?->name ?? 'user',
+                $properties['company_name'] ?? 'company'
+            ),
+            'impersonation.ended' => 'Ended impersonation session',
+            'platform.settings_updated' => 'Updated platform settings',
+            'platform.announcement_updated' => 'Updated platform announcement',
+            'platform.super_admin_created' => sprintf(
+                'Created Super Admin %s',
+                $properties['email'] ?? 'unknown'
             ),
             default => $this->actionLabel(),
         };

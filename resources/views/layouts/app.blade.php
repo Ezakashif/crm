@@ -9,6 +9,7 @@
 @stop
 
 @section('content')
+    @include('partials.impersonation-banner')
     {{ $slot }}
 @stop
 

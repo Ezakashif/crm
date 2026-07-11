@@ -31,6 +31,8 @@ class User extends Authenticatable
         'role',
         'status',
         'photo_path',
+        'is_super_admin',
+        'last_login_at',
     ];
 
     protected $hidden = [
@@ -42,9 +44,15 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
             'is_super_admin' => 'boolean',
         ];
+    }
+
+    public function ownedCompanies(): HasMany
+    {
+        return $this->hasMany(Company::class, 'owner_id');
     }
 
     public function assignedLeads(): HasMany

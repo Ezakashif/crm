@@ -25,3 +25,11 @@ Schedule::command('leads:send-follow-up-reminders --tier=hours_before')
     ->hourly()
     ->when($remindersEnabled)
     ->when(fn () => config('lead_reminders.tiers.hours_before.enabled', true));
+
+Schedule::call(function () {
+    \App\Models\PlatformSetting::query()->updateOrCreate(
+        ['key' => 'scheduler_last_run_at'],
+        ['value' => now()->toIso8601String()],
+    );
+    \Illuminate\Support\Facades\Cache::forget(\App\Services\SuperAdmin\PlatformSettingsService::CACHE_KEY);
+})->everyFiveMinutes()->name('platform-scheduler-heartbeat');

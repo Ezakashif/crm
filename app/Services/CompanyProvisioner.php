@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\Plan;
 use App\Models\User;
+use App\Services\SuperAdmin\PlatformSettingsService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -11,12 +13,25 @@ class CompanyProvisioner
 {
     public function __construct(
         private RbacRoleSynchronizer $roleSynchronizer,
+        private PlatformSettingsService $settings,
     ) {}
 
     /**
      * Create a company, sync default roles, and optionally provision the first admin.
      *
-     * @param  array{name: string, slug?: string|null, status?: string, admin_name?: string|null, admin_email?: string|null, admin_password?: string|null}  $data
+     * @param  array{
+     *     name: string,
+     *     slug?: string|null,
+     *     status?: string,
+     *     email?: string|null,
+     *     phone?: string|null,
+     *     plan_id?: int|null,
+     *     subscription_status?: string|null,
+     *     trial_ends_at?: string|null,
+     *     admin_name?: string|null,
+     *     admin_email?: string|null,
+     *     admin_password?: string|null
+     * }  $data
      * @return array{company: Company, admin: User|null}
      */
     public function provision(array $data): array
@@ -25,10 +40,24 @@ class CompanyProvisioner
             $slug = $data['slug'] ?? null;
             $slug = filled($slug) ? Str::slug((string) $slug) : Str::slug($data['name']);
 
+            $planId = $data['plan_id'] ?? Plan::default()?->id;
+            $subscriptionStatus = $data['subscription_status']
+                ?? Company::SUBSCRIPTION_TRIAL;
+            $trialEndsAt = $data['trial_ends_at'] ?? null;
+
+            if ($subscriptionStatus === Company::SUBSCRIPTION_TRIAL && blank($trialEndsAt)) {
+                $trialEndsAt = now()->addDays($this->settings->getInt('trial_duration_days', 14));
+            }
+
             $company = Company::query()->create([
                 'name' => $data['name'],
                 'slug' => $this->uniqueSlug($slug),
-                'status' => $data['status'] ?? Company::STATUS_ACTIVE,
+                'email' => $data['email'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'status' => $data['status'] ?? $this->settings->get('default_company_status', Company::STATUS_ACTIVE),
+                'plan_id' => $planId,
+                'subscription_status' => $subscriptionStatus,
+                'trial_ends_at' => $trialEndsAt,
             ]);
 
             $this->roleSynchronizer->syncDefaultRolesForCompany($company);
@@ -48,7 +77,17 @@ class CompanyProvisioner
                 $admin->company_id = $company->id;
                 $admin->save();
                 $admin->syncRolesFromLegacyColumn();
+
+                $company->update([
+                    'owner_id' => $admin->id,
+                    'email' => $company->email ?: $admin->email,
+                ]);
             }
+
+            ActivityLogger::log('company.created', $company, [
+                'name' => $company->name,
+                'slug' => $company->slug,
+            ]);
 
             return compact('company', 'admin');
         });

@@ -3,28 +3,46 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Company;
-use App\Models\Customer;
-use App\Models\Lead;
-use App\Models\Task;
-use App\Models\User;
+use App\Services\SuperAdmin\PlatformAlertService;
+use App\Services\SuperAdmin\PlatformDashboardService;
+use App\Services\SuperAdmin\SystemHealthService;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        protected PlatformDashboardService $dashboard,
+        protected PlatformAlertService $alerts,
+        protected SystemHealthService $health,
+    ) {}
+
     public function index(): View
     {
         return view('superadmin.dashboard', [
-            'stats' => [
-                'companies' => Company::query()->count(),
-                'active_companies' => Company::query()->where('status', Company::STATUS_ACTIVE)->count(),
-                'suspended_companies' => Company::query()->where('status', Company::STATUS_SUSPENDED)->count(),
-                'users' => User::withoutCompanyScope()->where('is_super_admin', false)->count(),
-                'leads' => Lead::withoutCompanyScope()->count(),
-                'customers' => Customer::withoutCompanyScope()->count(),
-                'tasks' => Task::withoutCompanyScope()->count(),
+            'stats' => $this->dashboard->stats(),
+            'alerts' => $this->alerts->alerts(),
+            'health' => $this->health->snapshot(),
+            'recentCompanies' => Company::query()
+                ->with(['owner:id,name,email', 'plan:id,name'])
+                ->withCount(['users'])
+                ->latest()
+                ->limit(5)
+                ->get(),
+            'recentActivity' => ActivityLog::withoutCompanyScope()
+                ->with([
+                    'actor:id,name,email',
+                    'company:id,name,slug',
+                ])
+                ->latest()
+                ->limit(15)
+                ->get(),
+            'charts' => [
+                'companies' => $this->dashboard->companiesGrowth(12),
+                'leads' => $this->dashboard->leadsGrowth(12),
+                'customers' => $this->dashboard->customersGrowth(12),
             ],
-            'recentCompanies' => Company::query()->latest()->limit(5)->get(),
         ]);
     }
 }

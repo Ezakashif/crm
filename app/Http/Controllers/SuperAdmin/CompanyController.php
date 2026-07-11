@@ -3,21 +3,27 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SuperAdmin\StoreCompanyRequest;
+use App\Http\Requests\SuperAdmin\UpdateCompanyRequest;
 use App\Models\Company;
+use App\Models\Plan;
+use App\Services\ActivityLogger;
 use App\Services\CompanyListQueryService;
 use App\Services\CompanyProvisioner;
 use App\Services\SuperAdmin\CompanyExportService;
+use App\Services\SuperAdmin\CompanyProfileService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class CompanyController extends Controller
 {
     public function __construct(
         protected CompanyListQueryService $listQuery,
+        protected CompanyProfileService $profiles,
     ) {}
 
     public function index(Request $request): View
@@ -33,6 +39,8 @@ class CompanyController extends Controller
             'companies' => $companies,
             'filters' => $filters,
             'statuses' => Company::STATUSES,
+            'subscriptionStatuses' => Company::SUBSCRIPTION_STATUSES,
+            'plans' => Plan::query()->active()->orderBy('name')->get(),
         ]);
     }
 
@@ -40,21 +48,23 @@ class CompanyController extends Controller
     {
         return view('superadmin.companies.create', [
             'statuses' => Company::STATUSES,
+            'subscriptionStatuses' => Company::SUBSCRIPTION_STATUSES,
+            'plans' => Plan::query()->active()->orderBy('name')->get(),
         ]);
     }
 
-    public function store(Request $request, CompanyProvisioner $provisioner): RedirectResponse
+    public function store(StoreCompanyRequest $request, CompanyProvisioner $provisioner): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:100', 'alpha_dash', 'unique:companies,slug'],
-            'status' => ['required', Rule::in(array_keys(Company::STATUSES))],
-            'admin_name' => ['nullable', 'string', 'max:255'],
-            'admin_email' => ['nullable', 'required_with:admin_password', 'email', 'max:255', 'unique:users,email'],
-            'admin_password' => ['nullable', 'required_with:admin_email', Password::defaults()],
-        ]);
+        $validated = $request->validated();
 
         $result = $provisioner->provision($validated);
+        $company = $result['company'];
+
+        if ($request->hasFile('logo')) {
+            $company->update([
+                'logo_path' => $request->file('logo')->store('company-logos', 'public'),
+            ]);
+        }
 
         $message = 'Company created successfully.';
         if ($result['admin']) {
@@ -62,49 +72,57 @@ class CompanyController extends Controller
         }
 
         return redirect()
-            ->route('superadmin.companies.show', $result['company'])
+            ->route('superadmin.companies.show', $company)
             ->with('success', $message);
     }
 
     public function show(Company $company): View
     {
-        $company->loadCount(['users', 'leads', 'customers', 'tasks', 'roles']);
+        $profile = $this->profiles->profile($company);
 
-        $admins = $company->users()
-            ->whereHas('roles', fn ($query) => $query->where('slug', 'admin'))
-            ->orderBy('name')
-            ->get();
-
-        return view('superadmin.companies.show', [
-            'company' => $company,
-            'admins' => $admins,
+        return view('superadmin.companies.show', array_merge($profile, [
             'statuses' => Company::STATUSES,
-        ]);
+            'subscriptionStatuses' => Company::SUBSCRIPTION_STATUSES,
+        ]));
     }
 
     public function edit(Company $company): View
     {
+        $company->load(['owner:id,name,email', 'plan:id,name']);
+
         return view('superadmin.companies.edit', [
             'company' => $company,
             'statuses' => Company::STATUSES,
+            'subscriptionStatuses' => Company::SUBSCRIPTION_STATUSES,
+            'plans' => Plan::query()->active()->orderBy('name')->get(),
+            'owners' => $company->users()->orderBy('name')->get(['id', 'name', 'email']),
         ]);
     }
 
-    public function update(Request $request, Company $company): RedirectResponse
+    public function update(UpdateCompanyRequest $request, Company $company): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => [
-                'required',
-                'string',
-                'max:100',
-                'alpha_dash',
-                Rule::unique('companies', 'slug')->ignore($company->id),
-            ],
-            'status' => ['required', Rule::in(array_keys(Company::STATUSES))],
-        ]);
+        $validated = $request->validated();
+
+        if ($request->boolean('remove_logo') && $company->logo_path) {
+            Storage::disk('public')->delete($company->logo_path);
+            $validated['logo_path'] = null;
+        }
+
+        if ($request->hasFile('logo')) {
+            if ($company->logo_path) {
+                Storage::disk('public')->delete($company->logo_path);
+            }
+            $validated['logo_path'] = $request->file('logo')->store('company-logos', 'public');
+        }
+
+        unset($validated['logo'], $validated['remove_logo']);
 
         $company->update($validated);
+
+        ActivityLogger::log('company.updated', $company, [
+            'name' => $company->name,
+            'slug' => $company->slug,
+        ]);
 
         return redirect()
             ->route('superadmin.companies.show', $company)
@@ -117,11 +135,38 @@ class CompanyController extends Controller
             'status' => ['required', Rule::in(array_keys(Company::STATUSES))],
         ]);
 
+        $from = $company->status;
         $company->update(['status' => $validated['status']]);
+
+        ActivityLogger::log('company.status_changed', $company, [
+            'from' => $from,
+            'to' => $validated['status'],
+            'name' => $company->name,
+        ]);
 
         $label = Company::STATUSES[$validated['status']];
 
         return back()->with('success', "Company marked as {$label}.");
+    }
+
+    public function destroy(Company $company): RedirectResponse
+    {
+        if ($company->slug === Company::DEFAULT_SLUG) {
+            return back()->withErrors(['company' => 'The default company cannot be deleted.']);
+        }
+
+        $name = $company->name;
+
+        ActivityLogger::log('company.deleted', $company, [
+            'name' => $name,
+            'slug' => $company->slug,
+        ]);
+
+        $company->delete();
+
+        return redirect()
+            ->route('superadmin.companies.index')
+            ->with('success', "Company \"{$name}\" deleted.");
     }
 
     public function pdf(Company $company, CompanyExportService $exports): Response

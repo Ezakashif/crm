@@ -35,7 +35,7 @@ class SuperAdminCompanyCsvPdfTest extends TestCase
         $response->sendContent();
         $content = ob_get_clean();
 
-        $this->assertStringContainsString('Name,Slug,Status', str_replace("\xEF\xBB\xBF", '', $content));
+        $this->assertStringContainsString('Name,Slug,Owner,"Owner Email",Plan,Status', str_replace("\xEF\xBB\xBF", '', $content));
         $this->assertStringContainsString('Export Co', $content);
     }
 

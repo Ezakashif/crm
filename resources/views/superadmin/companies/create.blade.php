@@ -5,8 +5,8 @@
 @section('subheading', 'Provision a tenant and optional first admin')
 
 @section('content')
-<div class="sa-card" style="max-width: 720px;">
-    <form method="POST" action="{{ route('superadmin.companies.store') }}">
+<div class="sa-card" style="max-width: 760px;">
+    <form method="POST" action="{{ route('superadmin.companies.store') }}" enctype="multipart/form-data">
         @csrf
 
         <div class="form-group">
@@ -14,18 +14,59 @@
             <input type="text" name="name" value="{{ old('name') }}" class="form-control" required>
         </div>
 
-        <div class="form-group">
-            <label>Slug <span class="sa-muted">(optional)</span></label>
-            <input type="text" name="slug" value="{{ old('slug') }}" class="form-control" placeholder="acme-crm">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Slug <span class="sa-muted">(optional)</span></label>
+                <input type="text" name="slug" value="{{ old('slug') }}" class="form-control" placeholder="acme-crm">
+            </div>
+            <div class="form-group col-md-6">
+                <label>Email</label>
+                <input type="email" name="email" value="{{ old('email') }}" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Phone</label>
+                <input type="text" name="phone" value="{{ old('phone') }}" class="form-control">
+            </div>
+            <div class="form-group col-md-6">
+                <label>Logo</label>
+                <input type="file" name="logo" class="form-control-file text-white">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label>Status</label>
+                <select name="status" class="custom-select" required>
+                    @foreach ($statuses as $value => $label)
+                        <option value="{{ $value }}" @selected(old('status', 'active') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label>Subscription</label>
+                <select name="subscription_status" class="custom-select" required>
+                    @foreach ($subscriptionStatuses as $value => $label)
+                        <option value="{{ $value }}" @selected(old('subscription_status', 'trial') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label>Plan</label>
+                <select name="plan_id" class="custom-select">
+                    <option value="">Default</option>
+                    @foreach ($plans as $plan)
+                        <option value="{{ $plan->id }}" @selected((string) old('plan_id') === (string) $plan->id)>{{ $plan->name }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
-            <label>Status</label>
-            <select name="status" class="custom-select" required>
-                @foreach ($statuses as $value => $label)
-                    <option value="{{ $value }}" @selected(old('status', 'active') === $value)>{{ $label }}</option>
-                @endforeach
-            </select>
+            <label>Trial ends at <span class="sa-muted">(optional)</span></label>
+            <input type="datetime-local" name="trial_ends_at" value="{{ old('trial_ends_at') }}" class="form-control">
         </div>
 
         <hr style="border-color: #1f2937;">

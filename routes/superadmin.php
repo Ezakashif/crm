@@ -1,16 +1,41 @@
 <?php
 
+use App\Http\Controllers\LeaveImpersonationController;
+use App\Http\Controllers\SuperAdmin\AnalyticsController;
 use App\Http\Controllers\SuperAdmin\CompanyController;
 use App\Http\Controllers\SuperAdmin\CompanyExportController;
 use App\Http\Controllers\SuperAdmin\CompanyImportController;
 use App\Http\Controllers\SuperAdmin\DashboardController;
+use App\Http\Controllers\SuperAdmin\ImpersonationController;
+use App\Http\Controllers\SuperAdmin\SearchController;
+use App\Http\Controllers\SuperAdmin\SettingsController;
+use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'active'])
+    ->post('impersonation/leave', [LeaveImpersonationController::class, 'store'])
+    ->name('impersonation.leave');
 
 Route::middleware(['auth', 'active', 'superadmin'])
     ->prefix('superadmin')
     ->name('superadmin.')
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('search', [SearchController::class, 'index'])->name('search.index');
+        Route::get('search/suggest', [SearchController::class, 'suggest'])
+            ->middleware('throttle:60,1')
+            ->name('search.suggest');
+
+        Route::get('analytics/companies', [AnalyticsController::class, 'companies'])
+            ->middleware('throttle:60,1')
+            ->name('analytics.companies');
+        Route::get('analytics/leads', [AnalyticsController::class, 'leads'])
+            ->middleware('throttle:60,1')
+            ->name('analytics.leads');
+        Route::get('analytics/customers', [AnalyticsController::class, 'customers'])
+            ->middleware('throttle:60,1')
+            ->name('analytics.customers');
 
         Route::get('companies/export', [CompanyExportController::class, 'csv'])
             ->middleware('throttle:30,1')
@@ -26,10 +51,21 @@ Route::middleware(['auth', 'active', 'superadmin'])
         Route::get('companies/import/sample', [CompanyImportController::class, 'sample'])
             ->name('companies.import.sample');
 
-        Route::resource('companies', CompanyController::class)->except(['destroy']);
+        Route::resource('companies', CompanyController::class);
         Route::patch('companies/{company}/status', [CompanyController::class, 'updateStatus'])
             ->name('companies.status');
         Route::get('companies/{company}/pdf', [CompanyController::class, 'pdf'])
             ->middleware('throttle:30,1')
             ->name('companies.pdf');
+        Route::post('companies/{company}/impersonate', [ImpersonationController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('companies.impersonate');
+
+        Route::get('super-admins', [SuperAdminUserController::class, 'index'])->name('super-admins.index');
+        Route::get('super-admins/create', [SuperAdminUserController::class, 'create'])->name('super-admins.create');
+        Route::post('super-admins', [SuperAdminUserController::class, 'store'])->name('super-admins.store');
+
+        Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::put('settings/announcement', [SettingsController::class, 'announcement'])->name('settings.announcement');
     });
