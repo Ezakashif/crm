@@ -4,6 +4,9 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -49,6 +52,44 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)->post('/logout');
 
         $this->assertGuest();
-        $response->assertRedirect('/');
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_logout_with_expired_session_redirects_to_login(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        // Simulate an expired / invalid CSRF token from a stale page.
+        $response = $this->post('/logout', ['_token' => 'stale-token']);
+
+        $this->assertGuest();
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_token_mismatch_redirects_to_login(): void
+    {
+        // CSRF is skipped during PHPUnit; exercise the 419 / session-expired handler.
+        Route::get('/__test/csrf-expired', function () {
+            throw new TokenMismatchException('CSRF token mismatch.');
+        })->middleware('web');
+
+        $response = $this->get('/__test/csrf-expired');
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('status');
+    }
+
+    public function test_http_419_redirects_to_login(): void
+    {
+        Route::get('/__test/page-expired', function () {
+            throw new HttpException(419, 'Page Expired');
+        })->middleware('web');
+
+        $response = $this->get('/__test/page-expired');
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('status');
     }
 }

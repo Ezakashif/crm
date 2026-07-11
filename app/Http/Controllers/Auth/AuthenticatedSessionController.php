@@ -41,14 +41,14 @@ class AuthenticatedSessionController extends Controller
     {
         if ($request->user()) {
             ActivityLogger::log('user.logout', $request->user());
+            Auth::guard('web')->logout();
         }
 
-        Auth::guard('web')->logout();
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return redirect('/');
+        return redirect()->route('login');
     }
 }
