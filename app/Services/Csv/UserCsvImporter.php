@@ -30,7 +30,13 @@ class UserCsvImporter
         $parsed = $this->reader->read($file);
         $result = new CsvImportResult;
         $seenEmails = [];
-        $rolesBySlug = Role::query()->pluck('id', 'slug');
+        $rolesBySlug = Role::withoutCompanyScope()
+            ->when(
+                $actor->company_id !== null,
+                fn ($query) => $query->where('company_id', $actor->company_id),
+                fn ($query) => $query->whereRaw('1 = 0'),
+            )
+            ->pluck('id', 'slug');
 
         foreach ($parsed['rows'] as $row) {
             $rowNumber = $row['row'];

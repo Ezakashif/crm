@@ -87,14 +87,20 @@ class CrmValidation
             ];
         }
 
+        $companyId = auth()->user()?->company_id;
+
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Password::defaults()],
             'roles' => ['required', 'array', 'min:1'],
-            'roles.*' => ['integer', 'exists:roles,id'],
+            'roles.*' => [
+                'integer',
+                Rule::exists('roles', 'id')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
             'status' => ['required', Rule::in(array_keys(User::STATUSES))],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
     }
 }
+

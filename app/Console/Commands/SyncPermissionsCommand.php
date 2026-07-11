@@ -23,9 +23,11 @@ class SyncPermissionsCommand extends Command
         $registrar->refreshGates();
 
         $count = $registry->allSlugs()->count();
+        $companies = \App\Models\Company::query()->count();
         $this->info("Synced {$count} permissions from registry.");
-        $this->info('Default roles updated. Only Administrator remains a system role.');
+        $this->info("Default roles updated for {$companies} company(ies). Only Administrator remains a system role.");
 
         return self::SUCCESS;
     }
 }
+

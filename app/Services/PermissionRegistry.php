@@ -108,7 +108,7 @@ class PermissionRegistry
             'permissions.manage' => ['view.roles', 'create.roles', 'update.roles', 'delete.roles'],
         ];
 
-        foreach (\App\Models\Role::with('permissions')->get() as $role) {
+        foreach (\App\Models\Role::withoutCompanyScope()->with('permissions')->get() as $role) {
             $newSlugs = collect();
 
             foreach ($role->permissions as $permission) {

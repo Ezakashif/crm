@@ -11,6 +11,7 @@ class Role extends Model
     use BelongsToCompany;
 
     protected $fillable = [
+        'company_id',
         'name',
         'slug',
         'description',

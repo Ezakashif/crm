@@ -116,6 +116,14 @@ trait HasRoles
      */
     public function syncRoles(array $roleIds): void
     {
+        if ($this->company_id !== null) {
+            $roleIds = Role::withoutCompanyScope()
+                ->where('company_id', $this->company_id)
+                ->whereIn('id', $roleIds)
+                ->pluck('id')
+                ->all();
+        }
+
         $this->roles()->sync($roleIds);
         $this->cachedPermissionSlugs = null;
         $this->syncLegacyRoleColumn();
@@ -126,10 +134,13 @@ trait HasRoles
      */
     public function syncRolesBySlug(array $slugs): void
     {
-        $roleIds = Role::query()
-            ->whereIn('slug', $slugs)
-            ->pluck('id')
-            ->all();
+        $query = Role::withoutCompanyScope()->whereIn('slug', $slugs);
+
+        if ($this->company_id !== null) {
+            $query->where('company_id', $this->company_id);
+        }
+
+        $roleIds = $query->pluck('id')->all();
 
         $this->syncRoles($roleIds);
     }
@@ -141,7 +152,13 @@ trait HasRoles
             default => 'sales',
         };
 
-        $role = Role::query()->where('slug', $slug)->first();
+        $query = Role::withoutCompanyScope()->where('slug', $slug);
+
+        if ($this->company_id !== null) {
+            $query->where('company_id', $this->company_id);
+        }
+
+        $role = $query->first();
 
         if ($role) {
             $this->roles()->syncWithoutDetaching([$role->id]);

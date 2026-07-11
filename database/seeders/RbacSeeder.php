@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission;
-use App\Models\Role;
+use App\Models\Company;
 use App\Services\PermissionRegistry;
 use App\Services\RbacRoleSynchronizer;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class RbacSeeder extends Seeder
 {
@@ -37,6 +37,24 @@ class RbacSeeder extends Seeder
     public function run(): void
     {
         app(PermissionRegistry::class)->sync();
-        app(RbacRoleSynchronizer::class)->syncDefaultRoles();
+
+        $synchronizer = app(RbacRoleSynchronizer::class);
+
+        // Historical migrations invoke this seeder before the companies table exists.
+        if (! Schema::hasTable('companies') || ! Schema::hasColumn('roles', 'company_id')) {
+            $synchronizer->syncDefaultRoles();
+
+            return;
+        }
+
+        $company = Company::query()->firstOrCreate(
+            ['slug' => Company::DEFAULT_SLUG],
+            [
+                'name' => 'Default Company',
+                'status' => Company::STATUS_ACTIVE,
+            ],
+        );
+
+        $synchronizer->syncDefaultRolesForCompany($company);
     }
 }

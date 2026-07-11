@@ -114,7 +114,10 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
             'roles' => ['required', 'array', 'min:1'],
-            'roles.*' => ['integer', 'exists:roles,id'],
+            'roles.*' => [
+                'integer',
+                Rule::exists('roles', 'id')->where(fn ($query) => $query->where('company_id', $request->user()->company_id)),
+            ],
             'status' => ['required', Rule::in(array_keys(self::STATUSES))],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ]);

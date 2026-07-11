@@ -50,9 +50,17 @@ class RoleController extends Controller
     {
         $this->authorize('create', Role::class);
 
+        $companyId = $request->user()->company_id;
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'slug' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:roles,slug'],
+            'slug' => [
+                'required',
+                'string',
+                'max:50',
+                'alpha_dash',
+                Rule::unique('roles', 'slug')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
             'description' => 'nullable|string|max:1000',
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'exists:permissions,id'],
@@ -87,9 +95,19 @@ class RoleController extends Controller
     {
         $this->authorize('update', $role);
 
+        $companyId = $request->user()->company_id;
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'slug' => ['required', 'string', 'max:50', 'alpha_dash', Rule::unique('roles', 'slug')->ignore($role->id)],
+            'slug' => [
+                'required',
+                'string',
+                'max:50',
+                'alpha_dash',
+                Rule::unique('roles', 'slug')
+                    ->where(fn ($query) => $query->where('company_id', $companyId))
+                    ->ignore($role->id),
+            ],
             'description' => 'nullable|string|max:1000',
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'exists:permissions,id'],
