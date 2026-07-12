@@ -794,26 +794,35 @@ body.crm-app .main-footer {
 
 /* ----- Platform logo branding ----- */
 body.crm-app .brand-link {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: flex-start;
-    min-height: 57px;
-    padding: 0.55rem 0.85rem !important;
+    min-height: 64px;
+    padding: 0.75rem 1rem !important;
+    overflow: hidden;
 }
 
 body.crm-app .brand-link .brand-image {
     float: none !important;
-    max-height: 36px !important;
-    max-width: 160px;
+    max-height: 40px !important;
+    max-width: 190px !important;
     width: auto !important;
     height: auto !important;
     margin: 0 !important;
+    padding: 0 !important;
     object-fit: contain;
     object-position: left center;
+    border-radius: 0 !important;
 }
 
 body.crm-app .brand-link .brand-text {
-    display: none;
+    display: none !important;
+}
+
+/* Collapsed sidebar: keep the mark readable */
+body.crm-app.sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .brand-link .brand-image {
+    max-width: 42px !important;
+    max-height: 42px !important;
 }
 
 body.login-page .login-logo,
@@ -834,6 +843,6 @@ body.register-page .register-logo img {
     height: auto !important;
     width: auto !important;
     max-height: 56px;
-    max-width: 240px;
+    max-width: 260px;
     object-fit: contain;
 }

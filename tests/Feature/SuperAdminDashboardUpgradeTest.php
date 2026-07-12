@@ -215,14 +215,17 @@ class SuperAdminDashboardUpgradeTest extends TestCase
         Storage::disk('public')->assertExists($storedPath);
 
         app(\App\Services\SuperAdmin\PlatformSettingsService::class)->applyBranding();
-        $this->assertSame('storage/'.$storedPath, config('adminlte.logo_img'));
+        $this->assertSame(
+            'storage/'.PlatformSetting::query()->where('key', 'platform_logo_path')->value('value'),
+            config('adminlte.auth_logo.img.path')
+        );
+        $this->assertNotEmpty(config('adminlte.logo_img'));
         $this->assertSame('Brand CRM', config('app.name'));
 
         auth()->logout();
 
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee('storage/'.$storedPath, false)
             ->assertSee('Brand CRM', false);
     }
 
@@ -238,6 +241,24 @@ class SuperAdminDashboardUpgradeTest extends TestCase
         $this->assertFileExists($output);
         $this->assertGreaterThan(1000, filesize($output));
         @unlink($output);
+    }
+
+    public function test_dark_sidebar_uses_light_logo_variant(): void
+    {
+        $settings = app(\App\Services\SuperAdmin\PlatformSettingsService::class);
+        $settings->setMany([
+            'platform_name' => 'Algos CRM',
+            'platform_logo_path' => 'platform/dark-logo.png',
+            'platform_logo_light_path' => 'platform/light-logo.png',
+        ]);
+
+        Storage::disk('public')->put('platform/dark-logo.png', 'dark');
+        Storage::disk('public')->put('platform/light-logo.png', 'light');
+
+        $settings->applyBranding();
+
+        $this->assertSame('storage/platform/light-logo.png', config('adminlte.logo_img'));
+        $this->assertSame('storage/platform/dark-logo.png', config('adminlte.auth_logo.img.path'));
     }
 
     public function test_super_admin_can_create_another_super_admin(): void

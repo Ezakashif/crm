@@ -73,43 +73,46 @@ class PlatformSettingsService
     /**
      * Public-relative path suitable for asset(), e.g. "storage/platform/logo.png".
      */
-    public function logoAssetPath(): ?string
+    public function logoAssetPath(?string $variant = null): ?string
     {
-        $path = $this->get('platform_logo_path');
+        if ($variant === 'light') {
+            $light = $this->get('platform_logo_light_path');
 
-        if (! filled($path)) {
-            return null;
+            if (filled($light)) {
+                return 'storage/'.ltrim((string) $light, '/');
+            }
+
+            if (is_file(public_path('branding/algos-logo-light.png'))) {
+                return 'branding/algos-logo-light.png';
+            }
         }
 
-        return 'storage/'.ltrim((string) $path, '/');
+        $path = $this->get('platform_logo_path');
+
+        if (filled($path)) {
+            return 'storage/'.ltrim((string) $path, '/');
+        }
+
+        if (is_file(public_path('branding/algos-logo.png'))) {
+            return 'branding/algos-logo.png';
+        }
+
+        return null;
     }
 
     public function logoUrl(?string $variant = null): ?string
     {
-        $path = null;
+        $assetPath = $this->logoAssetPath($variant === 'light' ? 'light' : null);
 
-        if ($variant === 'light') {
-            $path = $this->get('platform_logo_light_path') ?: null;
-            if (! filled($path) && is_file(public_path('branding/algos-logo-light.png'))) {
-                $version = (string) filemtime(public_path('branding/algos-logo-light.png'));
-
-                return asset('branding/algos-logo-light.png').'?v='.$version;
-            }
+        // Fall back to the primary logo when a light variant is requested but missing.
+        if ($assetPath === null && $variant === 'light') {
+            $assetPath = $this->logoAssetPath();
         }
 
-        $path ??= $this->get('platform_logo_path');
-
-        if (! filled($path)) {
-            if (is_file(public_path('branding/algos-logo.png'))) {
-                $version = (string) filemtime(public_path('branding/algos-logo.png'));
-
-                return asset('branding/algos-logo.png').'?v='.$version;
-            }
-
+        if ($assetPath === null) {
             return null;
         }
 
-        $assetPath = 'storage/'.ltrim((string) $path, '/');
         $absolute = public_path($assetPath);
         $version = is_file($absolute) ? (string) filemtime($absolute) : (string) time();
 
@@ -122,7 +125,11 @@ class PlatformSettingsService
     public function applyBranding(): void
     {
         $name = e($this->platformName());
-        $logoPath = $this->logoAssetPath();
+
+        // CRM sidebar is dark (`sidebar-dark-primary`) — use the light logo there.
+        // Login screens are light — use the primary/dark-ink logo.
+        $sidebarLogo = $this->logoAssetPath('light') ?: $this->logoAssetPath();
+        $authLogo = $this->logoAssetPath() ?: $sidebarLogo;
 
         config([
             'app.name' => $this->platformName(),
@@ -130,13 +137,13 @@ class PlatformSettingsService
             'adminlte.logo_img_alt' => $this->platformName(),
         ]);
 
-        if ($logoPath !== null) {
+        if ($sidebarLogo !== null) {
             config([
-                'adminlte.logo_img' => $logoPath,
+                'adminlte.logo_img' => $sidebarLogo,
                 'adminlte.logo_img_class' => 'brand-image',
                 'adminlte.logo' => '',
                 'adminlte.auth_logo.enabled' => true,
-                'adminlte.auth_logo.img.path' => $logoPath,
+                'adminlte.auth_logo.img.path' => $authLogo,
                 'adminlte.auth_logo.img.alt' => $this->platformName(),
                 'adminlte.auth_logo.img.class' => '',
                 'adminlte.auth_logo.img.width' => null,
