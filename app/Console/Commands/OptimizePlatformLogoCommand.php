@@ -21,7 +21,16 @@ class OptimizePlatformLogoCommand extends Command
 
         if ($this->option('force-packaged') || blank($current) || ! Storage::disk('public')->exists((string) $current)) {
             $path = $processor->storePackagedAsset((string) $this->option('packaged'));
-            $settings->setMany(['platform_logo_path' => $path]);
+            $lightPath = null;
+
+            if (is_file(public_path('branding/algos-logo-light.png'))) {
+                $lightPath = $processor->storePackagedAsset('branding/algos-logo-light.png');
+            }
+
+            $settings->setMany(array_filter([
+                'platform_logo_path' => $path,
+                'platform_logo_light_path' => $lightPath,
+            ]));
             $settings->applyBranding();
             $this->info("Installed packaged logo at [{$path}].");
 

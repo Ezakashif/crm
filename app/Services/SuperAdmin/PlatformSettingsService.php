@@ -84,18 +84,36 @@ class PlatformSettingsService
         return 'storage/'.ltrim((string) $path, '/');
     }
 
-    public function logoUrl(): ?string
+    public function logoUrl(?string $variant = null): ?string
     {
-        $path = $this->logoAssetPath();
+        $path = null;
 
-        if ($path === null) {
+        if ($variant === 'light') {
+            $path = $this->get('platform_logo_light_path') ?: null;
+            if (! filled($path) && is_file(public_path('branding/algos-logo-light.png'))) {
+                $version = (string) filemtime(public_path('branding/algos-logo-light.png'));
+
+                return asset('branding/algos-logo-light.png').'?v='.$version;
+            }
+        }
+
+        $path ??= $this->get('platform_logo_path');
+
+        if (! filled($path)) {
+            if (is_file(public_path('branding/algos-logo.png'))) {
+                $version = (string) filemtime(public_path('branding/algos-logo.png'));
+
+                return asset('branding/algos-logo.png').'?v='.$version;
+            }
+
             return null;
         }
 
-        $absolute = public_path($path);
+        $assetPath = 'storage/'.ltrim((string) $path, '/');
+        $absolute = public_path($assetPath);
         $version = is_file($absolute) ? (string) filemtime($absolute) : (string) time();
 
-        return asset($path).'?v='.$version;
+        return asset($assetPath).'?v='.$version;
     }
 
     /**

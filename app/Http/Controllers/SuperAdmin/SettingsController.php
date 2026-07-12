@@ -23,7 +23,7 @@ class SettingsController extends Controller
     {
         return view('superadmin.settings.edit', [
             'settings' => $this->settings->all(),
-            'logoUrl' => $this->settings->logoUrl(),
+            'logoUrl' => $this->settings->logoUrl('light') ?: $this->settings->logoUrl(),
         ]);
     }
 

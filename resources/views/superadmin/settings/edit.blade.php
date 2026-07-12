@@ -28,7 +28,7 @@
                         </label>
                     @endif
                     <input type="file" name="platform_logo" class="form-control-file text-white">
-                    <small class="sa-muted d-block mt-1">PNG/JPG/SVG accepted. Black or white backgrounds are removed automatically and the logo is cropped to fit the CRM.</small>
+                    <small class="sa-muted d-block mt-1">PNG/JPG/SVG accepted. Backgrounds are removed automatically. Tip: run <code>php artisan platform:optimize-logo --force-packaged</code> to install the official Algos logo.</small>
                 </div>
 
                 <div class="form-row">

@@ -55,8 +55,6 @@
             max-height: 72px;
             object-fit: contain;
             object-position: center center;
-            /* Packaged/processed logos are dark ink; invert for the dark Super Admin shell. */
-            filter: invert(1);
         }
         .sa-logo-preview {
             display: flex;
@@ -76,7 +74,6 @@
             height: auto;
             max-height: 88px;
             object-fit: contain;
-            filter: invert(1);
         }
         .sa-nav a {
             display: block;
@@ -180,7 +177,7 @@
         @endphp
         <div class="sa-brand">
             @if ($platformLogo)
-                <img src="{{ $platformLogo }}" alt="{{ $platformSettings->platformName() }}" class="sa-brand-logo">
+                <img src="{{ $platformSettings->logoUrl('light') ?: $platformLogo }}" alt="{{ $platformSettings->platformName() }}" class="sa-brand-logo">
             @else
                 <div class="sa-brand-text">{{ $platformSettings->platformName() }} <span>Platform</span></div>
             @endif
