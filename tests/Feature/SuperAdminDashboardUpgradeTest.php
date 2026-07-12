@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Services\SuperAdmin\ImpersonationService;
 use Database\Seeders\RbacSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SuperAdminDashboardUpgradeTest extends TestCase
@@ -184,6 +186,43 @@ class SuperAdminDashboardUpgradeTest extends TestCase
 
         $this->assertSame('Acme Platform', PlatformSetting::query()->where('key', 'platform_name')->value('value'));
         $this->assertSame('21', PlatformSetting::query()->where('key', 'trial_duration_days')->value('value'));
+    }
+
+    public function test_platform_logo_is_applied_to_login_and_crm_branding(): void
+    {
+        $superAdmin = User::factory()->superAdmin()->create();
+        Storage::fake('public');
+
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+        $tmp = tempnam(sys_get_temp_dir(), 'logo');
+        file_put_contents($tmp, $png);
+        $logo = new UploadedFile($tmp, 'brand.png', 'image/png', null, true);
+
+        $this->actingAs($superAdmin)
+            ->put(route('superadmin.settings.update'), [
+                'platform_name' => 'Brand CRM',
+                'default_timezone' => 'UTC',
+                'default_currency' => 'USD',
+                'trial_duration_days' => 14,
+                'default_company_status' => 'active',
+                'platform_logo' => $logo,
+            ])
+            ->assertRedirect();
+
+        $storedPath = PlatformSetting::query()->where('key', 'platform_logo_path')->value('value');
+        $this->assertNotEmpty($storedPath);
+        Storage::disk('public')->assertExists($storedPath);
+
+        app(\App\Services\SuperAdmin\PlatformSettingsService::class)->applyBranding();
+        $this->assertSame('storage/'.$storedPath, config('adminlte.logo_img'));
+        $this->assertSame('Brand CRM', config('app.name'));
+
+        auth()->logout();
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('storage/'.$storedPath, false)
+            ->assertSee('Brand CRM', false);
     }
 
     public function test_super_admin_can_create_another_super_admin(): void

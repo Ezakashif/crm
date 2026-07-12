@@ -4,7 +4,6 @@ namespace App\Services\SuperAdmin;
 
 use App\Models\PlatformSetting;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 
 class PlatformSettingsService
 {
@@ -71,7 +70,10 @@ class PlatformSettingsService
         return (string) ($this->get('platform_name') ?: config('app.name'));
     }
 
-    public function logoUrl(): ?string
+    /**
+     * Public-relative path suitable for asset(), e.g. "storage/platform/logo.png".
+     */
+    public function logoAssetPath(): ?string
     {
         $path = $this->get('platform_logo_path');
 
@@ -79,7 +81,46 @@ class PlatformSettingsService
             return null;
         }
 
-        return Storage::disk('public')->url($path);
+        return 'storage/'.ltrim((string) $path, '/');
+    }
+
+    public function logoUrl(): ?string
+    {
+        $path = $this->logoAssetPath();
+
+        if ($path === null) {
+            return null;
+        }
+
+        return asset($path);
+    }
+
+    /**
+     * Apply platform name/logo to AdminLTE (CRM sidebar, login) and app.name.
+     */
+    public function applyBranding(): void
+    {
+        $name = e($this->platformName());
+        $logoPath = $this->logoAssetPath();
+
+        config([
+            'app.name' => $this->platformName(),
+            'adminlte.logo' => '<b>'.$name.'</b>',
+            'adminlte.logo_img_alt' => $this->platformName(),
+        ]);
+
+        if ($logoPath !== null) {
+            config([
+                'adminlte.logo_img' => $logoPath,
+                'adminlte.logo_img_class' => 'brand-image',
+                'adminlte.auth_logo.enabled' => true,
+                'adminlte.auth_logo.img.path' => $logoPath,
+                'adminlte.auth_logo.img.alt' => $this->platformName(),
+                'adminlte.auth_logo.img.class' => '',
+                'adminlte.auth_logo.img.width' => 50,
+                'adminlte.auth_logo.img.height' => 50,
+            ]);
+        }
     }
 
     public function announcement(): ?string

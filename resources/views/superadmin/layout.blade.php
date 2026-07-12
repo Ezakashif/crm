@@ -136,7 +136,13 @@
 <body>
 <div class="sa-shell">
     <aside class="sa-nav">
-        <div class="sa-brand">{{ config('app.name') }} <span>Platform</span></div>
+        <div class="sa-brand d-flex align-items-center">
+            @php($platformLogo = app(\App\Services\SuperAdmin\PlatformSettingsService::class)->logoUrl())
+            @if ($platformLogo)
+                <img src="{{ $platformLogo }}" alt="" style="height:28px;width:auto;margin-right:0.5rem;border-radius:0.25rem;">
+            @endif
+            <span>{{ app(\App\Services\SuperAdmin\PlatformSettingsService::class)->platformName() }} <span>Platform</span></span>
+        </div>
         <a href="{{ route('superadmin.dashboard') }}" class="{{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
             <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
         </a>

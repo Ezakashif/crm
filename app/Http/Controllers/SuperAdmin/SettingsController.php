@@ -35,6 +35,7 @@ class SettingsController extends Controller
         }
 
         if ($request->hasFile('platform_logo')) {
+            $this->ensurePublicStorageLink();
             $this->deleteLogo();
             $validated['platform_logo_path'] = $request->file('platform_logo')->store('platform', 'public');
         }
@@ -55,6 +56,8 @@ class SettingsController extends Controller
                 ? $validated['platform_logo_path']
                 : $this->settings->get('platform_logo_path'),
         ]);
+
+        $this->settings->applyBranding();
 
         ActivityLogger::log('platform.settings_updated', null, [
             'keys' => array_keys($validated),
@@ -87,5 +90,21 @@ class SettingsController extends Controller
         if (filled($path) && Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
         }
+    }
+
+    private function ensurePublicStorageLink(): void
+    {
+        $link = public_path('storage');
+        $target = storage_path('app/public');
+
+        if (file_exists($link) || is_link($link)) {
+            return;
+        }
+
+        if (! is_dir($target)) {
+            mkdir($target, 0755, true);
+        }
+
+        symlink($target, $link);
     }
 }

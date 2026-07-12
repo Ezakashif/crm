@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Services\PermissionRegistrar;
+use App\Services\SuperAdmin\PlatformSettingsService;
 use App\Support\CurrentCompany;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
-use App\Services\PermissionRegistrar;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,5 +35,20 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(config('website_leads.rate_limit', 10))
                 ->by($request->ip());
         });
+
+        $this->applyPlatformBranding();
+    }
+
+    private function applyPlatformBranding(): void
+    {
+        try {
+            if (! Schema::hasTable('platform_settings')) {
+                return;
+            }
+
+            app(PlatformSettingsService::class)->applyBranding();
+        } catch (\Throwable) {
+            // Ignore during early bootstrap / migrate when DB is unavailable.
+        }
     }
 }

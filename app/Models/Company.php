@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class Company extends Model
 {
@@ -139,7 +138,7 @@ class Company extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->logo_path);
+        return asset('storage/'.ltrim($this->logo_path, '/'));
     }
 
     public function scopeActive(Builder $query): Builder
