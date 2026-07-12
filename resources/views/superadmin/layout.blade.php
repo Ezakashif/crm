@@ -51,10 +51,12 @@
             display: block;
             width: 100%;
             height: auto;
-            min-height: 56px;
-            max-height: 96px;
+            min-height: 42px;
+            max-height: 72px;
             object-fit: contain;
             object-position: center center;
+            /* Packaged/processed logos are dark ink; invert for the dark Super Admin shell. */
+            filter: invert(1);
         }
         .sa-logo-preview {
             display: flex;
@@ -72,8 +74,9 @@
             width: auto;
             max-width: 100%;
             height: auto;
-            max-height: 110px;
+            max-height: 88px;
             object-fit: contain;
+            filter: invert(1);
         }
         .sa-nav a {
             display: block;

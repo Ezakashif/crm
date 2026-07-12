@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SuperAdmin\UpdatePlatformSettingsRequest;
 use App\Services\ActivityLogger;
+use App\Services\SuperAdmin\PlatformLogoProcessor;
 use App\Services\SuperAdmin\PlatformSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ class SettingsController extends Controller
 {
     public function __construct(
         protected PlatformSettingsService $settings,
+        protected PlatformLogoProcessor $logoProcessor,
     ) {}
 
     public function edit(): View
@@ -37,7 +39,9 @@ class SettingsController extends Controller
         if ($request->hasFile('platform_logo')) {
             $this->ensurePublicStorageLink();
             $this->deleteLogo();
-            $validated['platform_logo_path'] = $request->file('platform_logo')->store('platform', 'public');
+            $validated['platform_logo_path'] = $this->logoProcessor->storeProcessed(
+                $request->file('platform_logo')
+            );
         }
 
         unset($validated['platform_logo'], $validated['remove_logo']);

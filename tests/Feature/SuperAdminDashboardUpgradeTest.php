@@ -211,6 +211,7 @@ class SuperAdminDashboardUpgradeTest extends TestCase
 
         $storedPath = PlatformSetting::query()->where('key', 'platform_logo_path')->value('value');
         $this->assertNotEmpty($storedPath);
+        $this->assertStringEndsWith('.png', $storedPath);
         Storage::disk('public')->assertExists($storedPath);
 
         app(\App\Services\SuperAdmin\PlatformSettingsService::class)->applyBranding();
@@ -223,6 +224,20 @@ class SuperAdminDashboardUpgradeTest extends TestCase
             ->assertOk()
             ->assertSee('storage/'.$storedPath, false)
             ->assertSee('Brand CRM', false);
+    }
+
+    public function test_platform_logo_processor_removes_black_background(): void
+    {
+        $source = base_path('public/branding/algos-logo.png');
+        $this->assertFileExists($source);
+
+        $output = sys_get_temp_dir().'/processed-logo-test.png';
+        app(\App\Services\SuperAdmin\PlatformLogoProcessor::class)
+            ->processToTransparentPng($source, $output);
+
+        $this->assertFileExists($output);
+        $this->assertGreaterThan(1000, filesize($output));
+        @unlink($output);
     }
 
     public function test_super_admin_can_create_another_super_admin(): void
