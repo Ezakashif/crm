@@ -113,12 +113,13 @@ class PlatformSettingsService
             config([
                 'adminlte.logo_img' => $logoPath,
                 'adminlte.logo_img_class' => 'brand-image',
+                'adminlte.logo' => '',
                 'adminlte.auth_logo.enabled' => true,
                 'adminlte.auth_logo.img.path' => $logoPath,
                 'adminlte.auth_logo.img.alt' => $this->platformName(),
                 'adminlte.auth_logo.img.class' => '',
-                'adminlte.auth_logo.img.width' => 50,
-                'adminlte.auth_logo.img.height' => 50,
+                'adminlte.auth_logo.img.width' => null,
+                'adminlte.auth_logo.img.height' => 56,
             ]);
         }
     }

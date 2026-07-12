@@ -20,7 +20,9 @@
                 <div class="form-group">
                     <label>Platform logo</label>
                     @if ($logoUrl)
-                        <div class="mb-2"><img src="{{ $logoUrl }}" alt="" style="height:48px;"></div>
+                        <div class="mb-2">
+                            <img src="{{ $logoUrl }}" alt="Platform logo" style="max-height:72px;max-width:220px;width:auto;height:auto;object-fit:contain;">
+                        </div>
                         <label class="sa-muted small d-block mb-2">
                             <input type="checkbox" name="remove_logo" value="1"> Remove logo
                         </label>
