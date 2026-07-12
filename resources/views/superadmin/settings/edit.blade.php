@@ -20,14 +20,15 @@
                 <div class="form-group">
                     <label>Platform logo</label>
                     @if ($logoUrl)
-                        <div class="mb-2">
-                            <img src="{{ $logoUrl }}" alt="Platform logo" style="max-height:72px;max-width:220px;width:auto;height:auto;object-fit:contain;">
+                        <div class="sa-logo-preview">
+                            <img src="{{ $logoUrl }}" alt="Platform logo">
                         </div>
                         <label class="sa-muted small d-block mb-2">
                             <input type="checkbox" name="remove_logo" value="1"> Remove logo
                         </label>
                     @endif
                     <input type="file" name="platform_logo" class="form-control-file text-white">
+                    <small class="sa-muted d-block mt-1">Use a wide wordmark or square mark. SVG/PNG with transparent background works best.</small>
                 </div>
 
                 <div class="form-row">

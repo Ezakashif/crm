@@ -92,7 +92,10 @@ class PlatformSettingsService
             return null;
         }
 
-        return asset($path);
+        $absolute = public_path($path);
+        $version = is_file($absolute) ? (string) filemtime($absolute) : (string) time();
+
+        return asset($path).'?v='.$version;
     }
 
     /**

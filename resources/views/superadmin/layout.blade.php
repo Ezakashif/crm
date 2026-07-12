@@ -26,30 +26,54 @@
         }
         .sa-shell { display: flex; min-height: 100vh; }
         .sa-nav {
-            width: 240px;
+            width: 260px;
             background: rgba(15, 23, 42, 0.95);
             border-right: 1px solid var(--sa-border);
-            padding: 1.5rem 1rem;
+            padding: 1.25rem 1rem 1.5rem;
             flex-shrink: 0;
         }
         .sa-brand {
-            margin-bottom: 1.5rem;
+            margin: 0 0 1.25rem;
+            padding: 0.85rem 0.75rem;
+            border: 1px solid var(--sa-border);
+            border-radius: 0.75rem;
+            background: rgba(2, 6, 23, 0.55);
             color: #fff;
         }
         .sa-brand-text {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 700;
             letter-spacing: 0.02em;
+            line-height: 1.25;
         }
         .sa-brand-text span { color: var(--sa-accent); }
         .sa-brand-logo {
             display: block;
             width: 100%;
-            max-width: 180px;
             height: auto;
-            max-height: 64px;
+            min-height: 56px;
+            max-height: 96px;
             object-fit: contain;
-            object-position: left center;
+            object-position: center center;
+        }
+        .sa-logo-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+            padding: 1.5rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--sa-border);
+            border-radius: 0.75rem;
+            background: #020617;
+        }
+        .sa-logo-preview img {
+            display: block;
+            width: auto;
+            max-width: 100%;
+            height: auto;
+            max-height: 110px;
+            object-fit: contain;
         }
         .sa-nav a {
             display: block;
