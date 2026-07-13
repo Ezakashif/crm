@@ -65,6 +65,8 @@ class SettingsController extends Controller
 
         ActivityLogger::log('platform.settings_updated', null, [
             'keys' => array_keys($validated),
+            'registration_enabled' => $request->boolean('registration_enabled'),
+            'maintenance_mode' => $request->boolean('maintenance_mode'),
         ]);
 
         return back()->with('success', 'Platform settings saved.');

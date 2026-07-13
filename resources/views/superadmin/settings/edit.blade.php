@@ -69,13 +69,17 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="custom-control custom-checkbox mb-2">
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="hidden" name="registration_enabled" value="0">
                         <input type="checkbox" class="custom-control-input" id="registration_enabled" name="registration_enabled" value="1" @checked(old('registration_enabled', ($settings['registration_enabled'] ?? '0') === '1'))>
                         <label class="custom-control-label" for="registration_enabled">Registration enabled</label>
+                        <div class="sa-muted small mt-1">When on, visitors can open <code>/register</code> and create a new company workspace.</div>
                     </div>
                     <div class="custom-control custom-checkbox">
+                        <input type="hidden" name="maintenance_mode" value="0">
                         <input type="checkbox" class="custom-control-input" id="maintenance_mode" name="maintenance_mode" value="1" @checked(old('maintenance_mode', ($settings['maintenance_mode'] ?? '0') === '1'))>
                         <label class="custom-control-label" for="maintenance_mode">Maintenance mode</label>
+                        <div class="sa-muted small mt-1">When on, tenant users are blocked from the CRM. Super Admins can still use this panel.</div>
                     </div>
                 </div>
 

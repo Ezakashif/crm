@@ -24,6 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'company' => \App\Http\Middleware\EnsureCompanyContext::class,
             'superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'website-lead-webhook' => \App\Http\Middleware\VerifyWebsiteLeadWebhook::class,
+            'registration.enabled' => \App\Http\Middleware\EnsurePlatformRegistrationEnabled::class,
+        ]);
+
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\EnsurePlatformNotInMaintenance::class,
         ]);
 
         // Resolve tenant context before route-model binding so CompanyScope applies.

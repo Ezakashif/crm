@@ -15,9 +15,17 @@ class PlatformSettingsService
     public function all(): array
     {
         return Cache::remember(self::CACHE_KEY, 300, function () {
-            return PlatformSetting::query()
-                ->pluck('value', 'key')
-                ->all();
+            try {
+                if (! \Illuminate\Support\Facades\Schema::hasTable('platform_settings')) {
+                    return [];
+                }
+
+                return PlatformSetting::query()
+                    ->pluck('value', 'key')
+                    ->all();
+            } catch (\Throwable) {
+                return [];
+            }
         });
     }
 
@@ -150,6 +158,10 @@ class PlatformSettingsService
                 'adminlte.auth_logo.img.height' => 56,
             ]);
         }
+
+        config([
+            'adminlte.register_url' => $this->getBool('registration_enabled') ? 'register' : false,
+        ]);
     }
 
     public function announcement(): ?string
