@@ -61,7 +61,7 @@ class CustomerTimelineTest extends TestCase
         $response = $this->actingAs($user)->get(route('customers.show', $customer));
 
         $response->assertOk()
-            ->assertSee('Customer Timeline')
+            ->assertSee('Customer timeline')
             ->assertSee('Customer Created')
             ->assertSee('Lead Converted')
             ->assertSee('Lead Assigned')

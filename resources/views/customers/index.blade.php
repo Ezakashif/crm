@@ -1,41 +1,37 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h1 class="crm-page-title">Customers</h1>
-                <span class="crm-page-subtitle">Accounts converted from won leads and direct adds.</span>
-            </div>
-            <div class="crm-header-actions mt-2 mt-md-0">
+        <x-page-header
+            title="Customers"
+            subtitle="Accounts converted from won leads and direct adds."
+            :breadcrumbs="[
+                ['label' => 'Home', 'url' => route('dashboard')],
+                ['label' => 'Customers'],
+            ]"
+        >
+            <x-slot:actions>
                 @can('viewAny', App\Models\Customer::class)
                     <a href="{{ route('exports.customers', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-file-download"></i> Export CSV
+                        <i class="fas fa-file-download" aria-hidden="true"></i> Export CSV
                     </a>
                 @endcan
                 @can('create', App\Models\Customer::class)
                     <a href="{{ route('imports.create', 'customers') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-file-upload"></i> Import CSV
+                        <i class="fas fa-file-upload" aria-hidden="true"></i> Import CSV
                     </a>
                     <a href="{{ route('customers.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Add Customer
+                        <i class="fas fa-plus" aria-hidden="true"></i> Add Customer
                     </a>
                 @endcan
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-page-header>
     </x-slot>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('import_errors'))
-        <div class="alert alert-warning alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
+    @if (session('import_errors'))
+        <div class="alert alert-warning alert-dismissible crm-keep-alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Dismiss">&times;</button>
             <strong>Import notes</strong>
             <ul class="mb-0 mt-2">
-                @foreach(session('import_errors') as $error)
+                @foreach (session('import_errors') as $error)
                     <li>Row {{ $error['row'] }}: {{ $error['message'] }}</li>
                 @endforeach
             </ul>
@@ -59,75 +55,95 @@
         </div>
     </x-list-filters>
 
+    @php
+        $hasFilters = collect($filters ?? [])->filter(fn ($value) => filled($value))->isNotEmpty();
+        $canCreateCustomer = auth()->user()->can('create', App\Models\Customer::class);
+    @endphp
+
     <div class="card">
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Company</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($customers as $customer)
-                        <tr>
-                            <td>
-                                @can('view', $customer)
-                                    <a href="{{ route('customers.show', $customer) }}">{{ $customer->name }}</a>
-                                @else
-                                    {{ $customer->name }}
-                                @endcan
-                            </td>
-                            <td>{{ $customer->email ?? '—' }}</td>
-                            <td>{{ $customer->phone ?? '—' }}</td>
-                            <td>{{ $customer->company_name ?? '—' }}</td>
-                            <td>
-                                <span class="badge badge-{{ $customer->status === 'active' ? 'success' : 'secondary' }}">
-                                    {{ ucfirst($customer->status) }}
-                                </span>
-                            </td>
-                            <td>
-                                @can('view', $customer)
-                                    <a href="{{ route('customers.show', $customer) }}" class="btn btn-xs btn-primary" title="View">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                @endcan
-                                @can('update', $customer)
-                                    <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-info" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                @endcan
-                                @can('delete', $customer)
-                                    <form method="POST" action="{{ route('customers.destroy', $customer) }}" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-danger"
-                                                title="Delete"
-                                                onclick="return confirm('Delete this customer?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                @endcan
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center text-muted">
-                                {{ collect($filters ?? [])->filter(fn ($v) => filled($v))->isNotEmpty() ? 'No customers match your filters.' : 'No customers yet.' }}
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if($customers->hasPages())
-            <div class="card-footer clearfix">
-                {{ $customers->links() }}
+        @if ($customers->isEmpty())
+            <div class="card-body">
+                <x-empty-state
+                    class="crm-empty--compact"
+                    icon="fas fa-building"
+                    :title="$hasFilters ? 'No customers match your filters' : 'No customers yet'"
+                    :description="$hasFilters
+                        ? 'Try clearing filters or broadening your search.'
+                        : 'Convert a won lead or add a customer to get started.'"
+                    :action-url="$hasFilters ? route('customers.index') : ($canCreateCustomer ? route('customers.create') : null)"
+                    :action-label="$hasFilters ? 'Clear filters' : ($canCreateCustomer ? 'Add customer' : null)"
+                />
             </div>
+        @else
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Company</th>
+                            <th>Status</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($customers as $customer)
+                            <tr>
+                                <td>
+                                    @can('view', $customer)
+                                        <a href="{{ route('customers.show', $customer) }}">{{ $customer->name }}</a>
+                                    @else
+                                        {{ $customer->name }}
+                                    @endcan
+                                </td>
+                                <td>{{ $customer->email ?? '—' }}</td>
+                                <td>{{ $customer->phone ?? '—' }}</td>
+                                <td>{{ $customer->company_name ?? '—' }}</td>
+                                <td>
+                                    <span class="badge badge-{{ $customer->status === 'active' ? 'success' : 'secondary' }}">
+                                        {{ ucfirst($customer->status) }}
+                                    </span>
+                                </td>
+                                <td class="text-right text-nowrap">
+                                    @can('view', $customer)
+                                        <a href="{{ route('customers.show', $customer) }}" class="btn btn-xs btn-primary" title="View" aria-label="View {{ $customer->name }}">
+                                            <i class="fas fa-eye" aria-hidden="true"></i>
+                                        </a>
+                                    @endcan
+                                    @can('update', $customer)
+                                        <a href="{{ route('customers.edit', $customer) }}" class="btn btn-xs btn-default" title="Edit" aria-label="Edit {{ $customer->name }}">
+                                            <i class="fas fa-edit" aria-hidden="true"></i>
+                                        </a>
+                                    @endcan
+                                    @can('delete', $customer)
+                                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button
+                                                type="submit"
+                                                class="btn btn-xs btn-danger"
+                                                title="Delete"
+                                                aria-label="Delete {{ $customer->name }}"
+                                                data-crm-confirm="Delete this customer? This cannot be undone."
+                                                data-crm-confirm-title="Delete customer"
+                                                data-crm-confirm-label="Delete"
+                                            >
+                                                <i class="fas fa-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    @endcan
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @if ($customers->hasPages())
+                <div class="card-footer clearfix">
+                    {{ $customers->links() }}
+                </div>
+            @endif
         @endif
     </div>
 </x-app-layout>
