@@ -1,28 +1,34 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h1 class="crm-page-title">Tasks</h1>
-                <span class="crm-page-subtitle">Organize work across pending, active, and done.</span>
-            </div>
-            <div class="crm-header-actions mt-2 mt-md-0">
+        <x-page-header
+            title="Tasks"
+            subtitle="Organize work across pending, active, and done."
+            :breadcrumbs="[
+                ['label' => 'Home', 'url' => route('dashboard')],
+                ['label' => 'Tasks'],
+            ]"
+        >
+            <x-slot:actions>
                 @can('viewAny', App\Models\Task::class)
                     <a href="{{ route('exports.tasks', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-file-download"></i> Export CSV
+                        <i class="fas fa-file-download" aria-hidden="true"></i> Export CSV
                     </a>
                 @endcan
                 @can('create', App\Models\Task::class)
                     <a href="{{ route('tasks.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Add Task
+                        <i class="fas fa-plus" aria-hidden="true"></i> Add Task
                     </a>
                 @endcan
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-page-header>
     </x-slot>
 
-    @if(! empty($boardTruncated))
-        <div class="alert alert-warning">
-            Showing the first {{ \App\Models\Task::BOARD_CARD_LIMIT }} tasks. Narrow filters to see the rest.
+    @if (! empty($boardTruncated))
+        <div class="crm-banner crm-banner--warning crm-keep-alert mb-3" role="status">
+            <div class="crm-banner__icon" aria-hidden="true"><i class="fas fa-filter"></i></div>
+            <div class="crm-banner__body">
+                Showing the first {{ \App\Models\Task::BOARD_CARD_LIMIT }} tasks. Narrow filters to see the rest.
+            </div>
         </div>
     @endif
 
@@ -35,6 +41,8 @@
         ];
         $canDragTasks = auth()->user()->hasPermission('update.tasks')
             || auth()->user()->hasPermission('change_status.tasks');
+        $hasFilters = collect($filters ?? [])->filter(fn ($value) => filled($value))->isNotEmpty();
+        $canCreateTask = auth()->user()->can('create', App\Models\Task::class);
     @endphp
 
     <x-list-filters :reset-url="route('tasks.index')">
@@ -48,7 +56,7 @@
             <label for="status" class="small text-muted mb-1">Status</label>
             <select id="status" name="status" class="form-control form-control-sm">
                 <option value="">All statuses</option>
-                @foreach($statuses as $value => $label)
+                @foreach ($statuses as $value => $label)
                     <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
                 @endforeach
             </select>
@@ -57,18 +65,18 @@
             <label for="priority" class="small text-muted mb-1">Priority</label>
             <select id="priority" name="priority" class="form-control form-control-sm">
                 <option value="">All priorities</option>
-                @foreach($priorities as $value => $label)
+                @foreach ($priorities as $value => $label)
                     <option value="{{ $value }}" @selected(($filters['priority'] ?? '') === $value)>{{ $label }}</option>
                 @endforeach
             </select>
         </div>
-        @if(auth()->user()->canViewAllTasks())
+        @if (auth()->user()->canViewAllTasks())
             <div class="col-md-3 mb-2">
-                <label for="assigned_to" class="small text-muted mb-1">Assigned To</label>
+                <label for="assigned_to" class="small text-muted mb-1">Assigned to</label>
                 <select id="assigned_to" name="assigned_to" class="form-control form-control-sm">
                     <option value="">Anyone</option>
                     <option value="unassigned" @selected(($filters['assigned_to'] ?? '') === 'unassigned')>Unassigned</option>
-                    @foreach($users as $user)
+                    @foreach ($users as $user)
                         <option value="{{ $user->id }}" @selected(($filters['assigned_to'] ?? '') == $user->id)>
                             {{ $user->name }}
                         </option>
@@ -78,73 +86,104 @@
         @endif
     </x-list-filters>
 
-    @if($tasks->isEmpty())
-        <div class="alert alert-info">
-            {{ collect($filters ?? [])->filter(fn ($v) => filled($v))->isNotEmpty() ? 'No tasks match your filters.' : 'No tasks yet.' }}
-        </div>
+    @if ($tasks->isEmpty())
+        <x-empty-state
+            class="mb-3"
+            icon="fas fa-tasks"
+            :title="$hasFilters ? 'No tasks match your filters' : 'No tasks yet'"
+            :description="$hasFilters
+                ? 'Try clearing filters or broadening your search.'
+                : 'Create a task when something needs follow-through.'"
+            :action-url="$hasFilters ? route('tasks.index') : ($canCreateTask ? route('tasks.create') : null)"
+            :action-label="$hasFilters ? 'Clear filters' : ($canCreateTask ? 'Add task' : null)"
+        />
     @endif
 
-    <div class="row crm-kanban">
-        @foreach($statuses as $statusKey => $statusTitle)
+    <div class="row crm-kanban" aria-label="Task board">
+        @foreach ($statuses as $statusKey => $statusTitle)
+            @php $columnTasks = $tasks->where('status', $statusKey); @endphp
             <div class="col-lg-3 col-md-6 mb-3">
                 <div class="card {{ $statusColors[$statusKey] ?? 'card-secondary' }} card-outline crm-kanban-column">
                     <div class="card-header">
                         <h3 class="card-title">{{ $statusTitle }}</h3>
                         <div class="card-tools">
-                            <span class="badge badge-light column-count">
-                                {{ $tasks->where('status', $statusKey)->count() }}
+                            <span class="badge badge-light column-count" aria-label="{{ $columnTasks->count() }} tasks">
+                                {{ $columnTasks->count() }}
                             </span>
                         </div>
                     </div>
-                    <div class="card-body task-column p-2" data-status="{{ $statusKey }}">
-                        @foreach($tasks->where('status', $statusKey) as $task)
+                    <div class="card-body task-column p-2" data-status="{{ $statusKey }}" aria-label="{{ $statusTitle }} column">
+                        @forelse ($columnTasks as $task)
                             @php($canChangeStatus = auth()->user()->can('changeStatus', $task))
-                            <div class="card card-sm mb-2 task-card"
-                                 data-task-id="{{ $task->id }}"
-                                 data-draggable="{{ $canChangeStatus ? '1' : '0' }}"
-                                 style="cursor: {{ $canChangeStatus ? 'grab' : 'default' }};">
+                            <article
+                                class="card card-sm mb-2 task-card"
+                                data-task-id="{{ $task->id }}"
+                                data-draggable="{{ $canChangeStatus ? '1' : '0' }}"
+                                style="cursor: {{ $canChangeStatus ? 'grab' : 'default' }};"
+                            >
                                 <div class="card-body p-2">
-                                    <h6 class="mb-1">{{ $task->title }}</h6>
-                                    @if($task->description)
+                                    <h6 class="mb-1 task-card__title">
+                                        @can('view', $task)
+                                            <a href="{{ route('tasks.show', $task) }}" class="text-dark">{{ $task->title }}</a>
+                                        @else
+                                            {{ $task->title }}
+                                        @endcan
+                                    </h6>
+                                    @if ($task->description)
                                         <p class="text-muted small mb-2">{{ Str::limit($task->description, 80) }}</p>
                                     @endif
-                                    <div class="d-flex justify-content-between small text-muted">
-                                        <span><i class="fas fa-user"></i> {{ optional($task->assignee)->name ?? 'Unassigned' }}</span>
-                                        <span><i class="fas fa-calendar"></i> {{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('d M') : '—' }}</span>
+                                    <div class="d-flex justify-content-between small text-muted mb-2">
+                                        <span>
+                                            <i class="fas fa-user" aria-hidden="true"></i>
+                                            {{ optional($task->assignee)->name ?? 'Unassigned' }}
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-calendar" aria-hidden="true"></i>
+                                            {{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('d M') : '—' }}
+                                        </span>
                                     </div>
-                                    <div class="mt-2">
+                                    <div class="task-card__actions">
                                         @can('view', $task)
                                             <a href="{{ route('tasks.show', $task) }}"
                                                class="btn btn-xs btn-primary"
                                                title="View task"
-                                               aria-label="View task">
-                                                <i class="fas fa-eye"></i>
+                                               aria-label="View {{ $task->title }}">
+                                                <i class="fas fa-eye" aria-hidden="true"></i>
                                             </a>
                                         @endcan
                                         @can('update', $task)
                                             <a href="{{ route('tasks.edit', $task) }}"
                                                class="btn btn-xs btn-default"
                                                title="Edit task"
-                                               aria-label="Edit task">
-                                                <i class="fas fa-edit"></i>
+                                               aria-label="Edit {{ $task->title }}">
+                                                <i class="fas fa-edit" aria-hidden="true"></i>
                                             </a>
                                         @endcan
                                         @can('delete', $task)
                                             <form method="POST" action="{{ route('tasks.destroy', $task) }}" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-xs btn-danger"
-                                                        title="Delete task"
-                                                        aria-label="Delete task"
-                                                        onclick="return confirm('Delete this task?')">
-                                                    <i class="fas fa-trash"></i>
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-xs btn-danger"
+                                                    title="Delete task"
+                                                    aria-label="Delete {{ $task->title }}"
+                                                    data-crm-confirm="Delete this task? This cannot be undone."
+                                                    data-crm-confirm-title="Delete task"
+                                                    data-crm-confirm-label="Delete"
+                                                >
+                                                    <i class="fas fa-trash" aria-hidden="true"></i>
                                                 </button>
                                             </form>
                                         @endcan
                                     </div>
                                 </div>
+                            </article>
+                        @empty
+                            <div class="crm-kanban-empty" aria-hidden="true">
+                                Drop tasks here
                             </div>
-                        @endforeach
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -153,49 +192,82 @@
 
     @push('js')
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-        @if($canDragTasks)
+        @if ($canDragTasks)
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
-                        || @json(csrf_token());
+                    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                    var csrfToken = csrfMeta ? csrfMeta.content : @json(csrf_token());
+
+                    function notify(type, message) {
+                        if (window.CrmUi && typeof window.CrmUi[type] === 'function') {
+                            window.CrmUi[type](message);
+                            return;
+                        }
+                        window.alert(message);
+                    }
 
                     function refreshColumnCounts() {
-                        document.querySelectorAll('.task-column').forEach(column => {
-                            const badge = column.closest('.card')?.querySelector('.column-count');
+                        document.querySelectorAll('.task-column').forEach(function (column) {
+                            var card = column.closest('.card');
+                            var badge = card ? card.querySelector('.column-count') : null;
                             if (badge) {
-                                badge.textContent = column.querySelectorAll('.task-card').length;
+                                var count = column.querySelectorAll('.task-card').length;
+                                badge.textContent = count;
+                                badge.setAttribute('aria-label', count + ' tasks');
+                            }
+
+                            var empty = column.querySelector('.crm-kanban-empty');
+                            if (column.querySelectorAll('.task-card').length === 0) {
+                                if (!empty) {
+                                    empty = document.createElement('div');
+                                    empty.className = 'crm-kanban-empty';
+                                    empty.setAttribute('aria-hidden', 'true');
+                                    empty.textContent = 'Drop tasks here';
+                                    column.appendChild(empty);
+                                }
+                            } else if (empty) {
+                                empty.remove();
                             }
                         });
                     }
 
-                    document.querySelectorAll('.task-column').forEach(column => {
+                    document.querySelectorAll('.task-column').forEach(function (column) {
                         new Sortable(column, {
                             group: 'tasks-kanban',
-                            animation: 200,
+                            animation: 180,
                             draggable: '.task-card[data-draggable="1"]',
-                            ghostClass: 'opacity-50',
+                            ghostClass: 'task-card--ghost',
+                            chosenClass: 'task-card--chosen',
+                            dragClass: 'task-card--dragging',
                             scroll: true,
                             bubbleScroll: true,
                             scrollSensitivity: 80,
                             scrollSpeed: 18,
                             emptyInsertThreshold: 48,
-                            onStart: function () {
+                            onStart: function (evt) {
+                                document.body.classList.add('crm-kanban-dragging');
                                 document.querySelectorAll('.task-column').forEach(function (target) {
                                     target.classList.add('is-drop-target');
                                 });
+                                if (evt.item) {
+                                    evt.item.style.cursor = 'grabbing';
+                                }
                             },
                             onEnd: function (evt) {
+                                document.body.classList.remove('crm-kanban-dragging');
                                 document.querySelectorAll('.task-column').forEach(function (target) {
                                     target.classList.remove('is-drop-target');
                                 });
-
-                                const taskId = evt.item.dataset.taskId;
-                                const status = evt.to.dataset.status;
-                                const sortOrder = evt.newIndex + 1;
+                                if (evt.item && evt.item.dataset.draggable === '1') {
+                                    evt.item.style.cursor = 'grab';
+                                }
 
                                 if (evt.from === evt.to && evt.oldIndex === evt.newIndex) {
                                     return;
                                 }
+
+                                refreshColumnCounts();
+                                evt.item.classList.add('is-saving');
 
                                 fetch(@json(route('tasks.board.update')), {
                                     method: 'POST',
@@ -206,34 +278,31 @@
                                         'X-Requested-With': 'XMLHttpRequest'
                                     },
                                     body: JSON.stringify({
-                                        task_id: taskId,
-                                        status: status,
-                                        sort_order: sortOrder
+                                        task_id: evt.item.dataset.taskId,
+                                        status: evt.to.dataset.status,
+                                        sort_order: evt.newIndex + 1
                                     })
-                                }).then(async (res) => {
-                                    let data = null;
-                                    try {
-                                        data = await res.json();
-                                    } catch (e) {
-                                        data = null;
-                                    }
-
-                                    if (! res.ok || ! data?.success) {
-                                        evt.from.insertBefore(
-                                            evt.item,
-                                            evt.from.children[evt.oldIndex] || null
-                                        );
-                                        alert(data?.message || 'Unable to update task status.');
+                                }).then(function (res) {
+                                    return res.json().then(function (data) {
+                                        return { ok: res.ok, data: data };
+                                    }).catch(function () {
+                                        return { ok: false, data: null };
+                                    });
+                                }).then(function (result) {
+                                    evt.item.classList.remove('is-saving');
+                                    if (! result.ok || ! result.data || ! result.data.success) {
+                                        evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                                        refreshColumnCounts();
+                                        notify('error', (result.data && result.data.message) || 'Unable to update task status.');
                                         return;
                                     }
-
                                     refreshColumnCounts();
-                                }).catch(() => {
-                                    evt.from.insertBefore(
-                                        evt.item,
-                                        evt.from.children[evt.oldIndex] || null
-                                    );
-                                    alert('Something went wrong while updating the task.');
+                                    notify('success', 'Task moved.');
+                                }).catch(function () {
+                                    evt.item.classList.remove('is-saving');
+                                    evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                                    refreshColumnCounts();
+                                    notify('error', 'Something went wrong while updating the task.');
                                 });
                             }
                         });

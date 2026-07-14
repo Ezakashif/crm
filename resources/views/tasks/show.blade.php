@@ -1,29 +1,26 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h1 class="crm-page-title">{{ $task->title }}</h1>
-                <span class="crm-page-subtitle">Task details</span>
-            </div>
-            <div class="mt-2 mt-md-0 d-flex flex-wrap align-items-center">
+        <x-page-header
+            :title="$task->title"
+            subtitle="Task details"
+            :breadcrumbs="[
+                ['label' => 'Home', 'url' => route('dashboard')],
+                ['label' => 'Tasks', 'url' => route('tasks.index')],
+                ['label' => $task->title],
+            ]"
+        >
+            <x-slot:actions>
                 @can('update', $task)
-                    <a href="{{ route('tasks.edit', $task) }}" class="btn btn-default btn-sm mb-1 mr-1">
-                        <i class="fas fa-edit"></i> Edit
+                    <a href="{{ route('tasks.edit', $task) }}" class="btn btn-default btn-sm">
+                        <i class="fas fa-edit" aria-hidden="true"></i> Edit
                     </a>
                 @endcan
-                <a href="{{ route('tasks.index') }}" class="btn btn-default btn-sm mb-1">
-                    <i class="fas fa-arrow-left"></i> Back to Board
+                <a href="{{ route('tasks.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to board
                 </a>
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-page-header>
     </x-slot>
-
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{ session('success') }}
-        </div>
-    @endif
 
     @php
         $statusBadge = match ($task->status) {
@@ -47,7 +44,7 @@
         <div class="col-lg-8">
             <div class="card card-outline card-primary">
                 <div class="card-header">
-                    <h3 class="card-title">Task Details</h3>
+                    <h3 class="card-title">Task details</h3>
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
@@ -65,33 +62,33 @@
                             </span>
                         </dd>
 
-                        <dt class="col-sm-4">Assigned To</dt>
+                        <dt class="col-sm-4">Assigned to</dt>
                         <dd class="col-sm-8">{{ $task->assignee?->name ?? 'Unassigned' }}</dd>
 
-                        <dt class="col-sm-4">Created By</dt>
+                        <dt class="col-sm-4">Created by</dt>
                         <dd class="col-sm-8">{{ $task->creator?->name ?? '—' }}</dd>
 
-                        <dt class="col-sm-4">Due Date</dt>
+                        <dt class="col-sm-4">Due date</dt>
                         <dd class="col-sm-8">
-                            @if($task->due_date)
+                            @if ($task->due_date)
                                 {{ \Carbon\Carbon::parse($task->due_date)->format('M j, Y') }}
                             @else
                                 —
                             @endif
                         </dd>
 
-                        <dt class="col-sm-4">Completed At</dt>
+                        <dt class="col-sm-4">Completed at</dt>
                         <dd class="col-sm-8">
-                            @if($task->completed_at)
+                            @if ($task->completed_at)
                                 {{ \Carbon\Carbon::parse($task->completed_at)->format('M j, Y g:i A') }}
                             @else
                                 —
                             @endif
                         </dd>
 
-                        <dt class="col-sm-4">Related Lead</dt>
+                        <dt class="col-sm-4">Related lead</dt>
                         <dd class="col-sm-8">
-                            @if($task->lead)
+                            @if ($task->lead)
                                 @can('view', $task->lead)
                                     <a href="{{ route('leads.show', $task->lead) }}">{{ $task->lead->name }}</a>
                                 @else
@@ -102,9 +99,9 @@
                             @endif
                         </dd>
 
-                        <dt class="col-sm-4">Related Customer</dt>
+                        <dt class="col-sm-4">Related customer</dt>
                         <dd class="col-sm-8">
-                            @if($task->customer)
+                            @if ($task->customer)
                                 @can('view', $task->customer)
                                     <a href="{{ route('customers.show', $task->customer) }}">{{ $task->customer->name }}</a>
                                 @else
@@ -118,8 +115,8 @@
 
                     <hr>
                     <p class="text-muted small mb-1">Description</p>
-                    @if(filled($task->description))
-                        <p class="mb-0" style="white-space: pre-wrap;">{{ $task->description }}</p>
+                    @if (filled($task->description))
+                        <p class="mb-0 crm-prewrap">{{ $task->description }}</p>
                     @else
                         <p class="mb-0 text-muted">No description.</p>
                     @endif
@@ -131,14 +128,14 @@
             @can('changeStatus', $task)
                 <div class="card card-outline card-secondary">
                     <div class="card-header">
-                        <h3 class="card-title">Update Status</h3>
+                        <h3 class="card-title">Update status</h3>
                     </div>
                     <form method="POST" action="{{ route('tasks.status', $task) }}">
                         @csrf
                         <div class="card-body">
                             <div class="form-group mb-0">
-                                <label for="status" class="small text-muted">Status</label>
-                                <select id="status" name="status" class="form-control" onchange="this.form.submit()">
+                                <x-form-label for="status">Status</x-form-label>
+                                <select id="status" name="status" class="form-control" onchange="this.form.submit()" aria-label="Update task status">
                                     <option value="pending" @selected($task->status === 'pending')>Pending</option>
                                     <option value="in_progress" @selected($task->status === 'in_progress')>In Progress</option>
                                     <option value="completed" @selected($task->status === 'completed')>Completed</option>
@@ -150,26 +147,38 @@
                 </div>
             @endcan
 
-            <div class="card">
+            <div class="card card-outline card-secondary">
                 <div class="card-body">
                     <p class="text-muted small mb-1">Created</p>
                     <p class="mb-3">{{ $task->created_at?->format('M j, Y g:i A') ?? '—' }}</p>
-                    <p class="text-muted small mb-1">Last Updated</p>
+                    <p class="text-muted small mb-1">Last updated</p>
                     <p class="mb-0">{{ $task->updated_at?->format('M j, Y g:i A') ?? '—' }}</p>
                 </div>
-                @can('delete', $task)
-                    <div class="card-footer text-right">
-                        <form method="POST" action="{{ route('tasks.destroy', $task) }}"
-                              onsubmit="return confirm('Delete this task?')">
+            </div>
+
+            @can('delete', $task)
+                <div class="card card-outline card-danger">
+                    <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
+                        <div class="mb-2 mb-md-0 pr-2">
+                            <strong class="d-block">Delete task</strong>
+                            <span class="text-muted small">Permanently remove this task.</span>
+                        </div>
+                        <form method="POST" action="{{ route('tasks.destroy', $task) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Delete Task
+                            <button
+                                type="submit"
+                                class="btn btn-danger btn-sm"
+                                data-crm-confirm="Delete this task? This cannot be undone."
+                                data-crm-confirm-title="Delete task"
+                                data-crm-confirm-label="Delete"
+                            >
+                                <i class="fas fa-trash" aria-hidden="true"></i> Delete task
                             </button>
                         </form>
                     </div>
-                @endcan
-            </div>
+                </div>
+            @endcan
         </div>
     </div>
 </x-app-layout>

@@ -1700,3 +1700,51 @@ body.crm-app a.customer-timeline-link:hover .customer-timeline-body {
 body.crm-app a.customer-timeline-link:focus-visible .customer-timeline-body {
     box-shadow: var(--crm-focus-ring);
 }
+
+/* =========================================================
+   Phase 2C — Tasks kanban card polish
+   ========================================================= */
+
+body.crm-app .task-card--ghost {
+    opacity: 0.45;
+    border-style: dashed !important;
+}
+
+body.crm-app .task-card--chosen {
+    box-shadow: var(--crm-shadow-hover) !important;
+    border-color: var(--crm-accent) !important;
+}
+
+body.crm-app .task-card--dragging {
+    opacity: 0.95;
+    cursor: grabbing !important;
+}
+
+body.crm-app .task-card.is-saving {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+body.crm-app .task-card.is-saving::after {
+    content: "";
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 2px solid var(--crm-accent);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: crm-spin 0.6s linear infinite;
+}
+
+body.crm-app .task-card__title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+body.crm-app .task-card__actions {
+    margin-top: 0.1rem;
+}
