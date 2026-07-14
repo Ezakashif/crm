@@ -91,15 +91,15 @@ class DashboardTest extends TestCase
         $response->assertSee('Follow-ups Today');
         $response->assertSee('Pending Tasks');
         $response->assertSee('Overdue Tasks');
-        $response->assertSee('New Leads');
-        $response->assertSee('Won Leads');
-        $response->assertSee('Lost Leads');
+        $response->assertSee('New leads');
+        $response->assertSee('Won leads');
+        $response->assertSee('Lost leads');
         $response->assertSee('Lead Conversion Rate');
-        $response->assertSee('Monthly Lead Growth');
-        $response->assertSee('Lead Source Distribution');
-        $response->assertSee('Recent Leads');
-        $response->assertSee('Recent Customers');
-        $response->assertSee('Recent Activities');
+        $response->assertSee('Monthly lead growth');
+        $response->assertSee('Lead source distribution');
+        $response->assertSee('Recent leads');
+        $response->assertSee('Recent customers');
+        $response->assertSee('Recent activities');
         $response->assertSee('Assigned Follow-up Lead');
         $response->assertSee('Call overdue prospect');
         $response->assertSee('Acme Recent Customer');
@@ -107,6 +107,7 @@ class DashboardTest extends TestCase
         $response->assertSee('Add Customer');
         $response->assertDontSee('Add Task');
         $response->assertSee('50.0');
+        $response->assertSee('crm-page-header', false);
     }
 
     public function test_sales_user_only_sees_assigned_lead_and_task_analytics(): void
