@@ -1748,3 +1748,22 @@ body.crm-app .task-card__title {
 body.crm-app .task-card__actions {
     margin-top: 0.1rem;
 }
+
+/* =========================================================
+   Phase 2C — Roles permission checklist
+   ========================================================= */
+
+body.crm-app .permission-checklist__module-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--crm-text);
+}
+
+body.crm-app .permission-checklist__item .form-check-label {
+    font-size: var(--crm-font-size-sm);
+    color: var(--crm-text-secondary);
+}
+
+body.crm-app .permission-checklist__item .form-check-input:focus {
+    box-shadow: var(--crm-focus-ring);
+}

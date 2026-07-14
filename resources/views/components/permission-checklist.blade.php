@@ -5,16 +5,17 @@
 ])
 
 <div class="permission-checklist">
-    @foreach($modulePermissions as $moduleKey => $module)
-        <div class="card card-outline card-secondary mb-3">
-            <div class="card-header py-2">
-                <strong>{{ $module['label'] }}</strong>
+    @foreach ($modulePermissions as $moduleKey => $module)
+        <div class="card card-outline card-secondary mb-3 permission-checklist__module">
+            <div class="card-header py-2 d-flex align-items-center justify-content-between">
+                <strong class="permission-checklist__module-title">{{ $module['label'] }}</strong>
+                <span class="badge badge-light">{{ count($module['permissions']) }}</span>
             </div>
             <div class="card-body py-3">
                 <div class="row">
-                    @foreach($module['permissions'] as $permission)
+                    @foreach ($module['permissions'] as $permission)
                         <div class="col-md-6 col-lg-3 mb-2">
-                            <div class="form-check">
+                            <div class="form-check permission-checklist__item">
                                 <input id="{{ $name }}-{{ $permission->id }}"
                                        name="{{ $name }}[]"
                                        type="checkbox"
