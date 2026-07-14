@@ -66,7 +66,12 @@
                 <a href="{{ route('superadmin.companies.index') }}" class="btn btn-sm btn-outline-light">View all</a>
             </div>
             @if ($recentCompanies->isEmpty())
-                <p class="sa-muted mb-0">No companies yet.</p>
+                <div class="sa-empty py-4">
+                    <div class="sa-empty__icon" aria-hidden="true"><i class="fas fa-building"></i></div>
+                    <h3 class="sa-empty__title">No companies yet</h3>
+                    <p class="sa-empty__text">Provision a tenant to see them here.</p>
+                    <a href="{{ route('superadmin.companies.create') }}" class="btn btn-sm btn-info">Create Company</a>
+                </div>
             @else
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
@@ -124,7 +129,9 @@
                     <div class="sa-muted small">{{ $alert['message'] }}</div>
                 </div>
             @empty
-                <p class="sa-muted mb-0">No alerts right now.</p>
+                <div class="sa-empty py-3">
+                    <p class="sa-empty__text mb-0">No alerts right now.</p>
+                </div>
             @endforelse
         </div>
 
@@ -143,7 +150,9 @@
                     </div>
                 </div>
             @empty
-                <p class="sa-muted mb-0">No activity logged yet.</p>
+                <div class="sa-empty py-3">
+                    <p class="sa-empty__text mb-0">No activity logged yet.</p>
+                </div>
             @endforelse
         </div>
     </div>
