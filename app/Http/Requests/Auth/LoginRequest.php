@@ -40,9 +40,10 @@ class LoginRequest extends FormRequest
     /**
      * Attempt to authenticate the request's credentials.
      *
-     * Tenant users must supply a company/workspace slug so the same email
-     * across companies cannot authenticate into the wrong tenant.
      * Super Admins authenticate without a company slug.
+     * Tenant users should supply a workspace slug; when omitted and the email
+     * uniquely identifies a single tenant account, that account is used.
+     * Ambiguous emails (same address in multiple workspaces) still require a slug.
      *
      * @throws ValidationException
      */
@@ -73,6 +74,8 @@ class LoginRequest extends FormRequest
 
     /**
      * Resolve the user for this login attempt without cross-tenant ambiguity.
+     *
+     * @throws ValidationException
      */
     private function resolveAuthenticatableUser(): ?User
     {
@@ -93,12 +96,31 @@ class LoginRequest extends FormRequest
                 ->first();
         }
 
-        // No workspace slug: only platform Super Admins may authenticate.
-        return User::withoutCompanyScope()
+        $superAdmin = User::withoutCompanyScope()
             ->where('email', $email)
             ->where('is_super_admin', true)
             ->whereNull('company_id')
             ->first();
+
+        if ($superAdmin) {
+            return $superAdmin;
+        }
+
+        // No workspace slug: allow tenant login only when the email is unique.
+        $matches = User::withoutCompanyScope()
+            ->where('email', $email)
+            ->where('is_super_admin', false)
+            ->whereNotNull('company_id')
+            ->limit(2)
+            ->get();
+
+        if ($matches->count() > 1) {
+            throw ValidationException::withMessages([
+                'company' => 'This email belongs to more than one workspace. Enter your workspace slug to continue.',
+            ]);
+        }
+
+        return $matches->first();
     }
 
     /**

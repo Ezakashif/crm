@@ -23,7 +23,7 @@
 
         <div class="input-group mb-3">
             <input type="text" name="company" class="form-control @error('company') is-invalid @enderror"
-                   value="{{ old('company') }}" placeholder="{{ __('Workspace slug (leave blank for platform admin)') }}"
+                   value="{{ old('company') }}" placeholder="{{ __('Workspace slug (optional if your email is unique)') }}"
                    autocomplete="organization" autofocus>
 
             <div class="input-group-append">
@@ -38,6 +38,9 @@
                 </span>
             @enderror
         </div>
+        <p class="text-muted small mb-3">
+            {{ __('Platform admins can leave the workspace blank. Team users only need a slug when the same email exists in more than one workspace.') }}
+        </p>
 
         <div class="input-group mb-3">
             <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"

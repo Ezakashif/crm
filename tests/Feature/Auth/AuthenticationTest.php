@@ -38,16 +38,40 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
-    public function test_tenant_login_without_company_slug_fails(): void
+    public function test_unique_tenant_email_can_authenticate_without_company_slug(): void
     {
         $user = User::factory()->create([
             'email' => 'tenant@example.com',
         ]);
 
-        $this->post('/login', [
+        $response = $this->post('/login', [
             'email' => 'tenant@example.com',
             'password' => 'password',
         ]);
+
+        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_ambiguous_tenant_email_requires_company_slug(): void
+    {
+        $companyA = Company::factory()->create(['slug' => 'acme']);
+        $companyB = Company::factory()->create(['slug' => 'beta']);
+
+        User::factory()->create([
+            'company_id' => $companyA->id,
+            'email' => 'shared@example.com',
+        ]);
+        User::factory()->create([
+            'company_id' => $companyB->id,
+            'email' => 'shared@example.com',
+        ]);
+
+        $this->from('/login')->post('/login', [
+            'email' => 'shared@example.com',
+            'password' => 'password',
+        ])->assertRedirect('/login')
+            ->assertSessionHasErrors('company');
 
         $this->assertGuest();
     }
