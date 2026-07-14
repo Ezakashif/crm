@@ -59,7 +59,13 @@
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="status" value="suspended">
-                        <button class="btn btn-sm btn-danger" onclick="return confirm('Suspend this company? Users will be blocked from the CRM.')">
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-danger"
+                            data-sa-confirm="Suspend this company? Users will be blocked from the CRM."
+                            data-sa-confirm-title="Suspend company"
+                            data-sa-confirm-label="Suspend"
+                        >
                             Suspend
                         </button>
                     </form>
@@ -68,14 +74,21 @@
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="status" value="active">
-                        <button class="btn btn-sm btn-success">Activate</button>
+                        <button class="btn btn-sm btn-success" type="submit">Activate</button>
                     </form>
                 @endif
 
                 @if ($company->status === 'active')
                     <form method="POST" action="{{ route('superadmin.companies.impersonate', $company) }}" class="mr-2 mb-2">
                         @csrf
-                        <button class="btn btn-sm btn-info" onclick="return confirm('Login as company admin?')">Login As Admin</button>
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-info"
+                            data-sa-confirm="Login as company admin? You will enter their CRM workspace."
+                            data-sa-confirm-title="Login as admin"
+                            data-sa-confirm-label="Login as"
+                            data-sa-confirm-class="btn-info"
+                        >Login As Admin</button>
                     </form>
                 @endif
 
@@ -83,7 +96,13 @@
                     <form method="POST" action="{{ route('superadmin.companies.destroy', $company) }}" class="mb-2">
                         @csrf
                         @method('DELETE')
-                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Soft-delete this company?')">Delete</button>
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-outline-danger"
+                            data-sa-confirm="Soft-delete this company? It can be restored later from the deleted list."
+                            data-sa-confirm-title="Delete company"
+                            data-sa-confirm-label="Delete"
+                        >Delete</button>
                     </form>
                 @endif
             </div>
@@ -147,7 +166,11 @@
         <div class="sa-card">
             <h2 class="h6 text-white mb-3">Users</h2>
             @if ($users->isEmpty())
-                <p class="sa-muted mb-0">No users in this company yet.</p>
+                <div class="sa-empty py-4">
+                    <div class="sa-empty__icon" aria-hidden="true"><i class="fas fa-users"></i></div>
+                    <h3 class="sa-empty__title">No users yet</h3>
+                    <p class="sa-empty__text mb-0">This company has no users provisioned.</p>
+                </div>
             @else
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
@@ -192,7 +215,9 @@
                     <div class="sa-muted small">{{ $log->description() }}</div>
                 </div>
             @empty
-                <p class="sa-muted mb-0">No recent activity.</p>
+                <div class="sa-empty py-3">
+                    <p class="sa-empty__text mb-0">No recent activity.</p>
+                </div>
             @endforelse
         </div>
     </div>

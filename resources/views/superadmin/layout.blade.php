@@ -7,174 +7,22 @@
     <title>@yield('title', 'Super Admin') — {{ config('app.name') }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        :root {
-            --sa-bg: #0f172a;
-            --sa-panel: #111827;
-            --sa-border: #1f2937;
-            --sa-accent: #38bdf8;
-            --sa-text: #e5e7eb;
-            --sa-muted: #94a3b8;
-            --sa-ok: #10b981;
-            --sa-warn: #f59e0b;
-            --sa-danger: #ef4444;
-        }
-        body {
-            background: radial-gradient(circle at top left, #1e293b, #020617 55%);
-            color: var(--sa-text);
-            min-height: 100vh;
-        }
-        .sa-shell { display: flex; min-height: 100vh; }
-        .sa-nav {
-            width: 260px;
-            background: rgba(15, 23, 42, 0.95);
-            border-right: 1px solid var(--sa-border);
-            padding: 1.25rem 1rem 1.5rem;
-            flex-shrink: 0;
-        }
-        .sa-brand {
-            margin: 0 0 1.25rem;
-            padding: 0.85rem 0.75rem;
-            border: 1px solid var(--sa-border);
-            border-radius: 0.75rem;
-            background: rgba(2, 6, 23, 0.55);
-            color: #fff;
-        }
-        .sa-brand-text {
-            font-size: 1.15rem;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            line-height: 1.25;
-        }
-        .sa-brand-text span { color: var(--sa-accent); }
-        .sa-brand-logo {
-            display: block;
-            width: 100%;
-            height: auto;
-            min-height: 42px;
-            max-height: 72px;
-            object-fit: contain;
-            object-position: center center;
-        }
-        .sa-logo-preview {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 140px;
-            padding: 1.5rem;
-            margin-bottom: 0.75rem;
-            border: 1px solid var(--sa-border);
-            border-radius: 0.75rem;
-            background: #020617;
-        }
-        .sa-logo-preview img {
-            display: block;
-            width: auto;
-            max-width: 100%;
-            height: auto;
-            max-height: 88px;
-            object-fit: contain;
-        }
-        .sa-nav a {
-            display: block;
-            color: var(--sa-muted);
-            padding: 0.6rem 0.75rem;
-            border-radius: 0.5rem;
-            margin-bottom: 0.25rem;
-            text-decoration: none;
-        }
-        .sa-nav a:hover, .sa-nav a.active {
-            background: rgba(56, 189, 248, 0.12);
-            color: #fff;
-        }
-        .sa-main { flex: 1; padding: 1.75rem; min-width: 0; }
-        .sa-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .sa-card {
-            background: rgba(17, 24, 39, 0.9);
-            border: 1px solid var(--sa-border);
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-        }
-        .sa-stat { font-size: 1.75rem; font-weight: 700; color: #fff; }
-        .sa-muted { color: var(--sa-muted); }
-        .table { color: var(--sa-text); }
-        .table thead th { border-top: 0; border-color: var(--sa-border); color: var(--sa-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
-        .table td, .table th { border-color: var(--sa-border); vertical-align: middle; }
-        .form-control, .custom-select {
-            background: #0b1220;
-            border-color: var(--sa-border);
-            color: #fff;
-        }
-        .form-control:focus, .custom-select:focus {
-            background: #0b1220;
-            color: #fff;
-            border-color: var(--sa-accent);
-            box-shadow: none;
-        }
-        .badge-active, .badge-ok { background: #065f46; }
-        .badge-suspended, .badge-danger { background: #7f1d1d; }
-        .badge-trial, .badge-warning { background: #92400e; }
-        .badge-expired { background: #4b5563; }
-        .sa-health-ok { color: var(--sa-ok); }
-        .sa-health-warning { color: var(--sa-warn); }
-        .sa-health-error { color: var(--sa-danger); }
-        .sa-health-unknown { color: var(--sa-muted); }
-        .sa-search { position: relative; min-width: 240px; }
-        .sa-search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            z-index: 40;
-            background: #0b1220;
-            border: 1px solid var(--sa-border);
-            border-radius: 0.5rem;
-            margin-top: 0.25rem;
-            display: none;
-            max-height: 360px;
-            overflow: auto;
-        }
-        .sa-search-results.open { display: block; }
-        .sa-search-results a {
-            display: block;
-            padding: 0.5rem 0.75rem;
-            color: var(--sa-text);
-            text-decoration: none;
-        }
-        .sa-search-results a:hover { background: rgba(56, 189, 248, 0.12); }
-        .sa-alert-item {
-            border-left: 3px solid var(--sa-accent);
-            padding-left: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-        .sa-alert-item.warning { border-left-color: var(--sa-warn); }
-        .sa-alert-item.danger { border-left-color: var(--sa-danger); }
-        .sa-alert-item.info { border-left-color: var(--sa-accent); }
-        .sa-activity-item { padding: 0.65rem 0; border-bottom: 1px solid var(--sa-border); }
-        .sa-activity-item:last-child { border-bottom: 0; }
-        .btn-group-actions .btn { margin: 0 0.15rem 0.25rem 0; }
-        @media (max-width: 768px) {
-            .sa-shell { flex-direction: column; }
-            .sa-nav { width: 100%; border-right: 0; border-bottom: 1px solid var(--sa-border); }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/sa-app.css') }}">
     @stack('styles')
 </head>
-<body>
+<body class="sa-app">
+@php
+    $platformSettings = app(\App\Services\SuperAdmin\PlatformSettingsService::class);
+    $platformLogo = $platformSettings->logoUrl();
+    $flashes = collect([
+        'success' => session('success'),
+        'error' => session('error') ?? session('danger'),
+        'warning' => session('warning'),
+        'info' => session('info'),
+    ])->filter(fn ($message) => filled($message) && is_string($message));
+@endphp
 <div class="sa-shell">
-    <aside class="sa-nav">
-        @php
-            $platformSettings = app(\App\Services\SuperAdmin\PlatformSettingsService::class);
-            $platformLogo = $platformSettings->logoUrl();
-        @endphp
+    <aside class="sa-nav" aria-label="Super Admin navigation">
         <div class="sa-brand">
             @if ($platformLogo)
                 <img src="{{ $platformSettings->logoUrl('light') ?: $platformLogo }}" alt="{{ $platformSettings->platformName() }}" class="sa-brand-logo">
@@ -182,26 +30,26 @@
                 <div class="sa-brand-text">{{ $platformSettings->platformName() }} <span>Platform</span></div>
             @endif
         </div>
-        <a href="{{ route('superadmin.dashboard') }}" class="{{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
-            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+        <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-link {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
+            <i class="fas fa-tachometer-alt" aria-hidden="true"></i> Dashboard
         </a>
-        <a href="{{ route('superadmin.companies.index') }}" class="{{ request()->routeIs('superadmin.companies.*') ? 'active' : '' }}">
-            <i class="fas fa-building mr-2"></i> Companies
+        <a href="{{ route('superadmin.companies.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.companies.*') ? 'active' : '' }}">
+            <i class="fas fa-building" aria-hidden="true"></i> Companies
         </a>
-        <a href="{{ route('superadmin.super-admins.index') }}" class="{{ request()->routeIs('superadmin.super-admins.*') ? 'active' : '' }}">
-            <i class="fas fa-user-shield mr-2"></i> Super Admins
+        <a href="{{ route('superadmin.super-admins.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.super-admins.*') ? 'active' : '' }}">
+            <i class="fas fa-user-shield" aria-hidden="true"></i> Super Admins
         </a>
-        <a href="{{ route('superadmin.settings.edit') }}" class="{{ request()->routeIs('superadmin.settings.*') ? 'active' : '' }}">
-            <i class="fas fa-cog mr-2"></i> Settings
+        <a href="{{ route('superadmin.settings.edit') }}" class="sa-nav-link {{ request()->routeIs('superadmin.settings.*') ? 'active' : '' }}">
+            <i class="fas fa-cog" aria-hidden="true"></i> Settings
         </a>
-        <a href="{{ route('superadmin.search.index') }}" class="{{ request()->routeIs('superadmin.search.*') ? 'active' : '' }}">
-            <i class="fas fa-search mr-2"></i> Search
+        <a href="{{ route('superadmin.search.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.search.*') ? 'active' : '' }}">
+            <i class="fas fa-search" aria-hidden="true"></i> Search
         </a>
-        <hr style="border-color: var(--sa-border);">
-        <form method="POST" action="{{ route('logout') }}">
+        <hr class="sa-nav-divider">
+        <form method="POST" action="{{ route('logout') }}" data-sa-no-loading="1">
             @csrf
-            <button type="submit" class="btn btn-link p-0 text-muted">
-                <i class="fas fa-sign-out-alt mr-2"></i> Log out
+            <button type="submit" class="sa-nav-logout">
+                <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Log out
             </button>
         </form>
     </aside>
@@ -215,20 +63,16 @@
                 @endif
             </div>
             <div class="d-flex align-items-center flex-wrap" style="gap: 0.75rem;">
-                <form action="{{ route('superadmin.search.index') }}" method="GET" class="sa-search" id="sa-global-search">
-                    <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="Search companies, users..." autocomplete="off" id="sa-search-input">
-                    <div class="sa-search-results" id="sa-search-results"></div>
+                <form action="{{ route('superadmin.search.index') }}" method="GET" class="sa-search" id="sa-global-search" data-sa-no-loading="1">
+                    <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="Search companies, users..." autocomplete="off" id="sa-search-input" aria-label="Search companies and users">
+                    <div class="sa-search-results" id="sa-search-results" role="listbox"></div>
                 </form>
                 <div class="sa-muted small">{{ auth()->user()->name }}</div>
             </div>
         </div>
 
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-
         @if ($errors->any())
-            <div class="alert alert-danger">
+            <div class="alert alert-danger sa-keep-alert">
                 <ul class="mb-0 pl-3">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -241,6 +85,31 @@
     </main>
 </div>
 
+<div id="sa-toast-stack" class="sa-toast-stack" aria-live="polite" aria-relevant="additions"></div>
+
+<div
+    id="sa-confirm-backdrop"
+    class="sa-confirm-backdrop"
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="sa-confirm-title"
+    aria-describedby="sa-confirm-message"
+>
+    <div class="sa-confirm">
+        <h2 id="sa-confirm-title" class="sa-confirm__title">Are you sure?</h2>
+        <p id="sa-confirm-message" class="sa-confirm__message">This action cannot be undone.</p>
+        <div class="sa-confirm__actions">
+            <button type="button" class="btn btn-outline-light" data-sa-confirm-cancel>Cancel</button>
+            <button type="button" class="btn btn-danger" data-sa-confirm-ok>Confirm</button>
+        </div>
+    </div>
+</div>
+
+<script type="application/json" id="sa-flash-data">@json($flashes->map(fn ($message, $type) => ['type' => $type === 'error' ? 'error' : $type, 'message' => $message])->values())</script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/sa-ui.js') }}"></script>
 <script>
 (function () {
     const input = document.getElementById('sa-search-input');

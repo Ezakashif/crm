@@ -121,7 +121,7 @@
                                         @csrf
                                         <button class="dropdown-item" type="submit">Restore</button>
                                     </form>
-                                @else
+                                                @else
                                     <a class="dropdown-item" href="{{ route('superadmin.companies.show', $company) }}">View</a>
                                     <a class="dropdown-item" href="{{ route('superadmin.companies.edit', $company) }}">Edit</a>
                                     @if (! $company->isDefault())
@@ -130,7 +130,13 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="suspended">
-                                                <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Suspend this company?')">Suspend</button>
+                                                <button
+                                                    class="dropdown-item text-danger"
+                                                    type="submit"
+                                                    data-sa-confirm="Suspend this company? Users will be blocked from the CRM."
+                                                    data-sa-confirm-title="Suspend company"
+                                                    data-sa-confirm-label="Suspend"
+                                                >Suspend</button>
                                             </form>
                                         @else
                                             <form method="POST" action="{{ route('superadmin.companies.status', $company) }}">
@@ -144,7 +150,14 @@
                                     @if ($company->status === 'active')
                                         <form method="POST" action="{{ route('superadmin.companies.impersonate', $company) }}">
                                             @csrf
-                                            <button class="dropdown-item" type="submit" onclick="return confirm('Login as this company admin?')">Login as</button>
+                                            <button
+                                                class="dropdown-item"
+                                                type="submit"
+                                                data-sa-confirm="Login as this company admin? You will enter their CRM workspace."
+                                                data-sa-confirm-title="Login as admin"
+                                                data-sa-confirm-label="Login as"
+                                                data-sa-confirm-class="btn-info"
+                                            >Login as</button>
                                         </form>
                                     @endif
                                     @if (! $company->isDefault())
@@ -152,7 +165,13 @@
                                         <form method="POST" action="{{ route('superadmin.companies.destroy', $company) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Soft-delete this company?')">Delete</button>
+                                            <button
+                                                class="dropdown-item text-danger"
+                                                type="submit"
+                                                data-sa-confirm="Soft-delete this company? It can be restored later from the deleted list."
+                                                data-sa-confirm-title="Delete company"
+                                                data-sa-confirm-label="Delete"
+                                            >Delete</button>
                                         </form>
                                     @endif
                                 @endif
@@ -162,15 +181,35 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="sa-muted">No companies found.</td>
+                    <td colspan="10">
+                        <div class="sa-empty">
+                            <div class="sa-empty__icon" aria-hidden="true"><i class="fas fa-building"></i></div>
+                            <h2 class="sa-empty__title">No companies found</h2>
+                            <p class="sa-empty__text">
+                                @if (! empty($filters['search']) || ! empty($filters['status']) || ! empty($filters['subscription_status']) || ! empty($filters['plan_id']) || ! empty($filters['trashed']))
+                                    No tenants match your filters. Try clearing them or create a new company.
+                                @else
+                                    Provision your first tenant to get started.
+                                @endif
+                            </p>
+                            <div class="d-flex justify-content-center flex-wrap" style="gap: 0.5rem;">
+                                @if (! empty($filters['search']) || ! empty($filters['status']) || ! empty($filters['subscription_status']) || ! empty($filters['plan_id']) || ! empty($filters['trashed']))
+                                    <a href="{{ route('superadmin.companies.index') }}" class="btn btn-sm btn-outline-light">Clear filters</a>
+                                @endif
+                                <a href="{{ route('superadmin.companies.create') }}" class="btn btn-sm btn-info">New company</a>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             @endforelse
             </tbody>
         </table>
     </div>
 
-    <div class="mt-3">
-        {{ $companies->links() }}
-    </div>
+    @if ($companies->hasPages())
+        <div class="mt-3">
+            {{ $companies->links() }}
+        </div>
+    @endif
 </div>
 @endsection

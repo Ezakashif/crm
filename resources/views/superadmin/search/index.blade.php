@@ -6,13 +6,13 @@
 
 @section('content')
 <div class="sa-card">
-    <form method="GET" class="form-row align-items-end">
+    <form method="GET" class="form-row align-items-end" data-sa-no-loading="1">
         <div class="form-group col-md-8 mb-md-0">
-            <label class="sa-muted">Query</label>
-            <input type="search" name="q" value="{{ $term }}" class="form-control" placeholder="Company, slug, email, owner...">
+            <label class="sa-muted" for="sa-search-q">Query</label>
+            <input id="sa-search-q" type="search" name="q" value="{{ $term }}" class="form-control" placeholder="Company, slug, email, owner..." autofocus>
         </div>
         <div class="form-group col-md-4 mb-0">
-            <button class="btn btn-info">Search</button>
+            <button type="submit" class="btn btn-info">Search</button>
         </div>
     </form>
 </div>
@@ -28,7 +28,9 @@
                         <div class="sa-muted small">{{ $company->slug }} · {{ $company->email ?? 'no email' }}</div>
                     </div>
                 @empty
-                    <p class="sa-muted mb-0">No companies matched.</p>
+                    <div class="sa-empty py-3">
+                        <p class="sa-empty__text mb-0">No companies matched.</p>
+                    </div>
                 @endforelse
             </div>
         </div>
@@ -47,9 +49,19 @@
                         @endif
                     </div>
                 @empty
-                    <p class="sa-muted mb-0">No users matched.</p>
+                    <div class="sa-empty py-3">
+                        <p class="sa-empty__text mb-0">No users matched.</p>
+                    </div>
                 @endforelse
             </div>
+        </div>
+    </div>
+@else
+    <div class="sa-card">
+        <div class="sa-empty py-4">
+            <div class="sa-empty__icon" aria-hidden="true"><i class="fas fa-search"></i></div>
+            <h2 class="sa-empty__title">Search the platform</h2>
+            <p class="sa-empty__text mb-0">Enter a company name, slug, email, or owner to find matches.</p>
         </div>
     </div>
 @endif
