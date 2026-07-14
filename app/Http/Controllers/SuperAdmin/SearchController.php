@@ -16,9 +16,9 @@ class SearchController extends Controller
 
     public function index(Request $request): View
     {
-        $term = (string) $request->validate([
+        $term = (string) ($request->validate([
             'q' => ['nullable', 'string', 'max:255'],
-        ])['q'] ?? '';
+        ])['q'] ?? '');
 
         $results = $this->search->search($term, 25);
 
@@ -31,9 +31,9 @@ class SearchController extends Controller
 
     public function suggest(Request $request): JsonResponse
     {
-        $term = (string) $request->validate([
+        $term = (string) ($request->validate([
             'q' => ['nullable', 'string', 'max:255'],
-        ])['q'] ?? '';
+        ])['q'] ?? '');
 
         $results = $this->search->search($term, 6);
 
