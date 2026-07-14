@@ -11,6 +11,7 @@
 @section('content')
     @include('partials.impersonation-banner')
     {{ $slot }}
+    @include('partials.crm-shell')
 @stop
 
 @section('css')

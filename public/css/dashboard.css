@@ -20,9 +20,9 @@
 }
 
 .crm-dashboard .crm-header-actions .btn {
-    border-radius: 999px;
+    border-radius: var(--crm-radius-btn);
     font-weight: 600;
-    padding: 0.35rem 0.9rem;
+    padding: 0.35rem 0.85rem;
 }
 
 .crm-dashboard .crm-header-actions .btn-primary {
@@ -448,7 +448,7 @@
 }
 
 .crm-dashboard .crm-empty__action .btn {
-    border-radius: 999px;
+    border-radius: var(--crm-radius-btn);
     font-weight: 600;
 }
 
