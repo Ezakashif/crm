@@ -67,11 +67,14 @@ class SuperAdminActivityIsolationTest extends TestCase
         $this->assertNull($platformLog->company_id);
         $this->assertSame($company->id, $platformLog->properties['company_id'] ?? null);
 
+        $this->assertFalse(
+            ActivityLog::query()->forTenant()->whereKey($platformLog->id)->exists()
+        );
+
         $this->actingAs($admin)
             ->get(route('activity-logs.index'))
             ->assertOk()
-            ->assertDontSee('Company updated')
-            ->assertDontSee('Acme CRM Updated');
+            ->assertDontSee('Updated company Acme CRM Updated');
     }
 
     public function test_super_admin_dashboard_shows_platform_activity_only(): void
@@ -135,10 +138,18 @@ class SuperAdminActivityIsolationTest extends TestCase
 
         app(CurrentCompany::class)->set($company);
 
+        $this->assertFalse(
+            ActivityLog::query()
+                ->forTenant()
+                ->where('user_id', $superAdmin->id)
+                ->where('action', 'user.login')
+                ->exists()
+        );
+
         $this->actingAs($admin)
             ->get(route('activity-logs.index'))
             ->assertOk()
             ->assertSee('Visible Customer')
-            ->assertDontSee('User logged in');
+            ->assertSee('Created customer Visible Customer');
     }
 }
