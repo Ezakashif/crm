@@ -1,32 +1,29 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h1 class="crm-page-title">{{ $lead->name }}</h1>
-                <span class="crm-page-subtitle">{{ $lead->company ?? 'No company' }}</span>
-            </div>
-            <div class="mt-2 mt-md-0 d-flex flex-wrap align-items-center">
-                <div class="mr-2 mb-1">
+        <x-page-header
+            :title="$lead->name"
+            :subtitle="$lead->company ?? 'No company'"
+            :breadcrumbs="[
+                ['label' => 'Home', 'url' => route('dashboard')],
+                ['label' => 'Leads', 'url' => route('leads.index')],
+                ['label' => $lead->name],
+            ]"
+        >
+            <x-slot:actions>
+                <div class="mr-1 mb-1">
                     <x-lead-contact-actions :lead="$lead" />
                 </div>
                 @can('update', $lead)
                     <a href="{{ route('leads.edit', $lead) }}" class="btn btn-default btn-sm mb-1">
-                        <i class="fas fa-edit"></i> Edit
+                        <i class="fas fa-edit" aria-hidden="true"></i> Edit
                     </a>
                 @endcan
-                <a href="{{ route('leads.index') }}" class="btn btn-default btn-sm mb-1">
-                    <i class="fas fa-arrow-left"></i> Back to Board
+                <a href="{{ route('leads.index') }}" class="btn btn-outline-secondary btn-sm mb-1">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to board
                 </a>
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-page-header>
     </x-slot>
-
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{ session('success') }}
-        </div>
-    @endif
 
     @php
         $statusBadge = match ($lead->status) {
@@ -44,7 +41,7 @@
         <div class="col-lg-4">
             <div class="card card-outline card-primary">
                 <div class="card-header">
-                    <h3 class="card-title">Lead Details</h3>
+                    <h3 class="card-title">Lead details</h3>
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
@@ -53,7 +50,7 @@
                             <span class="badge badge-{{ $statusBadge }}">{{ $lead->statusLabel() }}</span>
                         </dd>
 
-                        <dt class="col-sm-5">Assigned To</dt>
+                        <dt class="col-sm-5">Assigned to</dt>
                         <dd class="col-sm-7">{{ optional($lead->assignee)->name ?? 'Unassigned' }}</dd>
 
                         <dt class="col-sm-5">Source</dt>
@@ -61,14 +58,14 @@
                             {{ $lead->source ? ucfirst(str_replace('_', ' ', $lead->source)) : '—' }}
                         </dd>
 
-                        <dt class="col-sm-5">Estimated Value</dt>
+                        <dt class="col-sm-5">Estimated value</dt>
                         <dd class="col-sm-7">
                             {{ $lead->estimated_value ? number_format($lead->estimated_value, 2) : '—' }}
                         </dd>
 
-                        <dt class="col-sm-5">Follow Up</dt>
+                        <dt class="col-sm-5">Follow-up</dt>
                         <dd class="col-sm-7">
-                            @if($lead->follow_up_date)
+                            @if ($lead->follow_up_date)
                                 {{ \Carbon\Carbon::parse($lead->follow_up_date)->format('M j, Y') }}
                             @else
                                 —
@@ -77,11 +74,11 @@
 
                         <dt class="col-sm-5">Email</dt>
                         <dd class="col-sm-7">
-                            @if($lead->email)
+                            @if ($lead->email)
                                 <div class="d-flex align-items-center flex-wrap">
                                     <span class="mr-2">{{ $lead->email }}</span>
-                                    <a href="{{ $lead->emailUrl() }}" class="btn btn-info btn-xs">
-                                        <i class="fas fa-envelope"></i> Email
+                                    <a href="{{ $lead->emailUrl() }}" class="btn btn-outline-secondary btn-xs" aria-label="Email {{ $lead->name }}">
+                                        <i class="fas fa-envelope" aria-hidden="true"></i> Email
                                     </a>
                                 </div>
                             @else
@@ -91,16 +88,16 @@
 
                         <dt class="col-sm-5">Phone</dt>
                         <dd class="col-sm-7">
-                            @if($lead->phone)
+                            @if ($lead->phone)
                                 <div class="d-flex align-items-center flex-wrap">
                                     <span class="mr-2">{{ $lead->phone }}</span>
                                     <div class="btn-group btn-group-xs">
-                                        <a href="{{ $lead->callUrl() }}" class="btn btn-primary btn-xs">
-                                            <i class="fas fa-phone"></i> Call
+                                        <a href="{{ $lead->callUrl() }}" class="btn btn-primary btn-xs" aria-label="Call {{ $lead->name }}">
+                                            <i class="fas fa-phone" aria-hidden="true"></i> Call
                                         </a>
-                                        @if($lead->whatsAppUrl())
-                                            <a href="{{ $lead->whatsAppUrl() }}" target="_blank" rel="noopener" class="btn btn-success btn-xs">
-                                                <i class="fab fa-whatsapp"></i> WhatsApp
+                                        @if ($lead->whatsAppUrl())
+                                            <a href="{{ $lead->whatsAppUrl() }}" target="_blank" rel="noopener" class="btn btn-success btn-xs" aria-label="WhatsApp {{ $lead->name }}">
+                                                <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
                                             </a>
                                         @endif
                                     </div>
@@ -111,7 +108,7 @@
                         </dd>
                     </dl>
 
-                    @if($lead->notes)
+                    @if ($lead->notes)
                         <hr>
                         <p class="text-muted small mb-1">Initial notes</p>
                         <p class="mb-0">{{ $lead->notes }}</p>
@@ -122,24 +119,26 @@
                 </div>
             </div>
 
-            @if($lead->tasks->isNotEmpty())
+            @if ($lead->tasks->isNotEmpty())
                 <div class="card card-outline card-secondary">
                     <div class="card-header">
-                        <h3 class="card-title">Related Tasks</h3>
+                        <h3 class="card-title">Related tasks</h3>
                     </div>
                     <div class="card-body p-0">
                         <ul class="list-group list-group-flush">
-                            @foreach($lead->tasks as $task)
+                            @foreach ($lead->tasks as $task)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        @can('update', $task)
+                                        @can('view', $task)
+                                            <a href="{{ route('tasks.show', $task) }}">{{ $task->title }}</a>
+                                        @elsecan('update', $task)
                                             <a href="{{ route('tasks.edit', $task) }}">{{ $task->title }}</a>
                                         @else
                                             {{ $task->title }}
                                         @endcan
                                         <div class="small text-muted">
                                             {{ ucfirst(str_replace('_', ' ', $task->status)) }}
-                                            @if($task->due_date)
+                                            @if ($task->due_date)
                                                 · Due {{ \Carbon\Carbon::parse($task->due_date)->format('M j, Y') }}
                                             @endif
                                         </div>
@@ -154,14 +153,27 @@
                 </div>
             @endif
 
-            @if($lead->status !== 'won')
+            @if ($lead->status !== 'won')
                 @can('convert', $lead)
-                    <form method="POST" action="{{ route('leads.convert', $lead) }}" class="mt-3">
-                        @csrf
-                        <button type="submit" class="btn btn-info btn-block">
-                            <i class="fas fa-user-check"></i> Convert to Customer
-                        </button>
-                    </form>
+                    <div class="card card-outline card-success">
+                        <div class="card-body">
+                            <strong class="d-block mb-1">Ready to close?</strong>
+                            <p class="text-muted small mb-3">Convert this lead to create a customer and mark it won.</p>
+                            <form method="POST" action="{{ route('leads.convert', $lead) }}">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="btn btn-success btn-block"
+                                    data-crm-confirm="Convert this lead to a customer? This marks the lead as won."
+                                    data-crm-confirm-title="Convert lead"
+                                    data-crm-confirm-label="Convert"
+                                    data-crm-confirm-class="btn-success"
+                                >
+                                    <i class="fas fa-user-check" aria-hidden="true"></i> Convert to customer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 @endcan
             @endif
         </div>
@@ -170,7 +182,7 @@
             @can('createActivity', $lead)
                 <div class="card card-outline card-success mb-3">
                     <div class="card-header">
-                        <h3 class="card-title">Log Activity</h3>
+                        <h3 class="card-title">Log activity</h3>
                     </div>
                     <form method="POST" action="{{ route('leads.activities.store', $lead) }}">
                         @csrf
@@ -178,9 +190,9 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="type">Activity Type</label>
+                                        <x-form-label for="type" :required="true">Activity type</x-form-label>
                                         <select id="type" name="type" class="form-control @error('type') is-invalid @enderror" required>
-                                            @foreach($activityTypes as $value => $label)
+                                            @foreach ($activityTypes as $value => $label)
                                                 <option value="{{ $value }}" @selected(old('type') === $value)>{{ $label }}</option>
                                             @endforeach
                                         </select>
@@ -191,7 +203,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="occurred_at">When</label>
+                                        <x-form-label for="occurred_at">When</x-form-label>
                                         <input id="occurred_at" name="occurred_at" type="datetime-local"
                                                class="form-control @error('occurred_at') is-invalid @enderror"
                                                value="{{ old('occurred_at', now()->format('Y-m-d\TH:i')) }}">
@@ -202,7 +214,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="next_follow_up_date">Next Follow-up</label>
+                                        <x-form-label for="next_follow_up_date">Next follow-up</x-form-label>
                                         <input id="next_follow_up_date" name="next_follow_up_date" type="date"
                                                class="form-control @error('next_follow_up_date') is-invalid @enderror"
                                                value="{{ old('next_follow_up_date') }}">
@@ -213,7 +225,7 @@
                                 </div>
                             </div>
                             <div class="form-group mb-0">
-                                <label for="summary">What was discussed?</label>
+                                <x-form-label for="summary">What was discussed?</x-form-label>
                                 <textarea id="summary" name="summary" rows="3"
                                           class="form-control @error('summary') is-invalid @enderror"
                                           placeholder="Summarize the conversation, outcome, or next steps...">{{ old('summary') }}</textarea>
@@ -224,7 +236,7 @@
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-success">
-                                <i class="fas fa-plus"></i> Log Activity
+                                <i class="fas fa-plus" aria-hidden="true"></i> Log activity
                             </button>
                         </div>
                     </form>
@@ -233,44 +245,47 @@
 
             <div class="card card-outline card-secondary">
                 <div class="card-header">
-                    <h3 class="card-title">Activity Timeline</h3>
+                    <h3 class="card-title">Activity timeline</h3>
                     <div class="card-tools">
                         <span class="badge badge-light">{{ $lead->activities->count() }}</span>
                     </div>
                 </div>
                 <div class="card-body">
-                    @forelse($lead->activities as $activity)
-                        <div class="d-flex mb-3 pb-3 {{ ! $loop->last ? 'border-bottom' : '' }}">
+                    @forelse ($lead->activities as $activity)
+                        <div class="crm-activity d-flex mb-3 pb-3 {{ ! $loop->last ? 'border-bottom' : '' }}">
                             <div class="mr-3">
-                                <span class="btn btn-sm btn-{{ $activity->typeColor() }} disabled">
+                                <span class="crm-activity__icon btn btn-sm btn-{{ $activity->typeColor() }} disabled" aria-hidden="true">
                                     <i class="{{ $activity->typeIcon() }}"></i>
                                 </span>
                             </div>
                             <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between align-items-start">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap">
                                     <strong>{{ $activity->typeLabel() }}</strong>
                                     <small class="text-muted">
                                         {{ $activity->occurred_at->format('M j, Y g:i A') }}
                                     </small>
                                 </div>
-                                @if($activity->summary)
+                                @if ($activity->summary)
                                     <p class="mb-1 mt-1">{{ $activity->summary }}</p>
                                 @endif
                                 <div class="small text-muted">
-                                    @if($activity->user)
-                                        <i class="fas fa-user"></i> {{ $activity->user->name }}
+                                    @if ($activity->user)
+                                        <i class="fas fa-user" aria-hidden="true"></i> {{ $activity->user->name }}
                                     @endif
-                                    @if($activity->next_follow_up_date)
-                                        · <i class="fas fa-calendar"></i>
+                                    @if ($activity->next_follow_up_date)
+                                        · <i class="fas fa-calendar" aria-hidden="true"></i>
                                         Follow up {{ $activity->next_follow_up_date->format('M j, Y') }}
                                     @endif
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <p class="text-muted text-center mb-0">
-                            No activities logged yet. Use the form above to record your first contact.
-                        </p>
+                        <x-empty-state
+                            class="crm-empty--compact"
+                            icon="fas fa-stream"
+                            title="No activities yet"
+                            description="Log a call, email, or meeting to build the timeline."
+                        />
                     @endforelse
                 </div>
             </div>

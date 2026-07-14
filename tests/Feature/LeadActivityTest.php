@@ -21,7 +21,7 @@ class LeadActivityTest extends TestCase
             ->get(route('leads.show', $lead))
             ->assertOk()
             ->assertSee('John Smith')
-            ->assertSee('Log Activity');
+            ->assertSee('Log activity');
     }
 
     public function test_user_can_log_activity_and_update_follow_up_date(): void

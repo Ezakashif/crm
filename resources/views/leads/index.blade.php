@@ -1,47 +1,46 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h1 class="crm-page-title">Leads</h1>
-                <span class="crm-page-subtitle">Track and move deals across your pipeline.</span>
-            </div>
-            <div class="crm-header-actions mt-2 mt-md-0">
+        <x-page-header
+            title="Leads"
+            subtitle="Track and move deals across your pipeline."
+            :breadcrumbs="[
+                ['label' => 'Home', 'url' => route('dashboard')],
+                ['label' => 'Leads'],
+            ]"
+        >
+            <x-slot:actions>
                 @can('viewAny', App\Models\Lead::class)
                     <a href="{{ route('exports.leads', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-file-download"></i> Export CSV
+                        <i class="fas fa-file-download" aria-hidden="true"></i> Export CSV
                     </a>
                 @endcan
                 @can('create', App\Models\Lead::class)
                     <a href="{{ route('imports.create', 'leads') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-file-upload"></i> Import CSV
+                        <i class="fas fa-file-upload" aria-hidden="true"></i> Import CSV
                     </a>
                     <a href="{{ route('leads.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Add Lead
+                        <i class="fas fa-plus" aria-hidden="true"></i> Add Lead
                     </a>
                 @endcan
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-page-header>
     </x-slot>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{ session('success') }}
+    @if (! empty($boardTruncated))
+        <div class="crm-banner crm-banner--warning crm-keep-alert mb-3" role="status">
+            <div class="crm-banner__icon" aria-hidden="true"><i class="fas fa-filter"></i></div>
+            <div class="crm-banner__body">
+                Showing the first {{ \App\Models\Lead::BOARD_CARD_LIMIT }} leads. Narrow filters to see the rest.
+            </div>
         </div>
     @endif
 
-    @if(! empty($boardTruncated))
-        <div class="alert alert-warning">
-            Showing the first {{ \App\Models\Lead::BOARD_CARD_LIMIT }} leads. Narrow filters to see the rest.
-        </div>
-    @endif
-
-    @if(session('import_errors'))
-        <div class="alert alert-warning alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
+    @if (session('import_errors'))
+        <div class="alert alert-warning alert-dismissible crm-keep-alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Dismiss">&times;</button>
             <strong>Import notes</strong>
             <ul class="mb-0 mt-2">
-                @foreach(session('import_errors') as $error)
+                @foreach (session('import_errors') as $error)
                     <li>Row {{ $error['row'] }}: {{ $error['message'] }}</li>
                 @endforeach
             </ul>
@@ -59,7 +58,7 @@
             <label for="status" class="small text-muted mb-1">Status</label>
             <select id="status" name="status" class="form-control form-control-sm">
                 <option value="">All statuses</option>
-                @foreach($statuses as $value => $label)
+                @foreach ($statuses as $value => $label)
                     <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
                 @endforeach
             </select>
@@ -68,20 +67,20 @@
             <label for="source" class="small text-muted mb-1">Source</label>
             <select id="source" name="source" class="form-control form-control-sm">
                 <option value="">All sources</option>
-                @foreach(\App\Models\Lead::SOURCES as $source)
+                @foreach (\App\Models\Lead::SOURCES as $source)
                     <option value="{{ $source }}" @selected(($filters['source'] ?? '') === $source)>
                         {{ ucfirst(str_replace('_', ' ', $source)) }}
                     </option>
                 @endforeach
             </select>
         </div>
-        @if(auth()->user()->canViewAllLeads())
+        @if (auth()->user()->canViewAllLeads())
             <div class="col-md-3 mb-2">
-                <label for="assigned_to" class="small text-muted mb-1">Assigned To</label>
+                <label for="assigned_to" class="small text-muted mb-1">Assigned to</label>
                 <select id="assigned_to" name="assigned_to" class="form-control form-control-sm">
                     <option value="">Anyone</option>
                     <option value="unassigned" @selected(($filters['assigned_to'] ?? '') === 'unassigned')>Unassigned</option>
-                    @foreach($users as $user)
+                    @foreach ($users as $user)
                         <option value="{{ $user->id }}" @selected(($filters['assigned_to'] ?? '') == $user->id)>
                             {{ $user->name }}
                         </option>
@@ -100,68 +99,104 @@
             'won' => 'card-success',
             'lost' => 'card-danger',
         ];
+        $hasFilters = collect($filters ?? [])->filter(fn ($value) => filled($value))->isNotEmpty();
+        $canCreateLead = auth()->user()->can('create', App\Models\Lead::class);
     @endphp
 
-    @if($leads->isEmpty())
-        <div class="crm-empty mb-3">
-            <i class="fas fa-funnel-dollar"></i>
-            {{ collect($filters ?? [])->filter(fn ($v) => filled($v))->isNotEmpty() ? 'No leads match your filters.' : 'No leads yet. Add your first lead to start the pipeline.' }}
-        </div>
+    @if ($leads->isEmpty())
+        <x-empty-state
+            class="mb-3"
+            icon="fas fa-funnel-dollar"
+            :title="$hasFilters ? 'No leads match your filters' : 'No leads yet'"
+            :description="$hasFilters
+                ? 'Try clearing filters or broadening your search.'
+                : 'Add your first lead to start the pipeline.'"
+            :action-url="$hasFilters ? route('leads.index') : ($canCreateLead ? route('leads.create') : null)"
+            :action-label="$hasFilters ? 'Clear filters' : ($canCreateLead ? 'Add lead' : null)"
+        />
     @endif
 
-    <div class="row crm-kanban">
-        @foreach($statuses as $statusKey => $statusTitle)
+    <div class="row crm-kanban" aria-label="Lead pipeline board">
+        @foreach ($statuses as $statusKey => $statusTitle)
+            @php $columnLeads = $leads->where('status', $statusKey); @endphp
             <div class="col-lg-4 col-md-6 mb-3">
                 <div class="card {{ $statusColors[$statusKey] ?? 'card-secondary' }} card-outline crm-kanban-column">
                     <div class="card-header">
                         <h3 class="card-title">{{ $statusTitle }}</h3>
                         <div class="card-tools">
-                            <span class="badge badge-light column-count">
-                                {{ $leads->where('status', $statusKey)->count() }}
+                            <span class="badge badge-light column-count" aria-label="{{ $columnLeads->count() }} leads">
+                                {{ $columnLeads->count() }}
                             </span>
                         </div>
                     </div>
-                    <div class="card-body lead-column p-2" data-status="{{ $statusKey }}" @if($statusKey === 'won') data-convert-only="1" @endif>
-                        @foreach($leads->where('status', $statusKey) as $lead)
-                            <div class="card card-sm mb-2 lead-card" data-lead-id="{{ $lead->id }}" style="cursor: move;">
+                    <div
+                        class="card-body lead-column p-2"
+                        data-status="{{ $statusKey }}"
+                        @if ($statusKey === 'won') data-convert-only="1" @endif
+                        aria-label="{{ $statusTitle }} column"
+                    >
+                        @forelse ($columnLeads as $lead)
+                            <article
+                                class="card card-sm mb-2 lead-card"
+                                data-lead-id="{{ $lead->id }}"
+                                @can('update.leads') style="cursor: grab;" @else style="cursor: default;" @endcan
+                            >
                                 <div class="card-body p-2">
-                                    <h6 class="mb-1">
+                                    <h6 class="mb-1 lead-card__title">
                                         @can('view', $lead)
                                             <a href="{{ route('leads.show', $lead) }}" class="text-dark">{{ $lead->name }}</a>
                                         @else
                                             {{ $lead->name }}
                                         @endcan
                                     </h6>
-                                    @if($lead->company)
-                                        <p class="text-muted small mb-1"><i class="fas fa-building"></i> {{ $lead->company }}</p>
+                                    @if ($lead->company)
+                                        <p class="text-muted small mb-1">
+                                            <i class="fas fa-building" aria-hidden="true"></i> {{ $lead->company }}
+                                        </p>
                                     @endif
-                                    @if($lead->estimated_value)
-                                        <p class="text-muted small mb-1"><i class="fas fa-dollar-sign"></i> {{ number_format($lead->estimated_value, 2) }}</p>
+                                    @if ($lead->estimated_value)
+                                        <p class="text-muted small mb-1">
+                                            <i class="fas fa-dollar-sign" aria-hidden="true"></i> {{ number_format($lead->estimated_value, 2) }}
+                                        </p>
                                     @endif
                                     <div class="small text-muted mb-2">
-                                        <i class="fas fa-user"></i> {{ optional($lead->assignee)->name ?? 'Unassigned' }}
+                                        <i class="fas fa-user" aria-hidden="true"></i>
+                                        {{ optional($lead->assignee)->name ?? 'Unassigned' }}
                                     </div>
-                                    @if(auth()->user()->can('view', $lead) || auth()->user()->can('update', $lead) || auth()->user()->can('convert', $lead))
-                                        <div class="btn-group btn-group-xs">
+                                    @if (auth()->user()->can('view', $lead) || auth()->user()->can('update', $lead) || auth()->user()->can('convert', $lead))
+                                        <div class="btn-group btn-group-xs lead-card__actions">
                                             @can('view', $lead)
                                                 <a href="{{ route('leads.show', $lead) }}" class="btn btn-primary btn-xs">View</a>
                                             @endcan
                                             @can('update', $lead)
                                                 <a href="{{ route('leads.edit', $lead) }}" class="btn btn-default btn-xs">Edit</a>
                                             @endcan
-                                            @if($lead->status !== 'won')
+                                            @if ($lead->status !== 'won')
                                                 @can('convert', $lead)
                                                     <form method="POST" action="{{ route('leads.convert', $lead) }}" class="d-inline">
                                                         @csrf
-                                                        <button type="submit" class="btn btn-success btn-xs">Convert</button>
+                                                        <button
+                                                            type="submit"
+                                                            class="btn btn-success btn-xs"
+                                                            data-crm-confirm="Convert this lead to a customer? This marks the lead as won."
+                                                            data-crm-confirm-title="Convert lead"
+                                                            data-crm-confirm-label="Convert"
+                                                            data-crm-confirm-class="btn-success"
+                                                        >
+                                                            Convert
+                                                        </button>
                                                     </form>
                                                 @endcan
                                             @endif
                                         </div>
                                     @endif
                                 </div>
+                            </article>
+                        @empty
+                            <div class="crm-kanban-empty" aria-hidden="true">
+                                Drop leads here
                             </div>
-                        @endforeach
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -173,11 +208,35 @@
         @can('update.leads')
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
+                    function notify(type, message) {
+                        if (window.CrmUi && typeof window.CrmUi[type] === 'function') {
+                            window.CrmUi[type](message);
+                            return;
+                        }
+                        window.alert(message);
+                    }
+
                     function refreshColumnCounts() {
                         document.querySelectorAll('.lead-column').forEach(function (column) {
-                            var badge = column.closest('.card')?.querySelector('.column-count');
+                            var card = column.closest('.card');
+                            var badge = card ? card.querySelector('.column-count') : null;
                             if (badge) {
-                                badge.textContent = column.querySelectorAll('.lead-card').length;
+                                var count = column.querySelectorAll('.lead-card').length;
+                                badge.textContent = count;
+                                badge.setAttribute('aria-label', count + ' leads');
+                            }
+
+                            var empty = column.querySelector('.crm-kanban-empty');
+                            if (column.querySelectorAll('.lead-card').length === 0) {
+                                if (!empty) {
+                                    empty = document.createElement('div');
+                                    empty.className = 'crm-kanban-empty';
+                                    empty.setAttribute('aria-hidden', 'true');
+                                    empty.textContent = 'Drop leads here';
+                                    column.appendChild(empty);
+                                }
+                            } else if (empty) {
+                                empty.remove();
                             }
                         });
                     }
@@ -185,23 +244,33 @@
                     document.querySelectorAll('.lead-column').forEach(function (column) {
                         new Sortable(column, {
                             group: 'leads-kanban',
-                            animation: 200,
+                            animation: 180,
                             draggable: '.lead-card',
-                            ghostClass: 'opacity-50',
+                            ghostClass: 'lead-card--ghost',
+                            chosenClass: 'lead-card--chosen',
+                            dragClass: 'lead-card--dragging',
                             scroll: true,
                             bubbleScroll: true,
                             scrollSensitivity: 80,
                             scrollSpeed: 18,
                             emptyInsertThreshold: 48,
-                            onStart: function () {
+                            onStart: function (evt) {
+                                document.body.classList.add('crm-kanban-dragging');
                                 document.querySelectorAll('.lead-column').forEach(function (target) {
                                     target.classList.add('is-drop-target');
                                 });
+                                if (evt.item) {
+                                    evt.item.style.cursor = 'grabbing';
+                                }
                             },
                             onEnd: function (evt) {
+                                document.body.classList.remove('crm-kanban-dragging');
                                 document.querySelectorAll('.lead-column').forEach(function (target) {
                                     target.classList.remove('is-drop-target');
                                 });
+                                if (evt.item) {
+                                    evt.item.style.cursor = 'grab';
+                                }
 
                                 var targetStatus = evt.to.dataset.status;
                                 if (evt.to.dataset.convertOnly === '1' && evt.from !== evt.to) {
@@ -209,11 +278,16 @@
                                         evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
                                     }
                                     refreshColumnCounts();
-                                    alert('Mark a lead as won by converting it to a customer.');
+                                    notify('warning', 'Mark a lead as won by converting it to a customer.');
+                                    return;
+                                }
+
+                                if (evt.from === evt.to && evt.oldIndex === evt.newIndex) {
                                     return;
                                 }
 
                                 refreshColumnCounts();
+                                evt.item.classList.add('is-saving');
 
                                 fetch("{{ route('leads.board.update') }}", {
                                     method: "POST",
@@ -232,15 +306,23 @@
                                         return { ok: res.ok, data: data };
                                     });
                                 }).then(function (result) {
+                                    evt.item.classList.remove('is-saving');
                                     if (! result.ok || ! result.data.success) {
                                         if (typeof evt.from.insertBefore === 'function') {
                                             evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
                                         }
                                         refreshColumnCounts();
-                                        alert(result.data.message || 'Unable to update lead.');
+                                        notify('error', result.data.message || 'Unable to update lead.');
+                                        return;
                                     }
+                                    notify('success', 'Lead moved.');
                                 }).catch(function () {
-                                    alert('Something went wrong.');
+                                    evt.item.classList.remove('is-saving');
+                                    if (typeof evt.from.insertBefore === 'function') {
+                                        evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                                    }
+                                    refreshColumnCounts();
+                                    notify('error', 'Something went wrong.');
                                 });
                             }
                         });
@@ -250,7 +332,7 @@
         @else
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
-                    document.querySelectorAll('.lead-card').forEach(card => {
+                    document.querySelectorAll('.lead-card').forEach(function (card) {
                         card.style.cursor = 'default';
                     });
                 });
