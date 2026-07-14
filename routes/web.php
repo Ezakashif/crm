@@ -38,14 +38,16 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'active', 'company'])
     ->name('dashboard');
 
-Route::middleware(['auth', 'active', 'company'])->group(function () {
+Route::middleware(['auth', 'verified', 'active', 'company'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
     Route::delete('/profile/photo', [ProfileController::class, 'destroyPhoto'])->name('profile.photo.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/search', [GlobalSearchController::class, 'index'])->name('search.index');
+    Route::get('/search', [GlobalSearchController::class, 'index'])
+        ->middleware('throttle:60,1')
+        ->name('search.index');
     Route::get('/search/suggest', [GlobalSearchController::class, 'suggest'])
         ->middleware('throttle:60,1')
         ->name('search.suggest');
@@ -110,7 +112,7 @@ Route::middleware(['auth', 'active', 'company'])->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::middleware(['auth', 'active', 'company', 'permission:website_lead.demo'])->group(function () {
+Route::middleware(['auth', 'verified', 'active', 'company', 'permission:website_lead.demo'])->group(function () {
     Route::get('/demo/website-lead', [WebsiteLeadDemoController::class, 'index'])
         ->name('demo.website-lead');
     Route::post('/demo/website-lead', [WebsiteLeadDemoController::class, 'store'])

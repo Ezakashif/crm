@@ -105,13 +105,26 @@ class UserCsvImporter
 
             $roleIds = $roleSlugs->map(fn (string $slug) => (int) $rolesBySlug[$slug])->all();
 
-            $user = User::create([
+            try {
+                app(\App\Services\PlanLimitService::class)->assertCanAddUser($actor->company);
+                app(\App\Services\RoleAssignmentGuard::class)->assertCanAssignRoles($actor, $roleIds);
+            } catch (\Illuminate\Validation\ValidationException $exception) {
+                $result->addError($rowNumber, collect($exception->errors())->flatten()->first() ?: 'Plan or role limit reached.');
+
+                continue;
+            }
+
+            $user = new User;
+            $user->forceFill([
                 'name' => $validated['name'],
                 'email' => $email,
                 'password' => Hash::make($validated['password']),
                 'role' => 'user',
                 'status' => $validated['status'],
+                'is_super_admin' => false,
             ]);
+            $user->company_id = $actor->company_id;
+            $user->save();
 
             $user->syncRoles($roleIds);
 

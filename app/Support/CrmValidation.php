@@ -10,11 +10,32 @@ use Illuminate\Validation\Rules\Password;
 class CrmValidation
 {
     /**
+     * Tables that soft-delete and must exclude trashed rows from exists checks.
+     *
+     * @var list<string>
+     */
+    private const SOFT_DELETE_TABLES = [
+        'leads',
+        'customers',
+        'tasks',
+    ];
+
+    /**
      * @return \Illuminate\Validation\Rules\Exists
      */
     public static function existsInCompany(string $table, string $column, ?int $companyId)
     {
-        return Rule::exists($table, $column)->where(fn ($query) => $query->where('company_id', $companyId));
+        if ($companyId === null) {
+            return Rule::exists($table, $column)->where(fn ($query) => $query->whereRaw('0 = 1'));
+        }
+
+        return Rule::exists($table, $column)->where(function ($query) use ($table, $companyId) {
+            $query->where('company_id', $companyId);
+
+            if (in_array($table, self::SOFT_DELETE_TABLES, true)) {
+                $query->whereNull('deleted_at');
+            }
+        });
     }
 
     /**
@@ -22,7 +43,17 @@ class CrmValidation
      */
     public static function uniqueInCompany(string $table, string $column, ?int $companyId, mixed $ignore = null)
     {
-        $rule = Rule::unique($table, $column)->where(fn ($query) => $query->where('company_id', $companyId));
+        if ($companyId === null) {
+            $rule = Rule::unique($table, $column)->where(fn ($query) => $query->whereRaw('0 = 1'));
+        } else {
+            $rule = Rule::unique($table, $column)->where(function ($query) use ($table, $companyId) {
+                $query->where('company_id', $companyId);
+
+                if (in_array($table, self::SOFT_DELETE_TABLES, true)) {
+                    $query->whereNull('deleted_at');
+                }
+            });
+        }
 
         if ($ignore !== null) {
             $rule->ignore($ignore);

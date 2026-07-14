@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Services\PermissionRegistry;
+use App\Services\RoleAssignmentGuard;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class RoleController extends Controller
 {
+    public function __construct(
+        protected RoleAssignmentGuard $roleAssignmentGuard,
+    ) {}
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', Role::class);
@@ -66,6 +71,11 @@ class RoleController extends Controller
             'permissions.*' => ['integer', 'exists:permissions,id'],
         ]);
 
+        $permissionIds = $this->roleAssignmentGuard->filterAssignablePermissions(
+            $request->user(),
+            $validated['permissions'] ?? [],
+        );
+
         $role = Role::create([
             'name' => $validated['name'],
             'slug' => $validated['slug'],
@@ -73,7 +83,7 @@ class RoleController extends Controller
             'is_system' => false,
         ]);
 
-        $role->permissions()->sync($validated['permissions'] ?? []);
+        $role->permissions()->sync($permissionIds);
 
         return redirect()->route('roles.index')
             ->with('success', 'Role created successfully.');
@@ -123,7 +133,15 @@ class RoleController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
-        $role->permissions()->sync($validated['permissions'] ?? []);
+        // System Admin role permissions are managed by the platform synchronizer.
+        if (! ($role->isProtected() && $role->slug === 'admin')) {
+            $permissionIds = $this->roleAssignmentGuard->filterAssignablePermissions(
+                $request->user(),
+                $validated['permissions'] ?? [],
+            );
+
+            $role->permissions()->sync($permissionIds);
+        }
 
         return redirect()->route('roles.index')
             ->with('success', 'Role updated successfully.');

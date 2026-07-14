@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Lead;
 use App\Models\LeadActivity;
 use App\Models\User;
+use App\Services\PlanLimitService;
 use App\Support\CurrentCompany;
 use Illuminate\Support\Facades\Validator;
 
@@ -31,6 +32,8 @@ class WebsiteLeadService
         $currentCompany->set($company);
 
         try {
+            app(PlanLimitService::class)->assertCanAddLead($company);
+
             $createdById = $this->resolveCreatedByUserId($company->id);
 
             $sortOrder = Lead::query()->where('status', 'new')->max('sort_order') + 1;

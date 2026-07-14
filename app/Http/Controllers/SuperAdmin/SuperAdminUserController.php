@@ -32,7 +32,8 @@ class SuperAdminUserController extends Controller
     {
         $validated = $request->validated();
 
-        $user = new User([
+        $user = new User;
+        $user->forceFill([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],

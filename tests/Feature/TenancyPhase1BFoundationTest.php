@@ -53,8 +53,10 @@ class TenancyPhase1BFoundationTest extends TestCase
         $this->assertNull($current->id());
     }
 
-    public function test_company_scope_is_noop_when_current_company_unset(): void
+    public function test_company_scope_is_noop_when_current_company_unset_outside_production(): void
     {
+        config(['tenancy.fail_closed_without_context' => false]);
+
         $default = Company::default();
         $other = Company::factory()->create();
 
@@ -80,6 +82,28 @@ class TenancyPhase1BFoundationTest extends TestCase
         ]);
 
         $this->assertSame(2, Lead::query()->count());
+    }
+
+    public function test_company_scope_fails_closed_when_configured(): void
+    {
+        config(['tenancy.fail_closed_without_context' => true]);
+
+        $default = Company::default();
+
+        DB::table('leads')->insert([
+            [
+                'name' => 'Hidden Lead',
+                'email' => 'hidden-lead@example.com',
+                'status' => 'new',
+                'source' => 'website',
+                'company_id' => $default->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $this->assertSame(0, Lead::query()->count());
+        $this->assertSame(1, Lead::withoutCompanyScope()->count());
     }
 
     public function test_company_scope_filters_when_current_company_is_set(): void

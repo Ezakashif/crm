@@ -100,6 +100,14 @@ class LeadCsvImporter
 
             $sortOrder++;
 
+            try {
+                app(\App\Services\PlanLimitService::class)->assertCanAddLead($actor->company);
+            } catch (\Illuminate\Validation\ValidationException $exception) {
+                $result->addError($rowNumber, collect($exception->errors())->flatten()->first() ?: 'Lead plan limit reached.');
+
+                continue;
+            }
+
             $lead = Lead::create([
                 'created_by' => $actor->id,
                 'assigned_to' => $assignedTo,

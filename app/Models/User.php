@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Concerns\HasRoles;
 use App\Models\Concerns\BelongsToCompany;
 use Database\Factories\UserFactory;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,10 +15,10 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmailContract
 {
     /** @use HasFactory<UserFactory> */
-    use BelongsToCompany, HasFactory, HasRoles, Notifiable;
+    use BelongsToCompany, HasFactory, HasRoles, MustVerifyEmail, Notifiable;
 
     public const STATUSES = [
         'active' => 'Active',
@@ -28,11 +30,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
-        'status',
         'photo_path',
-        'is_super_admin',
-        'last_login_at',
     ];
 
     protected $hidden = [

@@ -81,6 +81,16 @@ class CustomerCsvImporter
                 $seenEmails[$normalizedEmail] = $rowNumber;
             }
 
+            $customer = null;
+
+            try {
+                app(\App\Services\PlanLimitService::class)->assertCanAddCustomer($actor->company);
+            } catch (\Illuminate\Validation\ValidationException $exception) {
+                $result->addError($rowNumber, collect($exception->errors())->flatten()->first() ?: 'Customer plan limit reached.');
+
+                continue;
+            }
+
             $customer = Customer::create([
                 'created_by' => $actor->id,
                 'name' => $validated['name'],

@@ -10,6 +10,7 @@ use App\Models\Task;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\LeadListQueryService;
+use App\Services\PlanLimitService;
 use App\Support\CrmValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ class LeadController extends Controller
 {
     public function __construct(
         protected LeadListQueryService $leadListQuery,
+        protected PlanLimitService $planLimits,
     ) {}
 
     public function index(Request $request)
@@ -63,6 +65,8 @@ class LeadController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
+
+        $this->planLimits->assertCanAddLead($user->company);
 
         $assignedTo = $user->canAssignLeads()
             ? ($validated['assigned_to'] ?? null)
@@ -223,45 +227,56 @@ class LeadController extends Controller
     {
         $this->authorize('convert', $lead);
 
-        $existing = Customer::withTrashed()->where('source_lead_id', $lead->id)->first();
+        $result = DB::transaction(function () use ($lead) {
+            $lockedLead = Lead::query()
+                ->whereKey($lead->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        if ($existing) {
-            if ($existing->trashed()) {
-                $existing->restore();
+            $existing = Customer::withTrashed()
+                ->where('source_lead_id', $lockedLead->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($existing) {
+                if ($existing->trashed()) {
+                    $existing->restore();
+                }
+
+                if ($lockedLead->status !== 'won') {
+                    $lockedLead->status = 'won';
+                    $lockedLead->save();
+                }
+
+                return [
+                    'customer' => $existing,
+                    'already_converted' => true,
+                ];
             }
 
-            if ($lead->status !== 'won') {
-                $lead->status = 'won';
-                $lead->save();
-            }
+            app(PlanLimitService::class)->assertCanAddCustomer(auth()->user()->company);
 
-            return redirect()
-                ->route('customers.show', $existing)
-                ->with('success', 'Lead was already converted to a customer.');
-        }
-
-        $customer = DB::transaction(function () use ($lead) {
             $customer = Customer::create([
                 'created_by' => auth()->id(),
-                'source_lead_id' => $lead->id,
-                'name' => $lead->name,
-                'email' => $lead->email,
-                'phone' => $lead->phone,
-                'company_name' => $lead->company,
+                'source_lead_id' => $lockedLead->id,
+                'name' => $lockedLead->name,
+                'email' => $lockedLead->email,
+                'phone' => $lockedLead->phone,
+                'company_name' => $lockedLead->company,
                 'address' => null,
-                'notes' => $lead->notes,
+                'notes' => $lockedLead->notes,
             ]);
 
-            $lead->status = 'won';
-            $lead->save();
+            $lockedLead->status = 'won';
+            $lockedLead->save();
 
             Task::query()
-                ->where('lead_id', $lead->id)
+                ->where('lead_id', $lockedLead->id)
                 ->whereNull('customer_id')
                 ->update(['customer_id' => $customer->id]);
 
-            ActivityLogger::log('lead.converted', $lead, [
-                'name' => $lead->name,
+            ActivityLogger::log('lead.converted', $lockedLead, [
+                'name' => $lockedLead->name,
                 'customer_id' => $customer->id,
             ]);
 
@@ -269,11 +284,20 @@ class LeadController extends Controller
                 'name' => $customer->name,
             ]);
 
-            return $customer;
+            return [
+                'customer' => $customer,
+                'already_converted' => false,
+            ];
         });
 
-        return redirect()->route('customers.show', $customer)
-            ->with('success', 'Lead converted to customer');
+        return redirect()
+            ->route('customers.show', $result['customer'])
+            ->with(
+                'success',
+                $result['already_converted']
+                    ? 'Lead was already converted to a customer.'
+                    : 'Lead converted to customer',
+            );
     }
 
     public function updateBoard(Request $request)

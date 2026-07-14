@@ -128,7 +128,7 @@ class PlatformSettingsService
     }
 
     /**
-     * Apply platform name/logo to AdminLTE (CRM sidebar, login) and app.name.
+     * Apply platform branding and runtime settings (timezone, mail, currency).
      */
     public function applyBranding(): void
     {
@@ -139,11 +139,27 @@ class PlatformSettingsService
         $sidebarLogo = $this->logoAssetPath('light') ?: $this->logoAssetPath();
         $authLogo = $this->logoAssetPath() ?: $sidebarLogo;
 
+        $timezone = (string) ($this->get('default_timezone') ?: config('app.timezone', 'UTC'));
+        $currency = strtoupper((string) ($this->get('default_currency') ?: 'USD'));
+        $mailFromName = $this->get('mail_from_name');
+        $mailFromAddress = $this->get('mail_from_address');
+
         config([
             'app.name' => $this->platformName(),
+            'app.timezone' => $timezone,
+            'app.currency' => $currency,
             'adminlte.logo' => '<b>'.$name.'</b>',
             'adminlte.logo_img_alt' => $this->platformName(),
         ]);
+
+        date_default_timezone_set($timezone);
+
+        if (filled($mailFromName) || filled($mailFromAddress)) {
+            config([
+                'mail.from.name' => filled($mailFromName) ? (string) $mailFromName : config('mail.from.name'),
+                'mail.from.address' => filled($mailFromAddress) ? (string) $mailFromAddress : config('mail.from.address'),
+            ]);
+        }
 
         if ($sidebarLogo !== null) {
             config([

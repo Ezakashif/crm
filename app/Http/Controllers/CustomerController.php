@@ -9,6 +9,7 @@ use App\Models\Task;
 use App\Services\ActivityLogger;
 use App\Services\CustomerListQueryService;
 use App\Services\CustomerTimelineService;
+use App\Services\PlanLimitService;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -16,6 +17,7 @@ class CustomerController extends Controller
     public function __construct(
         protected CustomerListQueryService $customerListQuery,
         protected CustomerTimelineService $customerTimeline,
+        protected PlanLimitService $planLimits,
     ) {}
 
     public function index(Request $request)
@@ -42,6 +44,8 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request)
     {
         $validated = $request->validated();
+
+        $this->planLimits->assertCanAddCustomer($request->user()->company);
 
         $customer = Customer::create([
             'created_by' => auth()->id(),

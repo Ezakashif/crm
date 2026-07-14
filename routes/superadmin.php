@@ -22,7 +22,9 @@ Route::middleware(['auth', 'active', 'superadmin'])
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('search', [SearchController::class, 'index'])->name('search.index');
+        Route::get('search', [SearchController::class, 'index'])
+            ->middleware('throttle:60,1')
+            ->name('search.index');
         Route::get('search/suggest', [SearchController::class, 'suggest'])
             ->middleware('throttle:60,1')
             ->name('search.suggest');

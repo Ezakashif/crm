@@ -13,11 +13,28 @@ class CompanyScope implements Scope
     {
         $companyId = app(CurrentCompany::class)->id();
 
-        // No-op until Phase 1C sets tenant context for web requests.
         if ($companyId === null) {
+            // Fail closed in production (and when explicitly enabled) so missing
+            // tenant context cannot leak cross-company rows. Callers that need
+            // unscoped access must use withoutCompanyScope().
+            if ($this->shouldFailClosed()) {
+                $builder->whereRaw('0 = 1');
+            }
+
             return;
         }
 
         $builder->where($model->getTable().'.company_id', $companyId);
+    }
+
+    private function shouldFailClosed(): bool
+    {
+        $configured = config('tenancy.fail_closed_without_context');
+
+        if ($configured === null) {
+            return app()->isProduction();
+        }
+
+        return filter_var($configured, FILTER_VALIDATE_BOOLEAN);
     }
 }

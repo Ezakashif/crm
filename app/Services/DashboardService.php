@@ -40,6 +40,13 @@ class DashboardService
                 ->pluck('aggregate', 'status')
             : collect();
 
+        $taskStatusCounts = $canViewTasks
+            ? (clone $taskQuery)
+                ->selectRaw('status, COUNT(*) as aggregate')
+                ->groupBy('status')
+                ->pluck('aggregate', 'status')
+            : collect();
+
         $newLeads = (int) ($leadStatusCounts['new'] ?? 0);
         $wonLeads = (int) ($leadStatusCounts['won'] ?? 0);
         $lostLeads = (int) ($leadStatusCounts['lost'] ?? 0);
@@ -54,13 +61,13 @@ class DashboardService
 
             'customerCount' => $canViewCustomers ? Customer::count() : null,
             'leadCount' => $canViewLeads ? (int) $leadStatusCounts->sum() : null,
-            'taskCount' => $canViewTasks ? (clone $taskQuery)->count() : null,
+            'taskCount' => $canViewTasks ? (int) $taskStatusCounts->sum() : null,
 
             'todaysFollowUpsCount' => $canViewLeads
                 ? $this->todaysFollowUpsQuery(clone $leadQuery)->count()
                 : null,
             'pendingTasksCount' => $canViewTasks
-                ? (clone $taskQuery)->where('status', 'pending')->count()
+                ? (int) ($taskStatusCounts['pending'] ?? 0)
                 : null,
             'overdueTasksCount' => $canViewTasks
                 ? $this->overdueTasksQuery(clone $taskQuery)->count()

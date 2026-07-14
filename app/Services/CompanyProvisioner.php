@@ -65,7 +65,8 @@ class CompanyProvisioner
             $admin = null;
 
             if (filled($data['admin_email'] ?? null)) {
-                $admin = new User([
+                $admin = new User;
+                $admin->forceFill([
                     'name' => $data['admin_name'] ?: 'Administrator',
                     'email' => $data['admin_email'],
                     'password' => $data['admin_password'] ?: Str::password(12),

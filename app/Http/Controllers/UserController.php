@@ -6,6 +6,8 @@ use App\Models\Role;
 use App\Models\User;
 use App\Notifications\UserStatusChanged;
 use App\Services\ActivityLogger;
+use App\Services\PlanLimitService;
+use App\Services\RoleAssignmentGuard;
 use App\Services\UserListQueryService;
 use App\Support\CrmValidation;
 use Illuminate\Http\Request;
@@ -20,6 +22,8 @@ class UserController extends Controller
 
     public function __construct(
         protected UserListQueryService $userListQuery,
+        protected PlanLimitService $planLimits,
+        protected RoleAssignmentGuard $roleAssignmentGuard,
     ) {}
 
     public function index(Request $request)
@@ -69,13 +73,21 @@ class UserController extends Controller
 
         $validated = $request->validate(CrmValidation::userStoreRules());
 
-        $user = User::create([
+        $actor = $request->user();
+        $this->roleAssignmentGuard->assertCanAssignRoles($actor, $validated['roles']);
+        $this->planLimits->assertCanAddUser($actor->company);
+
+        $user = new User;
+        $user->forceFill([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'user',
             'status' => $validated['status'],
+            'is_super_admin' => false,
         ]);
+        $user->company_id = $actor->company_id;
+        $user->save();
 
         $user->syncRoles($validated['roles']);
 
@@ -111,16 +123,18 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', \App\Support\CrmValidation::uniqueInCompany('users', 'email', $request->user()->company_id, $user->id)],
+            'email' => ['required', 'email', 'max:255', CrmValidation::uniqueInCompany('users', 'email', $request->user()->company_id, $user->id)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => [
                 'integer',
-                \App\Support\CrmValidation::existsInCompany('roles', 'id', $request->user()->company_id),
+                CrmValidation::existsInCompany('roles', 'id', $request->user()->company_id),
             ],
             'status' => ['required', Rule::in(array_keys(self::STATUSES))],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ]);
+
+        $this->roleAssignmentGuard->assertCanAssignRoles($request->user(), $validated['roles']);
 
         $adminRoleId = Role::query()->where('slug', 'admin')->value('id');
 
@@ -136,9 +150,11 @@ class UserController extends Controller
 
         $oldStatus = $user->status;
 
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        $user->status = $validated['status'];
+        $user->forceFill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'status' => $validated['status'],
+        ]);
 
         if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
@@ -209,7 +225,7 @@ class UserController extends Controller
             return back()->with('success', 'User status unchanged.');
         }
 
-        $user->update(['status' => $validated['status']]);
+        $user->forceFill(['status' => $validated['status']])->save();
 
         $this->notifyStatusChange($user, $oldStatus, $validated['status']);
 

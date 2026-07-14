@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\SuperAdmin\ImpersonationService;
 use App\Services\SuperAdmin\PlatformSettingsService;
 use Closure;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class EnsurePlatformNotInMaintenance
 
     /**
      * Block tenant access while platform maintenance mode is enabled.
-     * Super Admins can still reach /superadmin and auth routes to turn it off.
+     * Super Admins (and active impersonation sessions) can still operate.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
@@ -28,6 +29,10 @@ class EnsurePlatformNotInMaintenance
         $user = $request->user();
 
         if ($user?->isSuperAdmin()) {
+            return $next($request);
+        }
+
+        if (app(ImpersonationService::class)->isImpersonating($request)) {
             return $next($request);
         }
 
@@ -54,6 +59,11 @@ class EnsurePlatformNotInMaintenance
         }
 
         if ($request->is('superadmin') || $request->is('superadmin/*')) {
+            return true;
+        }
+
+        // Allow ending an impersonation session even if the flag flipped mid-session.
+        if ($request->routeIs('impersonation.leave') || $request->is('impersonation/leave')) {
             return true;
         }
 

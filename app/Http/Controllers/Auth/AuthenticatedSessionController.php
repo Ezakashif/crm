@@ -53,6 +53,13 @@ class AuthenticatedSessionController extends Controller
             ? Company::query()->find($user->company_id)
             : null;
 
+        if ($company && ! $company->isActive()) {
+            return $this->rejectAuthenticatedSession(
+                $request,
+                'Your company account is suspended. Please contact support.',
+            );
+        }
+
         if ($company && $company->isSubscriptionExpired()) {
             $this->markSubscriptionExpired($company);
 

@@ -250,6 +250,19 @@
     let timer = null;
     const suggestUrl = @json(route('superadmin.search.suggest'));
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(value) {
+        return escapeHtml(value).replace(/`/g, '&#096;');
+    }
+
     input.addEventListener('input', function () {
         clearTimeout(timer);
         const q = input.value.trim();
@@ -268,13 +281,13 @@
                 if (data.companies && data.companies.length) {
                     html += '<div class="px-3 pt-2 sa-muted small">Companies</div>';
                     data.companies.forEach(function (item) {
-                        html += '<a href="' + item.url + '"><strong>' + item.name + '</strong><div class="sa-muted small">' + (item.slug || '') + '</div></a>';
+                        html += '<a href="' + escapeAttr(item.url) + '"><strong>' + escapeHtml(item.name) + '</strong><div class="sa-muted small">' + escapeHtml(item.slug || '') + '</div></a>';
                     });
                 }
                 if (data.users && data.users.length) {
                     html += '<div class="px-3 pt-2 sa-muted small">Users</div>';
                     data.users.forEach(function (item) {
-                        html += '<a href="' + item.url + '"><strong>' + item.name + '</strong><div class="sa-muted small">' + item.email + (item.company ? ' · ' + item.company : '') + '</div></a>';
+                        html += '<a href="' + escapeAttr(item.url) + '"><strong>' + escapeHtml(item.name) + '</strong><div class="sa-muted small">' + escapeHtml(item.email) + (item.company ? ' · ' + escapeHtml(item.company) : '') + '</div></a>';
                     });
                 }
                 if (!html) {
