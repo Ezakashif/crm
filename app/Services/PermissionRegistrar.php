@@ -21,6 +21,16 @@ class PermissionRegistrar
         }
 
         Gate::define('access-reports', fn (User $user) => $user->canAccessReports());
+        Gate::define('access-search', fn (User $user) => $user->hasAnyPermission([
+            'view.leads',
+            'view.customers',
+            'view.tasks',
+            'view.users',
+        ]));
+        Gate::define('access-activity-logs', fn (User $user) => $user->hasAnyPermission([
+            'view.activity_logs',
+            'view_own.activity_logs',
+        ]));
     }
 
     public function refreshGates(): void

@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\Analytics\CrmAnalytics;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
 class ReportService
 {
@@ -25,6 +26,34 @@ class ReportService
      * @return array<string, mixed>
      */
     public function forUser(User $user, array $filters): array
+    {
+        if (app()->environment('testing')) {
+            return $this->buildForUser($user, $filters);
+        }
+
+        $cacheKey = sprintf(
+            'reports:%s:%s:%s',
+            $user->company_id ?? 'none',
+            $user->id,
+            md5(json_encode($filters).'|'.$user->permissionSlugs()->implode(',')),
+        );
+
+        return Cache::remember($cacheKey, now()->addSeconds(90), function () use ($user, $filters) {
+            return $this->buildForUser($user, $filters);
+        });
+    }
+
+    /**
+     * @param  array{
+     *     date_from: string,
+     *     date_to: string,
+     *     employee_id: int|null,
+     *     source: string|null,
+     *     status: string|null
+     * }  $filters
+     * @return array<string, mixed>
+     */
+    private function buildForUser(User $user, array $filters): array
     {
         $canViewLeads = $user->hasPermission('view.leads');
         $canViewTasks = $user->hasPermission('view.tasks');

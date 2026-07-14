@@ -18,34 +18,39 @@ class CompanyListQueryService
             'status' => ['nullable', Rule::in(array_keys(Company::STATUSES))],
             'subscription_status' => ['nullable', Rule::in(array_keys(Company::SUBSCRIPTION_STATUSES))],
             'plan_id' => ['nullable', 'integer', 'exists:plans,id'],
+            'trashed' => ['nullable', 'boolean'],
         ];
     }
 
     /**
-     * @param  array{search?: string|null, status?: string|null, subscription_status?: string|null, plan_id?: int|null}  $filters
+     * @param  array{search?: string|null, status?: string|null, subscription_status?: string|null, plan_id?: int|null, trashed?: bool|null}  $filters
      * @return Builder<Company>
      */
     public function query(array $filters): Builder
     {
-        return Company::query()
+        $query = ! empty($filters['trashed'])
+            ? Company::onlyTrashed()
+            : Company::query();
+
+        return $query
             ->with([
                 'owner:id,name,email',
                 'plan:id,name,slug',
             ])
             ->withCount(['users', 'leads', 'customers', 'tasks'])
             ->when(filled($filters['search'] ?? null), function ($query) use ($filters) {
-                $term = $filters['search'];
+                $term = (string) $filters['search'];
                 $query->where(function ($builder) use ($term) {
-                    $builder->where('name', 'like', "%{$term}%")
-                        ->orWhere('slug', 'like', "%{$term}%")
-                        ->orWhere('email', 'like', "%{$term}%")
-                        ->orWhereHas('owner', function ($ownerQuery) use ($term) {
-                            $ownerQuery->withoutCompanyScope()
-                                ->where(function ($inner) use ($term) {
-                                    $inner->where('name', 'like', "%{$term}%")
-                                        ->orWhere('email', 'like', "%{$term}%");
-                                });
-                        });
+                    \App\Support\SearchTerm::whereEscaped($builder, 'name', $term);
+                    \App\Support\SearchTerm::whereEscaped($builder, 'slug', $term, 'or');
+                    \App\Support\SearchTerm::whereEscaped($builder, 'email', $term, 'or');
+                    $builder->orWhereHas('owner', function ($ownerQuery) use ($term) {
+                        $ownerQuery->withoutCompanyScope()
+                            ->where(function ($inner) use ($term) {
+                                \App\Support\SearchTerm::whereEscaped($inner, 'name', $term);
+                                \App\Support\SearchTerm::whereEscaped($inner, 'email', $term, 'or');
+                            });
+                    });
                 });
             })
             ->when(filled($filters['status'] ?? null), fn ($query) => $query->where('status', $filters['status']))

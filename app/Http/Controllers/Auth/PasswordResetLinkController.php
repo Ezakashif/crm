@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -26,20 +27,29 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
+            'company' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $company = Company::query()
+            ->where('slug', strtolower(trim($validated['company'])))
+            ->first();
+
+        if (! $company) {
+            // Do not leak whether the workspace exists.
+            return back()->with('status', __(Password::RESET_LINK_SENT));
+        }
+
+        $status = Password::sendResetLink([
+            'email' => $validated['email'],
+            'company_id' => $company->id,
+            'is_super_admin' => false,
+        ]);
 
         return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+            ? back()->with('status', __($status))
+            : back()->withInput($request->only('company', 'email'))
+                ->withErrors(['email' => __($status)]);
     }
 }

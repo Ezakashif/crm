@@ -83,6 +83,19 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->status === 'active';
     }
 
+    /**
+     * Scope password-reset tokens per company so shared emails across tenants
+     * cannot collide in password_reset_tokens.
+     */
+    public function getEmailForPasswordReset(): string
+    {
+        if ($this->company_id) {
+            return $this->company_id.'|'.$this->email;
+        }
+
+        return (string) $this->email;
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
@@ -95,8 +108,8 @@ class User extends Authenticatable implements MustVerifyEmailContract
         }
 
         return $query->where(function (Builder $builder) use ($term) {
-            $builder->where('name', 'like', "%{$term}%")
-                ->orWhere('email', 'like', "%{$term}%");
+            \App\Support\SearchTerm::whereEscaped($builder, 'name', $term);
+            \App\Support\SearchTerm::whereEscaped($builder, 'email', $term, 'or');
         });
     }
 

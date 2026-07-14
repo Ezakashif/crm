@@ -30,6 +30,10 @@ return [
     | to expire immediately when the browser is closed then you may
     | indicate that via the expire_on_close configuration option.
     |
+    | Production policy: keep idle sessions short (default 120 minutes).
+    | Absolute session lifetime is enforced by regenerating on login and
+    | logging out suspended/expired tenants in EnsureCompanyContext.
+    |
     */
 
     'lifetime' => (int) env('SESSION_LIFETIME', 120),

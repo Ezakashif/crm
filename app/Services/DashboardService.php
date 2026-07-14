@@ -9,6 +9,7 @@ use App\Models\Task;
 use App\Models\User;
 use App\Services\Analytics\CrmAnalytics;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardService
 {
@@ -21,6 +22,27 @@ class DashboardService
      * @return array<string, mixed>
      */
     public function forUser(User $user): array
+    {
+        if (app()->environment('testing')) {
+            return $this->buildForUser($user);
+        }
+
+        $cacheKey = sprintf(
+            'dashboard:%s:%s:%s',
+            $user->company_id ?? 'none',
+            $user->id,
+            md5($user->permissionSlugs()->implode(',')),
+        );
+
+        return Cache::remember($cacheKey, now()->addSeconds(60), function () use ($user) {
+            return $this->buildForUser($user);
+        });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildForUser(User $user): array
     {
         $canViewLeads = $user->hasPermission('view.leads');
         $canViewTasks = $user->hasPermission('view.tasks');

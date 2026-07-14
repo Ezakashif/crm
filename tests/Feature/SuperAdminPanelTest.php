@@ -88,7 +88,7 @@ class SuperAdminPanelTest extends TestCase
     public function test_super_admin_can_suspend_company(): void
     {
         $superAdmin = User::factory()->superAdmin()->create();
-        $company = Company::default();
+        $company = Company::factory()->create(['slug' => 'suspendable']);
 
         $this->actingAs($superAdmin)
             ->patch(route('superadmin.companies.status', $company), [

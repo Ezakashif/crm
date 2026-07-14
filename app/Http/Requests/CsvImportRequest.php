@@ -31,6 +31,7 @@ class CsvImportRequest extends FormRequest
                 'required',
                 'file',
                 'mimes:csv,txt',
+                'mimetypes:text/plain,text/csv,application/csv,text/x-csv,application/vnd.ms-excel',
                 'max:2048',
             ],
             'type' => ['sometimes', Rule::in(CsvImportService::TYPES)],

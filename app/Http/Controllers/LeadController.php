@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreLeadRequest;
+use App\Http\Requests\UpdateLeadRequest;
 use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\LeadActivity;
@@ -136,43 +137,13 @@ class LeadController extends Controller
         return view('leads.edit', compact('lead', 'users'));
     }
 
-    public function update(Request $request, Lead $lead)
+    public function update(UpdateLeadRequest $request, Lead $lead)
     {
-        $this->authorize('update', $lead);
-
         $user = $request->user();
-
-        $allowedStatuses = array_keys(Lead::manuallyAssignableStatuses($lead->status));
-
-        $rules = [
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'company' => 'nullable|string|max:255',
-            'source' => 'nullable|in:'.implode(',', Lead::SOURCES),
-            'status' => 'required|in:'.implode(',', $allowedStatuses),
-            'estimated_value' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-            'follow_up_date' => 'nullable|date',
-        ];
-
-        if ($user->can('assign', $lead)) {
-            $rules['assigned_to'] = ['nullable', \App\Support\CrmValidation::existsInCompany('users', 'id', $user->company_id)];
-        }
-
-        $validated = $request->validate($rules);
+        $validated = $request->validated();
 
         if (! $user->can('assign', $lead)) {
             unset($validated['assigned_to']);
-        }
-
-        if (($validated['status'] ?? null) === 'won' && $lead->status !== 'won') {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->withErrors([
-                    'status' => 'Mark a lead as won by converting it to a customer.',
-                ]);
         }
 
         $previousStatus = $lead->status;

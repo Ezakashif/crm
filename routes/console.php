@@ -33,3 +33,7 @@ Schedule::call(function () {
     );
     \Illuminate\Support\Facades\Cache::forget(\App\Services\SuperAdmin\PlatformSettingsService::CACHE_KEY);
 })->everyFiveMinutes()->name('platform-scheduler-heartbeat');
+
+Schedule::command('activity-logs:prune --days=90')
+    ->weekly()
+    ->name('activity-logs-prune');

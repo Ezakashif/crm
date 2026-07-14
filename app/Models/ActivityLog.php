@@ -57,6 +57,7 @@ class ActivityLog extends Model
         'company.updated' => 'Company updated',
         'company.status_changed' => 'Company status changed',
         'company.deleted' => 'Company deleted',
+        'company.restored' => 'Company restored',
         'impersonation.started' => 'Impersonation started',
         'impersonation.ended' => 'Impersonation ended',
         'platform.settings_updated' => 'Platform settings updated',
@@ -191,6 +192,7 @@ class ActivityLog extends Model
                 $properties['to'] ?? 'unknown'
             ),
             'company.deleted' => sprintf('Deleted company %s', $properties['name'] ?? 'unknown'),
+            'company.restored' => sprintf('Restored company %s', $properties['name'] ?? 'unknown'),
             'impersonation.started' => sprintf(
                 'Started impersonating %s at %s',
                 $this->subject?->name ?? 'user',

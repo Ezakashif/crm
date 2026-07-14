@@ -88,8 +88,8 @@ class Task extends Model
         }
 
         return $query->where(function (Builder $builder) use ($term) {
-            $builder->where('title', 'like', "%{$term}%")
-                ->orWhere('description', 'like', "%{$term}%");
+            \App\Support\SearchTerm::whereEscaped($builder, 'title', $term);
+            \App\Support\SearchTerm::whereEscaped($builder, 'description', $term, 'or');
         });
     }
 

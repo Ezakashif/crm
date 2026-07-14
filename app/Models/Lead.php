@@ -160,10 +160,10 @@ class Lead extends Model
         }
 
         return $query->where(function (Builder $builder) use ($term) {
-            $builder->where('name', 'like', "%{$term}%")
-                ->orWhere('email', 'like', "%{$term}%")
-                ->orWhere('phone', 'like', "%{$term}%")
-                ->orWhere('company', 'like', "%{$term}%");
+            \App\Support\SearchTerm::whereEscaped($builder, 'name', $term);
+            \App\Support\SearchTerm::whereEscaped($builder, 'email', $term, 'or');
+            \App\Support\SearchTerm::whereEscaped($builder, 'phone', $term, 'or');
+            \App\Support\SearchTerm::whereEscaped($builder, 'company', $term, 'or');
         });
     }
 

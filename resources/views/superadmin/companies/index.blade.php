@@ -49,12 +49,18 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group col-md-3 mb-0 d-flex flex-wrap">
-            <button class="btn btn-outline-light mr-2 mb-2">Filter</button>
-            <a href="{{ route('superadmin.companies.create') }}" class="btn btn-info mr-2 mb-2">New company</a>
-            <a href="{{ route('superadmin.companies.import.create') }}" class="btn btn-outline-light mr-2 mb-2">Import CSV</a>
-            <a href="{{ route('superadmin.companies.export', request()->query()) }}" class="btn btn-outline-light mr-2 mb-2">Export CSV</a>
-            <a href="{{ route('superadmin.companies.export.pdf', request()->query()) }}" class="btn btn-outline-light mb-2">Export PDF</a>
+        <div class="form-group col-md-3 mb-0">
+            <div class="custom-control custom-checkbox mb-2">
+                <input type="checkbox" class="custom-control-input" id="trashed" name="trashed" value="1" @checked(! empty($filters['trashed']))>
+                <label class="custom-control-label sa-muted" for="trashed">Show deleted only</label>
+            </div>
+            <div class="d-flex flex-wrap">
+                <button class="btn btn-outline-light mr-2 mb-2">Filter</button>
+                <a href="{{ route('superadmin.companies.create') }}" class="btn btn-info mr-2 mb-2">New company</a>
+                <a href="{{ route('superadmin.companies.import.create') }}" class="btn btn-outline-light mr-2 mb-2">Import CSV</a>
+                <a href="{{ route('superadmin.companies.export', request()->query()) }}" class="btn btn-outline-light mr-2 mb-2">Export CSV</a>
+                <a href="{{ route('superadmin.companies.export.pdf', request()->query()) }}" class="btn btn-outline-light mb-2">Export PDF</a>
+            </div>
         </div>
     </form>
 </div>
@@ -78,9 +84,14 @@
             </thead>
             <tbody>
             @forelse ($companies as $company)
-                <tr>
+                <tr class="{{ $company->trashed() ? 'table-secondary' : '' }}">
                     <td>
-                        <div class="font-weight-bold text-white">{{ $company->name }}</div>
+                        <div class="font-weight-bold text-white">
+                            {{ $company->name }}
+                            @if ($company->trashed())
+                                <span class="badge badge-secondary ml-1">Deleted</span>
+                            @endif
+                        </div>
                         <div class="sa-muted small">{{ $company->slug }}</div>
                     </td>
                     <td>
@@ -99,35 +110,54 @@
                     </td>
                     <td class="sa-muted">{{ $company->last_active_at?->diffForHumans() ?? 'Never' }}</td>
                     <td class="sa-muted">{{ $company->created_at?->format('Y-m-d') }}</td>
-                    <td class="btn-group-actions text-nowrap">
-                        <a href="{{ route('superadmin.companies.show', $company) }}" class="btn btn-sm btn-outline-light" title="View">View</a>
-                        <a href="{{ route('superadmin.companies.edit', $company) }}" class="btn btn-sm btn-outline-light" title="Edit">Edit</a>
-                        @if ($company->status === 'active')
-                            <form method="POST" action="{{ route('superadmin.companies.status', $company) }}" class="d-inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="suspended">
-                                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Suspend this company?')">Suspend</button>
-                            </form>
-                        @else
-                            <form method="POST" action="{{ route('superadmin.companies.status', $company) }}" class="d-inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="active">
-                                <button class="btn btn-sm btn-outline-success">Activate</button>
-                            </form>
-                        @endif
-                        <form method="POST" action="{{ route('superadmin.companies.impersonate', $company) }}" class="d-inline">
-                            @csrf
-                            <button class="btn btn-sm btn-info" onclick="return confirm('Login as this company admin?')">Login as</button>
-                        </form>
-                        @if ($company->slug !== \App\Models\Company::DEFAULT_SLUG)
-                            <form method="POST" action="{{ route('superadmin.companies.destroy', $company) }}" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Soft-delete this company?')">Delete</button>
-                            </form>
-                        @endif
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                @if ($company->trashed())
+                                    <form method="POST" action="{{ route('superadmin.companies.restore', $company->id) }}">
+                                        @csrf
+                                        <button class="dropdown-item" type="submit">Restore</button>
+                                    </form>
+                                @else
+                                    <a class="dropdown-item" href="{{ route('superadmin.companies.show', $company) }}">View</a>
+                                    <a class="dropdown-item" href="{{ route('superadmin.companies.edit', $company) }}">Edit</a>
+                                    @if (! $company->isDefault())
+                                        @if ($company->status === 'active')
+                                            <form method="POST" action="{{ route('superadmin.companies.status', $company) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="suspended">
+                                                <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Suspend this company?')">Suspend</button>
+                                            </form>
+                                        @else
+                                            <form method="POST" action="{{ route('superadmin.companies.status', $company) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="active">
+                                                <button class="dropdown-item text-success" type="submit">Activate</button>
+                                            </form>
+                                        @endif
+                                    @endif
+                                    @if ($company->status === 'active')
+                                        <form method="POST" action="{{ route('superadmin.companies.impersonate', $company) }}">
+                                            @csrf
+                                            <button class="dropdown-item" type="submit" onclick="return confirm('Login as this company admin?')">Login as</button>
+                                        </form>
+                                    @endif
+                                    @if (! $company->isDefault())
+                                        <div class="dropdown-divider"></div>
+                                        <form method="POST" action="{{ route('superadmin.companies.destroy', $company) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="dropdown-item text-danger" type="submit" onclick="return confirm('Soft-delete this company?')">Delete</button>
+                                        </form>
+                                    @endif
+                                @endif
+                            </div>
+                        </div>
                     </td>
                 </tr>
             @empty

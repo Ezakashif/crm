@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Auth\TenantUserProvider;
+use App\Models\User;
 use App\Services\PermissionRegistrar;
 use App\Services\SuperAdmin\PlatformSettingsService;
 use App\Support\CurrentCompany;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +32,18 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFour();
+
+        Auth::provider('tenant-eloquent', function ($app, array $config) {
+            return new TenantUserProvider($app['hash'], $config['model']);
+        });
+
+        ResetPassword::createUrlUsing(function (User $user, string $token) {
+            return url(route('password.reset', [
+                'token' => $token,
+                'email' => $user->email,
+                'company' => $user->company?->slug,
+            ], false));
+        });
 
         app(PermissionRegistrar::class)->registerGates();
 

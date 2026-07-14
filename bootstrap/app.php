@@ -39,7 +39,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'webhooks/leads/website',
-            'logout',
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));

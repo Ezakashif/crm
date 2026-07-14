@@ -29,6 +29,7 @@ class CompanyController extends Controller
     public function index(Request $request): View
     {
         $filters = $request->validate($this->listQuery->filterRules());
+        $filters['trashed'] = $request->boolean('trashed');
 
         $companies = $this->listQuery
             ->query($filters)
@@ -135,6 +136,10 @@ class CompanyController extends Controller
             'status' => ['required', Rule::in(array_keys(Company::STATUSES))],
         ]);
 
+        if ($company->isDefault() && $validated['status'] === Company::STATUS_SUSPENDED) {
+            return back()->withErrors(['company' => 'The default company cannot be suspended.']);
+        }
+
         $from = $company->status;
         $company->update(['status' => $validated['status']]);
 
@@ -151,7 +156,7 @@ class CompanyController extends Controller
 
     public function destroy(Company $company): RedirectResponse
     {
-        if ($company->slug === Company::DEFAULT_SLUG) {
+        if ($company->isDefault()) {
             return back()->withErrors(['company' => 'The default company cannot be deleted.']);
         }
 
@@ -167,6 +172,22 @@ class CompanyController extends Controller
         return redirect()
             ->route('superadmin.companies.index')
             ->with('success', "Company \"{$name}\" deleted.");
+    }
+
+    public function restore(int $company): RedirectResponse
+    {
+        $model = Company::onlyTrashed()->findOrFail($company);
+
+        $model->restore();
+
+        ActivityLogger::log('company.restored', $model, [
+            'name' => $model->name,
+            'slug' => $model->slug,
+        ]);
+
+        return redirect()
+            ->route('superadmin.companies.show', $model)
+            ->with('success', "Company \"{$model->name}\" restored.");
     }
 
     public function pdf(Company $company, CompanyExportService $exports): Response

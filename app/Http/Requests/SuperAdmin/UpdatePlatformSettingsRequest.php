@@ -20,7 +20,7 @@ class UpdatePlatformSettingsRequest extends FormRequest
     {
         return [
             'platform_name' => ['required', 'string', 'max:255'],
-            'platform_logo' => ['nullable', 'image', 'max:2048'],
+            'platform_logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048', 'dimensions:max_width=2000,max_height=2000'],
             'remove_logo' => ['nullable', 'boolean'],
             'default_timezone' => ['required', 'timezone'],
             'default_currency' => ['required', 'string', 'size:3'],

@@ -264,7 +264,9 @@ class GlobalSearchService
             $names = Lead::visibleTo($user)
                 ->whereNotNull('leads.company')
                 ->where('leads.company', '!=', '')
-                ->where('leads.company', 'like', "%{$term}%")
+                ->where(function ($query) use ($term) {
+                    \App\Support\SearchTerm::whereEscaped($query, 'leads.company', $term);
+                })
                 ->orderBy('leads.company')
                 ->limit($limit)
                 ->distinct()
@@ -288,7 +290,9 @@ class GlobalSearchService
             $names = Customer::query()
                 ->whereNotNull('company_name')
                 ->where('company_name', '!=', '')
-                ->where('company_name', 'like', "%{$term}%")
+                ->where(function ($query) use ($term) {
+                    \App\Support\SearchTerm::whereEscaped($query, 'company_name', $term);
+                })
                 ->orderBy('company_name')
                 ->limit($limit)
                 ->distinct()

@@ -307,6 +307,7 @@ return [
             'method' => 'get',
             'id' => 'navbar-global-search',
             'topnav_right' => true,
+            'can' => 'access-search',
         ],
         [
             'type' => 'fullscreen-widget',
@@ -370,15 +371,9 @@ return [
             'text' => 'Activity Log',
             'route' => 'activity-logs.index',
             'icon' => 'fas fa-fw fa-history',
-            'can' => 'view.activity_logs',
+            'can' => 'access-activity-logs',
         ],
         ['header' => 'Account'],
-        [
-            'text' => 'My Activity',
-            'route' => 'activity-logs.index',
-            'icon' => 'fas fa-fw fa-history',
-            'can' => 'view_own.activity_logs',
-        ],
         [
             'text' => 'Profile',
             'route' => 'profile.edit',

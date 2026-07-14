@@ -32,7 +32,7 @@ class StoreCompanyRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:100', 'alpha_dash', 'unique:companies,slug'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'logo' => ['nullable', 'image', 'max:2048'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048', 'dimensions:max_width=2000,max_height=2000'],
             'status' => ['required', Rule::in(array_keys(Company::STATUSES))],
             'subscription_status' => ['required', Rule::in(array_keys(Company::SUBSCRIPTION_STATUSES))],
             'plan_id' => ['nullable', 'integer', 'exists:plans,id'],

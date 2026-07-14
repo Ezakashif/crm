@@ -54,7 +54,7 @@
                 <a href="{{ route('superadmin.companies.edit', $company) }}" class="btn btn-sm btn-outline-light mr-2 mb-2">Edit</a>
                 <a href="{{ route('superadmin.companies.pdf', $company) }}" class="btn btn-sm btn-outline-light mr-2 mb-2">Export PDF</a>
 
-                @if ($company->status === 'active')
+                @if ($company->status === 'active' && ! $company->isDefault())
                     <form method="POST" action="{{ route('superadmin.companies.status', $company) }}" class="mr-2 mb-2">
                         @csrf
                         @method('PATCH')
@@ -63,7 +63,7 @@
                             Suspend
                         </button>
                     </form>
-                @else
+                @elseif ($company->status !== 'active')
                     <form method="POST" action="{{ route('superadmin.companies.status', $company) }}" class="mr-2 mb-2">
                         @csrf
                         @method('PATCH')
@@ -72,12 +72,14 @@
                     </form>
                 @endif
 
-                <form method="POST" action="{{ route('superadmin.companies.impersonate', $company) }}" class="mr-2 mb-2">
-                    @csrf
-                    <button class="btn btn-sm btn-info" onclick="return confirm('Login as company admin?')">Login As Admin</button>
-                </form>
+                @if ($company->status === 'active')
+                    <form method="POST" action="{{ route('superadmin.companies.impersonate', $company) }}" class="mr-2 mb-2">
+                        @csrf
+                        <button class="btn btn-sm btn-info" onclick="return confirm('Login as company admin?')">Login As Admin</button>
+                    </form>
+                @endif
 
-                @if ($company->slug !== \App\Models\Company::DEFAULT_SLUG)
+                @if (! $company->isDefault())
                     <form method="POST" action="{{ route('superadmin.companies.destroy', $company) }}" class="mb-2">
                         @csrf
                         @method('DELETE')

@@ -110,6 +110,11 @@ class Company extends Model
         return $this->hasMany(ImpersonationLog::class);
     }
 
+    public function isDefault(): bool
+    {
+        return $this->slug === self::DEFAULT_SLUG;
+    }
+
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;

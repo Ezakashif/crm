@@ -56,6 +56,8 @@ Route::middleware(['auth', 'active', 'superadmin'])
         Route::resource('companies', CompanyController::class);
         Route::patch('companies/{company}/status', [CompanyController::class, 'updateStatus'])
             ->name('companies.status');
+        Route::post('companies/{company}/restore', [CompanyController::class, 'restore'])
+            ->name('companies.restore');
         Route::get('companies/{company}/pdf', [CompanyController::class, 'pdf'])
             ->middleware('throttle:30,1')
             ->name('companies.pdf');

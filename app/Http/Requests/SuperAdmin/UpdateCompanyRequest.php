@@ -32,7 +32,7 @@ class UpdateCompanyRequest extends FormRequest
             ],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'logo' => ['nullable', 'image', 'max:2048'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048', 'dimensions:max_width=2000,max_height=2000'],
             'remove_logo' => ['nullable', 'boolean'],
             'owner_id' => [
                 'nullable',
@@ -44,5 +44,20 @@ class UpdateCompanyRequest extends FormRequest
             'plan_id' => ['nullable', 'integer', 'exists:plans,id'],
             'trial_ends_at' => ['nullable', 'date'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            /** @var Company $company */
+            $company = $this->route('company');
+
+            if (
+                $company->isDefault()
+                && $this->input('status') === Company::STATUS_SUSPENDED
+            ) {
+                $validator->errors()->add('status', 'The default company cannot be suspended.');
+            }
+        });
     }
 }
