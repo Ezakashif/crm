@@ -32,7 +32,7 @@ class TaskCustomerFieldTest extends TestCase
         $this->actingAs($admin)
             ->get(route('tasks.create'))
             ->assertOk()
-            ->assertSee('Related Customer')
+            ->assertSee('Related customer')
             ->assertSee('Acme Customer')
             ->assertSee('Acme Inc');
     }
