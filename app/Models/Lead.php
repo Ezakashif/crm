@@ -35,6 +35,38 @@ class Lead extends Model
         'lost' => 'Lost',
     ];
 
+    /**
+     * Statuses that can be set directly (won is only via convertToCustomer).
+     *
+     * @return array<string, string>
+     */
+    public static function manuallyAssignableStatuses(?string $currentStatus = null): array
+    {
+        $statuses = self::STATUSES;
+
+        if ($currentStatus !== 'won') {
+            unset($statuses['won']);
+        }
+
+        return $statuses;
+    }
+
+    /**
+     * Whether this lead may transition to the given status without conversion.
+     */
+    public function canManuallyTransitionTo(string $status): bool
+    {
+        if (! array_key_exists($status, self::STATUSES)) {
+            return false;
+        }
+
+        if ($status === 'won' && $this->status !== 'won') {
+            return false;
+        }
+
+        return true;
+    }
+
     protected $fillable = [
         'created_by',
         'assigned_to',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Company;
 use App\Services\ActivityLogger;
 use App\Services\SuperAdmin\PlatformSettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -34,28 +35,61 @@ class AuthenticatedSessionController extends Controller
 
         $user = auth()->user();
 
+        if ($user?->isSuperAdmin()) {
+            $user->forceFill(['last_login_at' => now()])->save();
+            ActivityLogger::log('user.login', $user);
+
+            return redirect()->intended(route('superadmin.dashboard', absolute: false));
+        }
+
+        if ($settings->getBool('maintenance_mode')) {
+            return $this->rejectAuthenticatedSession(
+                $request,
+                'The platform is temporarily unavailable for maintenance. Please try again later.',
+            );
+        }
+
+        $company = $user?->company_id
+            ? Company::query()->find($user->company_id)
+            : null;
+
+        if ($company && $company->isSubscriptionExpired()) {
+            $this->markSubscriptionExpired($company);
+
+            return $this->rejectAuthenticatedSession(
+                $request,
+                'Your company subscription has expired. Please contact support to renew access.',
+            );
+        }
+
         if ($user) {
             $user->forceFill(['last_login_at' => now()])->save();
             ActivityLogger::log('user.login', $user);
         }
 
-        if ($user?->isSuperAdmin()) {
-            return redirect()->intended(route('superadmin.dashboard', absolute: false));
-        }
-
-        if ($settings->getBool('maintenance_mode')) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect()
-                ->route('login')
-                ->withErrors([
-                    'email' => 'The platform is temporarily unavailable for maintenance. Please try again later.',
-                ]);
-        }
-
         return redirect()->intended(route('dashboard', absolute: false));
+    }
+
+    private function rejectAuthenticatedSession(Request $request, string $message): RedirectResponse
+    {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()
+            ->route('login')
+            ->withErrors(['email' => $message]);
+    }
+
+    private function markSubscriptionExpired(Company $company): void
+    {
+        if ($company->subscription_status === Company::SUBSCRIPTION_EXPIRED) {
+            return;
+        }
+
+        $company->forceFill([
+            'subscription_status' => Company::SUBSCRIPTION_EXPIRED,
+        ])->save();
     }
 
     /**

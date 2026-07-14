@@ -138,13 +138,15 @@ class LeadController extends Controller
 
         $user = $request->user();
 
+        $allowedStatuses = array_keys(Lead::manuallyAssignableStatuses($lead->status));
+
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
             'company' => 'nullable|string|max:255',
             'source' => 'nullable|in:'.implode(',', Lead::SOURCES),
-            'status' => 'required|in:'.implode(',', array_keys(Lead::STATUSES)),
+            'status' => 'required|in:'.implode(',', $allowedStatuses),
             'estimated_value' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
             'follow_up_date' => 'nullable|date',
@@ -158,6 +160,15 @@ class LeadController extends Controller
 
         if (! $user->can('assign', $lead)) {
             unset($validated['assigned_to']);
+        }
+
+        if (($validated['status'] ?? null) === 'won' && $lead->status !== 'won') {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'status' => 'Mark a lead as won by converting it to a customer.',
+                ]);
         }
 
         $previousStatus = $lead->status;
@@ -229,12 +240,6 @@ class LeadController extends Controller
                 ->with('success', 'Lead was already converted to a customer.');
         }
 
-        if ($lead->status === 'won') {
-            return redirect()
-                ->route('leads.show', $lead)
-                ->with('success', 'Lead is already marked as won.');
-        }
-
         $customer = DB::transaction(function () use ($lead) {
             $customer = Customer::create([
                 'created_by' => auth()->id(),
@@ -275,13 +280,20 @@ class LeadController extends Controller
     {
         $request->validate([
             'lead_id' => ['required', \App\Support\CrmValidation::existsInCompany('leads', 'id', $request->user()->company_id)],
-            'status' => 'required|in:new,contacted,qualified,proposal_sent,won,lost',
+            'status' => 'required|in:'.implode(',', array_keys(Lead::STATUSES)),
             'sort_order' => 'required|integer|min:0',
         ]);
 
         $lead = Lead::findOrFail($request->lead_id);
 
         $this->authorize('update', $lead);
+
+        if (! $lead->canManuallyTransitionTo($request->status)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mark a lead as won by converting it to a customer.',
+            ], 422);
+        }
 
         $previousStatus = $lead->status;
 

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Company;
+use App\Services\SuperAdmin\ImpersonationService;
 use App\Support\CurrentCompany;
 use Closure;
 use Illuminate\Http\Request;
@@ -49,11 +50,35 @@ class EnsureCompanyContext
             return $this->deny($request, 'Your company account is suspended. Please contact support.');
         }
 
+        $impersonating = app(ImpersonationService::class)->isImpersonating($request);
+
+        if ($company->isSubscriptionExpired() && ! $impersonating) {
+            $this->markSubscriptionExpired($company);
+
+            return $this->deny(
+                $request,
+                'Your company subscription has expired. Please contact support to renew access.',
+            );
+        }
+
         $this->currentCompany->set($company);
 
         $this->touchLastActive($company);
 
         return $next($request);
+    }
+
+    private function markSubscriptionExpired(Company $company): void
+    {
+        if ($company->subscription_status === Company::SUBSCRIPTION_EXPIRED) {
+            return;
+        }
+
+        Company::query()->whereKey($company->id)->update([
+            'subscription_status' => Company::SUBSCRIPTION_EXPIRED,
+        ]);
+
+        $company->subscription_status = Company::SUBSCRIPTION_EXPIRED;
     }
 
     public function terminate(Request $request, Response $response): void

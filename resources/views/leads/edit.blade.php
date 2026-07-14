@@ -60,13 +60,20 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="status">Status</label>
-                            <select id="status" name="status" class="form-control">
-                                @foreach(['new', 'contacted', 'qualified', 'proposal_sent', 'won', 'lost'] as $status)
+                            <select id="status" name="status" class="form-control @error('status') is-invalid @enderror">
+                                @foreach(\App\Models\Lead::manuallyAssignableStatuses($lead->status) as $status => $label)
                                     <option value="{{ $status }}" @selected(old('status', $lead->status) === $status)>
-                                        {{ ucfirst(str_replace('_', ' ', $status)) }}
+                                        {{ $label }}
                                     </option>
                                 @endforeach
                             </select>
+                            @error('status')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @else
+                                @if($lead->status !== 'won')
+                                    <small class="form-text text-muted">To mark as won, use Convert to Customer.</small>
+                                @endif
+                            @enderror
                         </div>
                     </div>
                 </div>

@@ -121,7 +121,7 @@
                             </span>
                         </div>
                     </div>
-                    <div class="card-body lead-column p-2" data-status="{{ $statusKey }}">
+                    <div class="card-body lead-column p-2" data-status="{{ $statusKey }}" @if($statusKey === 'won') data-convert-only="1" @endif>
                         @foreach($leads->where('status', $statusKey) as $lead)
                             <div class="card card-sm mb-2 lead-card" data-lead-id="{{ $lead->id }}" style="cursor: move;">
                                 <div class="card-body p-2">
@@ -203,6 +203,16 @@
                                     target.classList.remove('is-drop-target');
                                 });
 
+                                var targetStatus = evt.to.dataset.status;
+                                if (evt.to.dataset.convertOnly === '1' && evt.from !== evt.to) {
+                                    if (typeof evt.from.insertBefore === 'function') {
+                                        evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                                    }
+                                    refreshColumnCounts();
+                                    alert('Mark a lead as won by converting it to a customer.');
+                                    return;
+                                }
+
                                 refreshColumnCounts();
 
                                 fetch("{{ route('leads.board.update') }}", {
@@ -214,12 +224,24 @@
                                     },
                                     body: JSON.stringify({
                                         lead_id: evt.item.dataset.leadId,
-                                        status: evt.to.dataset.status,
+                                        status: targetStatus,
                                         sort_order: evt.newIndex + 1
                                     })
-                                }).then(res => res.json()).then(data => {
-                                    if (!data.success) alert('Unable to update lead.');
-                                }).catch(() => alert('Something went wrong.'));
+                                }).then(function (res) {
+                                    return res.json().then(function (data) {
+                                        return { ok: res.ok, data: data };
+                                    });
+                                }).then(function (result) {
+                                    if (! result.ok || ! result.data.success) {
+                                        if (typeof evt.from.insertBefore === 'function') {
+                                            evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                                        }
+                                        refreshColumnCounts();
+                                        alert(result.data.message || 'Unable to update lead.');
+                                    }
+                                }).catch(function () {
+                                    alert('Something went wrong.');
+                                });
                             }
                         });
                     });

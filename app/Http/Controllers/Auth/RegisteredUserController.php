@@ -50,6 +50,11 @@ class RegisteredUserController extends Controller
         Auth::login($admin);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        return redirect()
+            ->route('dashboard')
+            ->with(
+                'success',
+                'Welcome! Your workspace slug is "'.$result['company']->slug.'". Use it when signing in next time.',
+            );
     }
 }
