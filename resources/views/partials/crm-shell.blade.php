@@ -1,16 +1,31 @@
 @php
+    $statusToasts = [
+        'profile-updated' => ['type' => 'success', 'message' => 'Profile saved.'],
+        'password-updated' => ['type' => 'success', 'message' => 'Password updated.'],
+        'photo-updated' => ['type' => 'success', 'message' => 'Photo updated.'],
+        'photo-removed' => ['type' => 'success', 'message' => 'Photo removed.'],
+        'verification-link-sent' => ['type' => 'success', 'message' => 'A new verification link has been sent.'],
+    ];
+
+    $statusKey = session('status');
+    $statusFlash = is_string($statusKey) && isset($statusToasts[$statusKey])
+        ? $statusToasts[$statusKey]
+        : null;
+
     $flashes = collect([
         'success' => session('success'),
         'error' => session('error') ?? session('danger'),
         'warning' => session('warning'),
-        'info' => session('status') && ! in_array(session('status'), [
-            'profile-updated',
-            'password-updated',
-            'photo-updated',
-            'photo-removed',
-            'verification-link-sent',
-        ], true) ? session('status') : session('info'),
-    ])->filter(fn ($message) => filled($message) && is_string($message));
+        'info' => ($statusFlash === null && filled(session('status')) && is_string(session('status')))
+            ? session('status')
+            : session('info'),
+    ])->filter(fn ($message) => filled($message) && is_string($message))
+        ->map(fn ($message, $type) => ['type' => $type === 'error' ? 'error' : $type, 'message' => $message])
+        ->values();
+
+    if ($statusFlash) {
+        $flashes = $flashes->push($statusFlash);
+    }
 @endphp
 
 <div id="crm-toast-stack" class="crm-toast-stack" aria-live="polite" aria-relevant="additions"></div>
@@ -34,4 +49,4 @@
     </div>
 </div>
 
-<script type="application/json" id="crm-flash-data">@json($flashes->map(fn ($message, $type) => ['type' => $type === 'error' ? 'error' : $type, 'message' => $message])->values())</script>
+<script type="application/json" id="crm-flash-data">@json($flashes)</script>
