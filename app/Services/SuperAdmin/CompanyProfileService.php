@@ -33,6 +33,7 @@ class CompanyProfileService
             ->get();
 
         $recentActivity = ActivityLog::withoutCompanyScope()
+            ->forTenant()
             ->with(['actor:id,name,email'])
             ->where('company_id', $company->id)
             ->latest()

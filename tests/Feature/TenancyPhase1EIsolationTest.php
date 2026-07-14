@@ -127,6 +127,23 @@ class TenancyPhase1EIsolationTest extends TestCase
         $this->assertSame($company->id, $log->company_id);
     }
 
+    public function test_super_admin_activity_logger_keeps_platform_company_id_null(): void
+    {
+        $superAdmin = User::factory()->superAdmin()->create();
+        $company = Company::default();
+
+        app(CurrentCompany::class)->clear();
+
+        $log = \App\Services\ActivityLogger::log('company.updated', $company, [
+            'name' => $company->name,
+            'slug' => $company->slug,
+        ], $superAdmin->id);
+
+        $this->assertNull($log->company_id);
+        $this->assertSame($company->id, $log->properties['company_id'] ?? null);
+        $this->assertSame($company->name, $log->properties['company_name'] ?? null);
+    }
+
     public function test_user_email_unique_is_per_company(): void
     {
         $default = Company::default();

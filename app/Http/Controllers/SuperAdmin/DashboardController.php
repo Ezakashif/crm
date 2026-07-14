@@ -31,6 +31,7 @@ class DashboardController extends Controller
                 ->limit(5)
                 ->get(),
             'recentActivity' => ActivityLog::withoutCompanyScope()
+                ->forPlatform()
                 ->with([
                     'actor:id,name,email',
                     'company:id,name,slug',

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -83,6 +84,42 @@ class ActivityLog extends Model
     public function subject(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Tenant CRM audit trail — excludes Super Admin / platform events.
+     */
+    public function scopeForTenant(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull($query->getModel()->getTable().'.company_id')
+            ->where(function (Builder $builder) {
+                $builder->whereNull('user_id')
+                    ->orWhereNotIn('user_id', User::withoutCompanyScope()
+                        ->where('is_super_admin', true)
+                        ->select('id'));
+            });
+    }
+
+    /**
+     * Super Admin / platform audit trail only.
+     */
+    public function scopeForPlatform(Builder $query): Builder
+    {
+        return $query->where(function (Builder $builder) {
+            $builder->whereNull('company_id')
+                ->orWhereIn('user_id', User::withoutCompanyScope()
+                    ->where('is_super_admin', true)
+                    ->select('id'));
+        });
+    }
+
+    public function relatedCompanyName(): string
+    {
+        return $this->company?->name
+            ?? ($this->properties['company_name'] ?? null)
+            ?? ($this->properties['name'] ?? null)
+            ?? 'Platform';
     }
 
     public function module(): string

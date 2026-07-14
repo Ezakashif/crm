@@ -28,7 +28,7 @@ class ActivityLogController extends Controller
             'action' => ['nullable', 'string', Rule::in(array_keys(ActivityLog::ACTION_LABELS))],
         ]);
 
-        $query = ActivityLog::with(['actor', 'subject'])->latest();
+        $query = ActivityLog::query()->forTenant()->with(['actor', 'subject'])->latest();
 
         if ($canViewAll) {
             if (! empty($filters['user_id'])) {

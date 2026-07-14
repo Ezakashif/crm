@@ -29,6 +29,14 @@ trait BelongsToCompany
                 return;
             }
 
+            // Platform ActivityLog rows may intentionally keep company_id null.
+            if (
+                $model instanceof \App\Models\ActivityLog
+                && array_key_exists('company_id', $model->getAttributes())
+            ) {
+                return;
+            }
+
             $companyId = app(CurrentCompany::class)->id();
 
             if (

@@ -133,7 +133,7 @@
             @forelse ($recentActivity as $log)
                 <div class="sa-activity-item">
                     <div class="text-white">
-                        {{ $log->company?->name ?? 'Platform' }}
+                        {{ $log->relatedCompanyName() }}
                         <span class="sa-muted">·</span>
                         {{ $log->actionLabel() }}
                     </div>

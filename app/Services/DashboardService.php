@@ -175,7 +175,7 @@ class DashboardService
 
     protected function recentActivitiesQuery(User $user, bool $canViewAll): Builder
     {
-        $query = ActivityLog::query()->latest();
+        $query = ActivityLog::query()->forTenant()->latest();
 
         if (! $canViewAll) {
             $query->where('user_id', $user->id);
