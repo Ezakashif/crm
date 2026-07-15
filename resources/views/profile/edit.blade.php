@@ -31,7 +31,7 @@
                                 label="Upload new photo"
                                 :preview-url="$user->photo_path ? $user->photoUrl() : null"
                                 :required="true"
-                                help="Drag a photo here or browse, then crop. JPEG, PNG, GIF or WebP. Max 2 MB."
+                                help="Choose a photo, then drag it to adjust inside the frame. JPEG, PNG, GIF or WebP. Max 2 MB."
                             />
                             <button type="submit" class="btn btn-primary btn-sm mt-3">
                                 <i class="fas fa-upload" aria-hidden="true"></i> Upload photo
