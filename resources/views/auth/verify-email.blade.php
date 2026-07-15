@@ -4,12 +4,12 @@
 
 @section('auth_body')
     @if (session('status') == 'verification-link-sent')
-        <div class="alert alert-success">
+        <div class="alert alert-success crm-keep-alert">
             {{ __('A new verification link has been sent to the email address you provided during registration.') }}
         </div>
     @endif
 
-    <p class="mb-3">
+    <p class="crm-auth-lead">
         {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
     </p>
 

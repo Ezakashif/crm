@@ -172,9 +172,9 @@ return [
     */
 
     'classes_auth_card' => 'card-outline card-primary crm-auth-card',
-    'classes_auth_header' => '',
+    'classes_auth_header' => 'crm-auth-header',
     'classes_auth_body' => 'crm-auth-body',
-    'classes_auth_footer' => '',
+    'classes_auth_footer' => 'crm-auth-footer text-center',
     'classes_auth_icon' => '',
     'classes_auth_btn' => 'btn btn-primary',
 

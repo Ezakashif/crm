@@ -779,8 +779,12 @@ body.crm-app .img-circle.elevation-1 {
 body.login-page,
 body.register-page,
 body.lockscreen {
-    background: linear-gradient(160deg, #eff6ff 0%, #f8fafc 45%, #ecfeff 100%) !important;
+    background:
+        radial-gradient(ellipse 70% 50% at 10% 0%, rgba(37, 99, 235, 0.1), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 100% 10%, rgba(14, 165, 233, 0.08), transparent 50%),
+        linear-gradient(160deg, #f8fafc 0%, #eff6ff 50%, #f8fafc 100%) !important;
     font-family: var(--crm-font);
+    min-height: 100vh;
 }
 
 body.login-page .card,
@@ -797,11 +801,62 @@ body.register-page .register-card-body {
 }
 
 body.login-page .btn-primary,
-body.register-page .btn-primary {
+body.register-page .btn-primary,
+body.lockscreen .btn-primary {
     background: var(--crm-accent);
     border-color: var(--crm-accent);
     border-radius: var(--crm-radius-btn);
     font-weight: 600;
+}
+
+body.login-page .btn-primary:hover,
+body.register-page .btn-primary:hover,
+body.lockscreen .btn-primary:hover {
+    filter: brightness(0.96);
+}
+
+body.login-page .crm-auth-label,
+body.register-page .crm-auth-label,
+body.lockscreen .crm-auth-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--crm-text-secondary, #334155);
+}
+
+body.login-page .crm-auth-lead,
+body.register-page .crm-auth-lead,
+body.lockscreen .crm-auth-lead {
+    margin: 0 0 1.15rem;
+    font-size: 0.9rem;
+    color: var(--crm-text-muted);
+    line-height: 1.45;
+    text-align: center;
+}
+
+body.login-page .crm-auth-footer-link a,
+body.register-page .crm-auth-footer-link a {
+    color: var(--crm-accent);
+    font-weight: 500;
+}
+
+body.login-page .crm-auth-footer-link a:hover,
+body.register-page .crm-auth-footer-link a:hover {
+    color: var(--crm-text);
+    text-decoration: underline;
+}
+
+body.lockscreen .crm-auth-lockscreen {
+    max-width: 24rem;
+}
+
+body.lockscreen .lockscreen-item {
+    background: var(--crm-surface, #fff);
+    border: 1px solid var(--crm-border);
+    border-radius: var(--crm-radius);
+    box-shadow: var(--crm-shadow);
+    padding: 1rem 1.1rem;
 }
 
 /* ----- Global search dropdown token alignment ----- */
