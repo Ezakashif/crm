@@ -287,7 +287,7 @@ class GlobalSearchTest extends TestCase
             ->get(route('customers.show', $customer))
             ->assertOk()
             ->assertSee('Profile Customer')
-            ->assertSee('Customer Details');
+            ->assertSee('Customer details');
     }
 
     public function test_admin_can_search_users_and_open_profile(): void
