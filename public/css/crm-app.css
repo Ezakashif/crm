@@ -1840,3 +1840,38 @@ body.crm-app .permission-checklist__item .form-check-label {
 body.crm-app .permission-checklist__item .form-check-input:focus {
     box-shadow: var(--crm-focus-ring);
 }
+
+/* =========================================================
+   Phase 2C — Notifications
+   ========================================================= */
+
+body.crm-app .crm-notification-list .list-group-item {
+    border-color: var(--crm-border);
+    padding: 1rem 1.15rem;
+}
+
+body.crm-app .crm-notification-item.is-unread {
+    background: var(--crm-accent-soft);
+    box-shadow: inset 3px 0 0 var(--crm-accent);
+}
+
+body.crm-app .crm-notification-item.is-read {
+    background: var(--crm-surface);
+}
+
+body.crm-app .crm-notification-item__title {
+    color: var(--crm-text);
+    font-size: 0.95rem;
+}
+
+body.crm-app .crm-notification-item__message {
+    margin: 0;
+    color: var(--crm-text-secondary);
+    font-size: var(--crm-font-size-sm);
+    line-height: 1.45;
+}
+
+body.crm-app .crm-notification-item__actions {
+    flex: 0 0 auto;
+}
+
