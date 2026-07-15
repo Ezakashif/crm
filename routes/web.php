@@ -22,17 +22,7 @@ Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'st
     ->middleware(['website-lead-webhook', 'throttle:website-leads'])
     ->name('webhooks.leads.website');
 
-Route::get('/', function () {
-    if (! auth()->check()) {
-        return redirect()->route('login');
-    }
-
-    if (auth()->user()->isSuperAdmin()) {
-        return redirect()->route('superadmin.dashboard');
-    }
-
-    return redirect()->route('dashboard');
-});
+require __DIR__.'/marketing.php';
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'active', 'company'])
