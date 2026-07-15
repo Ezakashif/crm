@@ -22,20 +22,18 @@
             <div class="card card-outline card-primary">
                 <div class="card-body text-center">
                     <x-form-section title="Profile photo" description="Shown across the CRM next to your name.">
-                        <div class="mb-3">
-                            <x-user-avatar :user="$user" :size="120" />
-                        </div>
                         <form method="post" action="{{ route('profile.photo.update') }}" enctype="multipart/form-data" class="text-left">
                             @csrf
                             @method('patch')
-                            <div class="form-group">
-                                <x-form-label for="photo">Upload new photo</x-form-label>
-                                <input id="photo" name="photo" type="file" accept="image/*"
-                                       class="form-control-file @error('photo') is-invalid @enderror">
-                                @error('photo')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                                <small class="form-text text-muted">JPEG, PNG, GIF or WebP. Max 2 MB.</small>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-sm">
+                            <x-image-crop-upload
+                                name="photo"
+                                id="photo"
+                                label="Upload new photo"
+                                :preview-url="$user->photo_path ? $user->photoUrl() : null"
+                                :required="true"
+                                help="Drag a photo here or browse, then crop. JPEG, PNG, GIF or WebP. Max 2 MB."
+                            />
+                            <button type="submit" class="btn btn-primary btn-sm mt-3">
                                 <i class="fas fa-upload" aria-hidden="true"></i> Upload photo
                             </button>
                         </form>

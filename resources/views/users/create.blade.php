@@ -31,11 +31,12 @@
                     </div>
 
                     <div class="form-group mb-0">
-                        <x-form-label for="photo">Profile photo</x-form-label>
-                        <input id="photo" name="photo" type="file" accept="image/*"
-                               class="form-control-file @error('photo') is-invalid @enderror">
-                        @error('photo')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                        <small class="form-text text-muted">Optional. JPEG, PNG, GIF or WebP. Max 2 MB.</small>
+                        <x-image-crop-upload
+                            name="photo"
+                            id="photo"
+                            label="Profile photo"
+                            help="Optional. Drag a photo here or browse, then crop. JPEG, PNG, GIF or WebP. Max 2 MB."
+                        />
                     </div>
                 </x-form-section>
 

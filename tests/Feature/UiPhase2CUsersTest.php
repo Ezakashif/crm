@@ -44,13 +44,17 @@ class UiPhase2CUsersTest extends TestCase
             ->assertOk()
             ->assertSee('crm-form-section', false)
             ->assertSee('Create user')
-            ->assertSee('crm-required', false);
+            ->assertSee('crm-required', false)
+            ->assertSee('data-image-crop-upload', false)
+            ->assertSee('Drag & drop a photo');
 
         $this->actingAs($admin)
             ->get(route('users.edit', $user))
             ->assertOk()
             ->assertSee('Edit user')
-            ->assertSee('Teammate One');
+            ->assertSee('Teammate One')
+            ->assertSee('data-image-crop-upload', false)
+            ->assertSee('Crop photo');
 
         $this->actingAs($admin)
             ->get(route('users.show', $user))

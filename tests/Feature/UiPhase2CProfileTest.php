@@ -33,6 +33,20 @@ class UiPhase2CProfileTest extends TestCase
             ->assertSee('Delete account');
     }
 
+    public function test_profile_photo_upload_supports_drag_and_crop(): void
+    {
+        $user = User::factory()->admin()->create();
+
+        $this->actingAs($user)
+            ->get(route('profile.edit'))
+            ->assertOk()
+            ->assertSee('data-image-crop-upload', false)
+            ->assertSee('Drag & drop a photo')
+            ->assertSee('Crop photo')
+            ->assertSee('image-crop-upload.js', false)
+            ->assertSee('cropper.min.js', false);
+    }
+
     public function test_profile_photo_remove_uses_confirm_attr(): void
     {
         $user = User::factory()->admin()->create([

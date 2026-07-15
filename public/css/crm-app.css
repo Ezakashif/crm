@@ -1785,3 +1785,141 @@ body.crm-app .permission-checklist__item .form-check-label {
 body.crm-app .permission-checklist__item .form-check-input:focus {
     box-shadow: var(--crm-focus-ring);
 }
+
+/* =========================================================
+   Image crop upload (drag + crop)
+   ========================================================= */
+
+body.crm-app .crm-image-crop {
+    text-align: left;
+}
+
+body.crm-app .crm-image-crop__body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+body.crm-app .crm-image-crop__preview-wrap {
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--crm-surface-muted, #f1f5f9);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.crm-app .crm-image-crop__preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+body.crm-app .crm-image-crop__preview-placeholder {
+    color: #94a3b8;
+    font-size: 1.75rem;
+}
+
+body.crm-app .crm-image-crop__controls {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+body.crm-app .crm-image-crop__dropzone {
+    position: relative;
+    border: 1.5px dashed rgba(100, 116, 139, 0.55);
+    border-radius: var(--crm-radius-sm, 0.5rem);
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 1rem 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.crm-app .crm-image-crop__dropzone:hover,
+body.crm-app .crm-image-crop__dropzone:focus-visible,
+body.crm-app .crm-image-crop__dropzone.is-dragover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    outline: none;
+}
+
+body.crm-app .crm-image-crop__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+body.crm-app .crm-image-crop__dropzone-inner {
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    color: #475569;
+    text-align: center;
+}
+
+body.crm-app .crm-image-crop__dropzone-inner > .fas {
+    font-size: 1.35rem;
+    color: #2563eb;
+    margin-bottom: 0.15rem;
+}
+
+body.crm-app .crm-image-crop__dropzone-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--crm-text, #0f172a);
+}
+
+body.crm-app .crm-image-crop__dropzone-sub {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+body.crm-app .crm-image-crop__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+}
+
+body.crm-app .crm-image-crop__stage {
+    width: 100%;
+    max-height: 420px;
+    background: #0f172a;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+body.crm-app .crm-image-crop__stage img {
+    display: block;
+    max-width: 100%;
+}
+
+body.crm-app .crm-image-crop.is-invalid .crm-image-crop__dropzone {
+    border-color: #dc2626;
+}
+
+@media (max-width: 575.98px) {
+    body.crm-app .crm-image-crop__body {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    body.crm-app .crm-image-crop__controls {
+        width: 100%;
+    }
+}

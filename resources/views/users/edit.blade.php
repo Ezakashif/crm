@@ -24,15 +24,14 @@
             @method('PUT')
             <div class="card-body">
                 <x-form-section title="Profile">
-                    <div class="form-group text-center mb-4">
-                        <x-user-avatar :user="$user" :size="80" class="mb-2" />
-                        <div>
-                            <x-form-label for="photo">Profile photo</x-form-label>
-                            <input id="photo" name="photo" type="file" accept="image/*"
-                                   class="form-control-file @error('photo') is-invalid @enderror">
-                            @error('photo')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                            <small class="form-text text-muted">Optional. Max 2 MB.</small>
-                        </div>
+                    <div class="form-group mb-4">
+                        <x-image-crop-upload
+                            name="photo"
+                            id="photo"
+                            label="Profile photo"
+                            :preview-url="$user->photo_path ? $user->photoUrl() : null"
+                            help="Optional. Drag a photo here or browse, then crop. Max 2 MB."
+                        />
                     </div>
 
                     <div class="form-group">
