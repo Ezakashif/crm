@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Models\Company;
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -31,7 +30,6 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'company' => ['nullable', 'string', 'max:100'],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ];
@@ -40,10 +38,7 @@ class LoginRequest extends FormRequest
     /**
      * Attempt to authenticate the request's credentials.
      *
-     * Super Admins authenticate without a company slug.
-     * Tenant users should supply a workspace slug; when omitted and the email
-     * uniquely identifies a single tenant account, that account is used.
-     * Ambiguous emails (same address in multiple workspaces) still require a slug.
+     * Emails are globally unique, so login is email + password only.
      *
      * @throws ValidationException
      */
@@ -51,7 +46,9 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $user = $this->resolveAuthenticatableUser();
+        $user = User::withoutCompanyScope()
+            ->where('email', (string) $this->input('email'))
+            ->first();
 
         if (! $user || ! Hash::check($this->input('password'), $user->password)) {
             RateLimiter::hit($this->throttleKey());
@@ -70,57 +67,6 @@ class LoginRequest extends FormRequest
         Auth::login($user, $this->boolean('remember'));
 
         RateLimiter::clear($this->throttleKey());
-    }
-
-    /**
-     * Resolve the user for this login attempt without cross-tenant ambiguity.
-     *
-     * @throws ValidationException
-     */
-    private function resolveAuthenticatableUser(): ?User
-    {
-        $email = (string) $this->input('email');
-        $companySlug = Str::lower(trim((string) $this->input('company', '')));
-
-        if ($companySlug !== '') {
-            $company = Company::query()->where('slug', $companySlug)->first();
-
-            if (! $company) {
-                return null;
-            }
-
-            return User::withoutCompanyScope()
-                ->where('email', $email)
-                ->where('company_id', $company->id)
-                ->where('is_super_admin', false)
-                ->first();
-        }
-
-        $superAdmin = User::withoutCompanyScope()
-            ->where('email', $email)
-            ->where('is_super_admin', true)
-            ->whereNull('company_id')
-            ->first();
-
-        if ($superAdmin) {
-            return $superAdmin;
-        }
-
-        // No workspace slug: allow tenant login only when the email is unique.
-        $matches = User::withoutCompanyScope()
-            ->where('email', $email)
-            ->where('is_super_admin', false)
-            ->whereNotNull('company_id')
-            ->limit(2)
-            ->get();
-
-        if ($matches->count() > 1) {
-            throw ValidationException::withMessages([
-                'company' => 'This email belongs to more than one workspace. Enter your workspace slug to continue.',
-            ]);
-        }
-
-        return $matches->first();
     }
 
     /**
@@ -151,11 +97,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        $company = Str::lower(trim((string) $this->input('company', '')));
-
-        return Str::transliterate(
-            ($company !== '' ? $company.'|' : '')
-            .Str::lower($this->string('email')).'|'.$this->ip()
-        );
+        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
     }
 }

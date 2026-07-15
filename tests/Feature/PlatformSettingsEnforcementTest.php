@@ -122,10 +122,7 @@ class PlatformSettingsEnforcementTest extends TestCase
         $tenant = User::factory()->admin()->create([
             'email' => 'tenant@example.com',
         ]);
-        $slug = Company::query()->findOrFail($tenant->company_id)->slug;
-
         $this->post('/login', [
-            'company' => $slug,
             'email' => 'tenant@example.com',
             'password' => 'password',
         ])->assertRedirect(route('login'))

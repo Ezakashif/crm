@@ -77,7 +77,7 @@ class UserCsvImporter
                 continue;
             }
 
-            if (User::query()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
+            if (User::withoutCompanyScope()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
                 $result->addDuplicate($rowNumber, "User with email already exists: {$email}");
 
                 continue;

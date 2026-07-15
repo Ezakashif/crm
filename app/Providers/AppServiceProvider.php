@@ -41,7 +41,6 @@ class AppServiceProvider extends ServiceProvider
             return url(route('password.reset', [
                 'token' => $token,
                 'email' => $user->email,
-                'company' => $user->company?->slug,
             ], false));
         });
 

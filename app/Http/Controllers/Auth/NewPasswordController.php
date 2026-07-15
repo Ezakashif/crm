@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
@@ -34,30 +33,12 @@ class NewPasswordController extends Controller
     {
         $request->validate([
             'token' => ['required'],
-            'company' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $company = Company::query()
-            ->where('slug', strtolower(trim((string) $request->input('company'))))
-            ->first();
-
-        if (! $company) {
-            throw ValidationException::withMessages([
-                'company' => __('This password reset token is invalid.'),
-            ]);
-        }
-
         $status = Password::reset(
-            [
-                'email' => $request->input('email'),
-                'company_id' => $company->id,
-                'is_super_admin' => false,
-                'password' => $request->input('password'),
-                'password_confirmation' => $request->input('password_confirmation'),
-                'token' => $request->input('token'),
-            ],
+            $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
                 $user->forceFill([
                     'password' => Hash::make($request->password),
@@ -70,7 +51,7 @@ class NewPasswordController extends Controller
 
         return $status == Password::PASSWORD_RESET
             ? redirect()->route('login')->with('status', __($status))
-            : back()->withInput($request->only('company', 'email'))
+            : back()->withInput($request->only('email'))
                 ->withErrors(['email' => __($status)]);
     }
 }

@@ -181,7 +181,6 @@ class HighPriorityAuditFixesTest extends TestCase
         ]);
 
         $this->post('/login', [
-            'company' => 'suspended-co',
             'email' => 'suspended@example.com',
             'password' => 'password',
         ])->assertSessionHasErrors([
@@ -189,7 +188,6 @@ class HighPriorityAuditFixesTest extends TestCase
         ]);
 
         $this->post('/login', [
-            'company' => 'expired-co',
             'email' => 'expired@example.com',
             'password' => 'password',
         ])->assertSessionHasErrors([

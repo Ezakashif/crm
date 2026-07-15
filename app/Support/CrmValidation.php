@@ -135,7 +135,7 @@ class CrmValidation
         if ($forImport) {
             return [
                 'name' => 'required|string|max:255',
-                'email' => ['required', 'email', 'max:255', self::uniqueInCompany('users', 'email', $companyId)],
+                'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
                 'password' => ['required', 'string', Password::defaults()],
                 'roles' => ['required', 'string', 'max:255'],
                 'status' => ['required', Rule::in(array_keys(User::STATUSES))],
@@ -144,7 +144,7 @@ class CrmValidation
 
         return [
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', self::uniqueInCompany('users', 'email', $companyId)],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'confirmed', Password::defaults()],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => [

@@ -58,7 +58,6 @@ class SubscriptionExpiryEnforcementTest extends TestCase
         ]);
 
         $this->post('/login', [
-            'company' => 'expired-co',
             'email' => 'expired@example.com',
             'password' => 'password',
         ])->assertRedirect(route('login'))

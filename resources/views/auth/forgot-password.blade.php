@@ -7,25 +7,14 @@
         <div class="alert alert-info">{{ session('status') }}</div>
     @endif
 
-    <p class="login-box-msg">{{ __('Enter your workspace slug and email to receive a reset link.') }}</p>
+    <p class="login-box-msg">{{ __('Enter your email to receive a reset link.') }}</p>
 
     <form action="{{ route('password.email') }}" method="post">
         @csrf
 
         <div class="input-group mb-3">
-            <input type="text" name="company" class="form-control @error('company') is-invalid @enderror"
-                   value="{{ old('company') }}" placeholder="{{ __('Workspace slug') }}" required autofocus>
-            <div class="input-group-append">
-                <div class="input-group-text"><span class="fas fa-building"></span></div>
-            </div>
-            @error('company')
-                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-            @enderror
-        </div>
-
-        <div class="input-group mb-3">
             <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                   value="{{ old('email') }}" placeholder="{{ __('Email') }}" required>
+                   value="{{ old('email') }}" placeholder="{{ __('Email') }}" required autofocus>
             <div class="input-group-append">
                 <div class="input-group-text"><span class="fas fa-envelope"></span></div>
             </div>

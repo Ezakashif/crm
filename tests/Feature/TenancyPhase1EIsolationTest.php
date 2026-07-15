@@ -144,7 +144,7 @@ class TenancyPhase1EIsolationTest extends TestCase
         $this->assertSame($company->name, $log->properties['company_name'] ?? null);
     }
 
-    public function test_user_email_unique_is_per_company(): void
+    public function test_user_email_must_be_globally_unique(): void
     {
         $default = Company::default();
         $other = Company::factory()->create();
@@ -170,11 +170,11 @@ class TenancyPhase1EIsolationTest extends TestCase
                 'roles' => [$salesRole->id],
                 'status' => 'active',
             ])
-            ->assertRedirect(route('users.index'));
+            ->assertSessionHasErrors('email');
 
-        $this->assertDatabaseHas('users', [
-            'email' => 'shared@example.com',
-            'company_id' => $default->id,
-        ]);
+        $this->assertSame(
+            1,
+            User::withoutCompanyScope()->where('email', 'shared@example.com')->count()
+        );
     }
 }

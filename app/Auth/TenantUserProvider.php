@@ -9,8 +9,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 class TenantUserProvider extends EloquentUserProvider
 {
     /**
-     * Retrieve a user by credentials, supporting optional company_id for
-     * multi-tenant password reset / auth lookups without CompanyScope leakage.
+     * Retrieve a user by credentials without CompanyScope leakage.
      *
      * @param  array<string, mixed>  $credentials
      */

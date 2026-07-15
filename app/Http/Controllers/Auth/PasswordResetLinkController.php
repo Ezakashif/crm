@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -27,29 +26,17 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'company' => ['required', 'string', 'max:100'],
+        $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        $company = Company::query()
-            ->where('slug', strtolower(trim($validated['company'])))
-            ->first();
-
-        if (! $company) {
-            // Do not leak whether the workspace exists.
-            return back()->with('status', __(Password::RESET_LINK_SENT));
-        }
-
-        $status = Password::sendResetLink([
-            'email' => $validated['email'],
-            'company_id' => $company->id,
-            'is_super_admin' => false,
-        ]);
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
 
         return $status == Password::RESET_LINK_SENT
             ? back()->with('status', __($status))
-            : back()->withInput($request->only('company', 'email'))
+            : back()->withInput($request->only('email'))
                 ->withErrors(['email' => __($status)]);
     }
 }

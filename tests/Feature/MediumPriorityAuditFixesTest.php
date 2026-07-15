@@ -23,47 +23,31 @@ class MediumPriorityAuditFixesTest extends TestCase
         $this->seed(RbacSeeder::class);
     }
 
-    public function test_password_reset_is_scoped_to_company_workspace(): void
+    public function test_password_reset_works_by_email_without_workspace_slug(): void
     {
         Notification::fake();
 
-        $companyA = Company::factory()->create(['slug' => 'acme']);
-        $companyB = Company::factory()->create(['slug' => 'beta']);
-
-        $userA = User::factory()->create([
-            'company_id' => $companyA->id,
-            'email' => 'shared@example.com',
+        $user = User::factory()->create([
+            'email' => 'reset-me@example.com',
             'password' => Hash::make('password-a'),
-        ]);
-        User::factory()->create([
-            'company_id' => $companyB->id,
-            'email' => 'shared@example.com',
-            'password' => Hash::make('password-b'),
         ]);
 
         $this->post(route('password.email'), [
-            'company' => 'acme',
-            'email' => 'shared@example.com',
+            'email' => 'reset-me@example.com',
         ])->assertSessionHas('status');
 
-        Notification::assertSentTo($userA, ResetPassword::class);
+        Notification::assertSentTo($user, ResetPassword::class);
 
-        $token = Password::broker()->createToken($userA);
+        $token = Password::broker()->createToken($user);
 
         $this->post(route('password.store'), [
             'token' => $token,
-            'company' => 'acme',
-            'email' => 'shared@example.com',
+            'email' => 'reset-me@example.com',
             'password' => 'new-password',
             'password_confirmation' => 'new-password',
         ])->assertRedirect(route('login'));
 
-        $this->assertTrue(Hash::check('new-password', $userA->fresh()->password));
-        $this->assertTrue(Hash::check('password-b', User::withoutCompanyScope()
-            ->where('company_id', $companyB->id)
-            ->where('email', 'shared@example.com')
-            ->first()
-            ->password));
+        $this->assertTrue(Hash::check('new-password', $user->fresh()->password));
     }
 
     public function test_default_company_cannot_be_suspended(): void

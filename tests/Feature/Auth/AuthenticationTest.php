@@ -6,7 +6,6 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Session\TokenMismatchException;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
@@ -20,16 +19,14 @@ class AuthenticationTest extends TestCase
         $response = $this->get('/login');
 
         $response->assertStatus(200);
-        $response->assertSee('name="company"', false);
+        $response->assertDontSee('name="company"', false);
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
         $user = User::factory()->create();
-        $slug = Company::query()->findOrFail($user->company_id)->slug;
 
         $response = $this->post('/login', [
-            'company' => $slug,
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -38,22 +35,21 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
-    public function test_unique_tenant_email_can_authenticate_without_company_slug(): void
+    public function test_super_admin_can_authenticate_with_email_only(): void
     {
-        $user = User::factory()->create([
-            'email' => 'tenant@example.com',
+        $superAdmin = User::factory()->superAdmin()->create([
+            'email' => 'superadmin@example.com',
         ]);
 
-        $response = $this->post('/login', [
-            'email' => 'tenant@example.com',
+        $this->post('/login', [
+            'email' => 'superadmin@example.com',
             'password' => 'password',
-        ]);
+        ])->assertRedirect(route('superadmin.dashboard', absolute: false));
 
-        $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertAuthenticatedAs($superAdmin);
     }
 
-    public function test_ambiguous_tenant_email_requires_company_slug(): void
+    public function test_user_emails_must_be_globally_unique(): void
     {
         $companyA = Company::factory()->create(['slug' => 'acme']);
         $companyB = Company::factory()->create(['slug' => 'beta']);
@@ -62,83 +58,20 @@ class AuthenticationTest extends TestCase
             'company_id' => $companyA->id,
             'email' => 'shared@example.com',
         ]);
+
+        $this->expectException(\Illuminate\Database\QueryException::class);
+
         User::factory()->create([
             'company_id' => $companyB->id,
             'email' => 'shared@example.com',
         ]);
-
-        $this->from('/login')->post('/login', [
-            'email' => 'shared@example.com',
-            'password' => 'password',
-        ])->assertRedirect('/login')
-            ->assertSessionHasErrors('company');
-
-        $this->assertGuest();
-    }
-
-    public function test_same_email_across_companies_authenticates_correct_tenant(): void
-    {
-        $companyA = Company::factory()->create(['slug' => 'acme']);
-        $companyB = Company::factory()->create(['slug' => 'beta']);
-
-        $userA = User::factory()->create([
-            'company_id' => $companyA->id,
-            'email' => 'shared@example.com',
-            'password' => Hash::make('password-a'),
-        ]);
-
-        $userB = User::factory()->create([
-            'company_id' => $companyB->id,
-            'email' => 'shared@example.com',
-            'password' => Hash::make('password-b'),
-        ]);
-
-        $this->post('/login', [
-            'company' => 'beta',
-            'email' => 'shared@example.com',
-            'password' => 'password-b',
-        ])->assertRedirect(route('dashboard', absolute: false));
-
-        $this->assertAuthenticatedAs($userB);
-
-        $this->post('/logout');
-        $this->assertGuest();
-
-        $this->post('/login', [
-            'company' => 'acme',
-            'email' => 'shared@example.com',
-            'password' => 'password-a',
-        ])->assertRedirect(route('dashboard', absolute: false));
-
-        $this->assertAuthenticatedAs($userA);
-    }
-
-    public function test_wrong_company_slug_does_not_authenticate_even_with_valid_password(): void
-    {
-        $companyA = Company::factory()->create(['slug' => 'acme']);
-        Company::factory()->create(['slug' => 'beta']);
-
-        User::factory()->create([
-            'company_id' => $companyA->id,
-            'email' => 'shared@example.com',
-        ]);
-
-        $this->post('/login', [
-            'company' => 'beta',
-            'email' => 'shared@example.com',
-            'password' => 'password',
-        ]);
-
-        $this->assertGuest();
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
         $user = User::factory()->create();
-        $slug = Company::query()->findOrFail($user->company_id)->slug;
 
         $this->post('/login', [
-            'company' => $slug,
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
