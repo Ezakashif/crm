@@ -466,12 +466,8 @@
         line-height: 1;
     }
 
-    /* Dashboard preview motion */
+    /* Dashboard preview motion (transform only — keep opacity solid for first paint) */
     @media (prefers-reduced-motion: no-preference) {
-        .mk-dashboard-preview {
-            animation: mk-fade-up 700ms 120ms cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-
         .mk-float-soft {
             animation: mk-float-soft 7s ease-in-out infinite;
         }
