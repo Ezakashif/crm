@@ -35,7 +35,7 @@
                             name="photo"
                             id="photo"
                             label="Profile photo"
-                            help="Optional. Drag a photo here or browse, then crop. JPEG, PNG, GIF or WebP. Max 2 MB."
+                            help="Optional. Choose a photo, then drag it to adjust inside the frame. JPEG, PNG, GIF or WebP. Max 2 MB."
                         />
                     </div>
                 </x-form-section>

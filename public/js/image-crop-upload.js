@@ -1,6 +1,6 @@
 /**
- * Drag-and-drop image upload with Cropper.js crop modal.
- * Targets [data-image-crop-upload] roots rendered by x-image-crop-upload.
+ * Photo upload with fixed-frame adjust UX.
+ * User chooses/drops a photo, then drags it inside a locked circular frame.
  */
 (function (window, document) {
     'use strict';
@@ -97,7 +97,9 @@
         this.zoom = this.modalEl ? this.modalEl.querySelector('[data-icu-zoom]') : null;
         this.applyBtn = this.modalEl ? this.modalEl.querySelector('[data-icu-apply]') : null;
         this.cropper = null;
+        this.minZoom = 1;
         this.pendingName = 'photo.jpg';
+        this.pendingSourceUrl = null;
         this.objectUrl = null;
         this.bound = false;
 
@@ -112,10 +114,7 @@
 
         var self = this;
 
-        this.dropzone.addEventListener('click', function (e) {
-            if (e.target === self.input) {
-                return;
-            }
+        this.dropzone.addEventListener('click', function () {
             self.input.click();
         });
 
@@ -157,7 +156,17 @@
 
         if (this.changeBtn) {
             this.changeBtn.addEventListener('click', function () {
-                self.input.click();
+                // Re-open adjuster with current pending source, or browse for a new file.
+                if (self.pendingSourceUrl) {
+                    self.cropImage.src = self.pendingSourceUrl;
+                    self.showModal();
+                    // Init after modal is visible so Cropper measures correctly.
+                    window.setTimeout(function () {
+                        self.initCropper();
+                    }, 180);
+                } else {
+                    self.input.click();
+                }
             });
         }
 
@@ -178,18 +187,20 @@
                 if (!self.cropper) {
                     return;
                 }
-                var imageData = self.cropper.getImageData();
-                if (!imageData || !imageData.naturalWidth) {
-                    return;
-                }
-                var minZoom = imageData.width / imageData.naturalWidth;
-                var maxZoom = minZoom * 3;
                 var t = parseFloat(self.zoom.value || '0');
-                self.cropper.zoomTo(minZoom + (maxZoom - minZoom) * t);
+                var maxZoom = self.minZoom * 3;
+                self.cropper.zoomTo(self.minZoom + (maxZoom - self.minZoom) * t);
             });
         }
 
         if (window.jQuery) {
+            window.jQuery(this.modalEl).on('shown.bs.modal', function () {
+                if (self.cropImage && self.cropImage.src && !self.cropper) {
+                    self.initCropper();
+                } else if (self.cropper) {
+                    self.cropper.resize();
+                }
+            });
             window.jQuery(this.modalEl).on('hidden.bs.modal', function () {
                 self.destroyCropper();
             });
@@ -215,9 +226,12 @@
         var self = this;
 
         readFileAsDataUrl(file).then(function (url) {
+            self.pendingSourceUrl = url;
             self.cropImage.src = url;
             self.showModal();
-            self.initCropper();
+            window.setTimeout(function () {
+                self.initCropper();
+            }, 180);
         }).catch(function () {
             setError(self.root, 'Could not read that image. Please try another file.');
             self.input.value = '';
@@ -247,9 +261,6 @@
             this.cropper.destroy();
             this.cropper = null;
         }
-        if (this.cropImage) {
-            this.cropImage.src = '';
-        }
         if (this.zoom) {
             this.zoom.value = '0';
         }
@@ -257,12 +268,14 @@
 
     ImageCropUpload.prototype.initCropper = function () {
         this.destroyCropper();
-        if (!this.cropImage || typeof window.Cropper === 'undefined') {
-            setError(this.root, 'Cropping is unavailable right now. Please refresh and try again.');
+        if (!this.cropImage || !this.cropImage.src || typeof window.Cropper === 'undefined') {
+            setError(this.root, 'Photo adjuster is unavailable right now. Please refresh and try again.');
             return;
         }
 
         var self = this;
+
+        // Fixed frame: user only drags/zooms the photo; crop box stays locked.
         this.cropper = new window.Cropper(this.cropImage, {
             aspectRatio: this.aspectRatio,
             viewMode: 1,
@@ -272,17 +285,25 @@
             background: false,
             movable: true,
             zoomable: true,
+            zoomOnWheel: true,
             scalable: false,
             rotatable: false,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            guides: true,
-            center: true,
+            cropBoxMovable: false,
+            cropBoxResizable: false,
+            toggleDragModeOnDblclick: false,
+            guides: false,
+            center: false,
             highlight: false,
             ready: function () {
+                var imageData = self.cropper.getImageData();
+                self.minZoom = imageData.naturalWidth
+                    ? (imageData.width / imageData.naturalWidth)
+                    : 1;
                 if (self.zoom) {
                     self.zoom.value = '0';
                 }
+                // Keep the crop box centered and full-size in the stage.
+                self.cropper.setDragMode('move');
             }
         });
     };
@@ -300,28 +321,29 @@
         });
 
         if (!canvas) {
-            setError(this.root, 'Could not crop that image. Please try again.');
+            setError(this.root, 'Could not prepare that photo. Please try again.');
             return;
         }
 
         var self = this;
         canvasToBlob(canvas, 'image/jpeg', 0.92).then(function (blob) {
             if (!blob) {
-                setError(self.root, 'Could not prepare the cropped photo.');
+                setError(self.root, 'Could not prepare the adjusted photo.');
                 return;
             }
 
             if (blob.size > self.maxBytes) {
-                setError(self.root, 'Cropped image is still too large. Try a smaller zoom area.');
+                setError(self.root, 'Photo is still too large after cropping. Try zooming in more.');
                 return;
             }
 
             var file = new File([blob], self.pendingName, { type: 'image/jpeg', lastModified: Date.now() });
             if (!assignFile(self.input, file)) {
-                setError(self.root, 'Your browser could not attach the cropped photo. Please try another browser.');
+                setError(self.root, 'Your browser could not attach the photo. Please try another browser.');
                 return;
             }
 
+            // Required attribute is satisfied via DataTransfer assignment above.
             if (self.objectUrl) {
                 URL.revokeObjectURL(self.objectUrl);
             }
@@ -337,11 +359,11 @@
 
     ImageCropUpload.prototype.clear = function () {
         this.input.value = '';
+        this.pendingSourceUrl = null;
         if (this.objectUrl) {
             URL.revokeObjectURL(this.objectUrl);
             this.objectUrl = null;
         }
-        // Keep server preview if present via initial src data attribute? Clear to placeholder.
         this.preview.removeAttribute('src');
         hide(this.preview);
         show(this.placeholder);

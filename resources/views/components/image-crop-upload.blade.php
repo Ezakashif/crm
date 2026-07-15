@@ -2,7 +2,7 @@
     'name' => 'photo',
     'id' => null,
     'label' => 'Profile photo',
-    'help' => 'Drag a photo here or browse. You can crop before uploading. JPEG, PNG, GIF or WebP. Max 2 MB.',
+    'help' => 'Choose a photo, then drag it to adjust inside the frame. JPEG, PNG, GIF or WebP. Max 2 MB.',
     'previewUrl' => null,
     'aspectRatio' => 1,
     'required' => false,
@@ -58,7 +58,7 @@
                 tabindex="0"
                 role="button"
                 aria-controls="{{ $inputId }}"
-                aria-label="{{ __('Drag a photo here or press Enter to browse') }}"
+                aria-label="{{ __('Choose a photo or press Enter to browse') }}"
             >
                 <input
                     type="file"
@@ -71,14 +71,14 @@
                 >
                 <div class="crm-image-crop__dropzone-inner" data-icu-drop-label>
                     <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
-                    <span class="crm-image-crop__dropzone-title">{{ __('Drag & drop a photo') }}</span>
-                    <span class="crm-image-crop__dropzone-sub">{{ __('or click to browse') }}</span>
+                    <span class="crm-image-crop__dropzone-title">{{ __('Drop a photo here') }}</span>
+                    <span class="crm-image-crop__dropzone-sub">{{ __('or click to browse, then drag to adjust in the frame') }}</span>
                 </div>
             </div>
 
             <div class="crm-image-crop__actions" data-icu-actions @if (! $previewUrl) hidden @endif>
                 <button type="button" class="btn btn-sm btn-outline-primary" data-icu-change>
-                    <i class="fas fa-crop-alt" aria-hidden="true"></i> {{ __('Change / crop') }}
+                    <i class="fas fa-hand-paper" aria-hidden="true"></i> {{ __('Adjust in frame') }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-icu-clear>
                     <i class="fas fa-times" aria-hidden="true"></i> {{ __('Clear') }}
@@ -95,28 +95,36 @@
     </div>
 
     <div class="modal fade" id="{{ $modalId }}" tabindex="-1" role="dialog" aria-labelledby="{{ $modalId }}-title" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="{{ $modalId }}-title">{{ __('Crop photo') }}</h5>
+                    <h5 class="modal-title" id="{{ $modalId }}-title">{{ __('Adjust photo in frame') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted small mb-3">{{ __('Drag the image to reposition. Use the slider to zoom, then apply the crop.') }}</p>
-                    <div class="crm-image-crop__stage">
-                        <img src="" alt="" data-icu-crop-image>
+                    <p class="crm-image-crop__hint mb-3">
+                        <i class="fas fa-arrows-alt" aria-hidden="true"></i>
+                        {{ __('Drag the photo to position it inside the frame. Use zoom to scale.') }}
+                    </p>
+                    <div class="crm-image-crop__frame-shell">
+                        <div class="crm-image-crop__stage crm-image-crop__stage--framed">
+                            <img src="" alt="" data-icu-crop-image>
+                        </div>
                     </div>
                     <div class="crm-image-crop__zoom mt-3">
-                        <label class="mb-1 small text-muted" for="{{ $rootId }}-zoom">{{ __('Zoom') }}</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="mb-0 small text-muted" for="{{ $rootId }}-zoom">{{ __('Zoom') }}</label>
+                            <span class="small text-muted">{{ __('Drag photo to adjust') }}</span>
+                        </div>
                         <input id="{{ $rootId }}-zoom" type="range" min="0" max="1" step="0.01" value="0" data-icu-zoom class="w-100">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('Cancel') }}</button>
                     <button type="button" class="btn btn-primary" data-icu-apply>
-                        <i class="fas fa-check" aria-hidden="true"></i> {{ __('Use photo') }}
+                        <i class="fas fa-check" aria-hidden="true"></i> {{ __('Use this photo') }}
                     </button>
                 </div>
             </div>

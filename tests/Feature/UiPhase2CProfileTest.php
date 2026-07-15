@@ -41,8 +41,9 @@ class UiPhase2CProfileTest extends TestCase
             ->get(route('profile.edit'))
             ->assertOk()
             ->assertSee('data-image-crop-upload', false)
-            ->assertSee('Drag & drop a photo')
-            ->assertSee('Crop photo')
+            ->assertSee('Drop a photo here')
+            ->assertSee('Adjust photo in frame')
+            ->assertSee('Drag the photo to position it inside the frame')
             ->assertSee('image-crop-upload.js', false)
             ->assertSee('cropper.min.js', false);
     }

@@ -30,7 +30,7 @@
                             id="photo"
                             label="Profile photo"
                             :preview-url="$user->photo_path ? $user->photoUrl() : null"
-                            help="Optional. Drag a photo here or browse, then crop. Max 2 MB."
+                            help="Optional. Choose a photo, then drag it to adjust inside the frame. Max 2 MB."
                         />
                     </div>
 

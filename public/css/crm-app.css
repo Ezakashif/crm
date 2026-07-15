@@ -1896,17 +1896,69 @@ body.crm-app .crm-image-crop__actions {
     margin-top: 0.65rem;
 }
 
+body.crm-app .crm-image-crop__hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.5rem;
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-size: 0.875rem;
+}
+
+body.crm-app .crm-image-crop__hint .fas {
+    color: #2563eb;
+}
+
+body.crm-app .crm-image-crop__frame-shell {
+    position: relative;
+    width: min(100%, 360px);
+    margin: 0 auto;
+}
+
 body.crm-app .crm-image-crop__stage {
     width: 100%;
-    max-height: 420px;
+    height: 360px;
     background: #0f172a;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     overflow: hidden;
+}
+
+body.crm-app .crm-image-crop__stage--framed {
+    cursor: grab;
+}
+
+body.crm-app .crm-image-crop__stage--framed:active {
+    cursor: grabbing;
 }
 
 body.crm-app .crm-image-crop__stage img {
     display: block;
     max-width: 100%;
+}
+
+/* Circular frame: crop box is locked; user drags the photo underneath */
+body.crm-app .crm-image-crop__stage .cropper-view-box,
+body.crm-app .crm-image-crop__stage .cropper-face {
+    border-radius: 50%;
+}
+
+body.crm-app .crm-image-crop__stage .cropper-view-box {
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95);
+}
+
+body.crm-app .crm-image-crop__stage .cropper-modal {
+    background: rgba(15, 23, 42, 0.62);
+}
+
+body.crm-app .crm-image-crop__stage .cropper-dashed,
+body.crm-app .crm-image-crop__stage .cropper-center,
+body.crm-app .crm-image-crop__stage .cropper-line,
+body.crm-app .crm-image-crop__stage .cropper-point {
+    display: none;
 }
 
 body.crm-app .crm-image-crop.is-invalid .crm-image-crop__dropzone {
@@ -1921,5 +1973,9 @@ body.crm-app .crm-image-crop.is-invalid .crm-image-crop__dropzone {
 
     body.crm-app .crm-image-crop__controls {
         width: 100%;
+    }
+
+    body.crm-app .crm-image-crop__stage {
+        height: 300px;
     }
 }
