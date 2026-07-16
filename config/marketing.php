@@ -261,4 +261,186 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Features page
+    |--------------------------------------------------------------------------
+    */
+
+    'features_page' => [
+        'headline' => 'Every module your revenue team needs',
+        'subheadline' => 'Algos covers the full CRM lifecycle—from first lead to closed customer—with clear permissions, reporting, and multi-tenant control.',
+        'groups' => [
+            [
+                'id' => 'sales',
+                'title' => 'Sales & relationships',
+                'description' => 'Capture demand and keep customer context after the win.',
+                'modules' => [
+                    [
+                        'icon' => 'user-plus',
+                        'title' => 'Lead management',
+                        'description' => 'Track every inquiry from capture to conversion with owners, stages, and follow-ups.',
+                        'highlights' => [
+                            'Pipeline stages and ownership',
+                            'Activity history on every lead',
+                            'Convert leads to customers in one step',
+                        ],
+                    ],
+                    [
+                        'icon' => 'users',
+                        'title' => 'Customer management',
+                        'description' => 'Maintain account records, timelines, and ownership after deals close.',
+                        'highlights' => [
+                            'Central customer profiles',
+                            'Timeline of related activity',
+                            'Company-scoped customer data',
+                        ],
+                    ],
+                    [
+                        'icon' => 'building',
+                        'title' => 'Company management',
+                        'description' => 'Organize workspaces, branding, and tenant settings for each company.',
+                        'highlights' => [
+                            'Per-company configuration',
+                            'Plan and limit awareness',
+                            'Clean admin controls',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'execution',
+                'title' => 'Execution & collaboration',
+                'description' => 'Keep the team aligned on what to do next.',
+                'modules' => [
+                    [
+                        'icon' => 'check-square',
+                        'title' => 'Task management',
+                        'description' => 'Assign follow-ups, track due dates, and close the loop on sales work.',
+                        'highlights' => [
+                            'Statuses and assignees',
+                            'Due-date visibility',
+                            'List and detail views',
+                        ],
+                    ],
+                    [
+                        'icon' => 'kanban',
+                        'title' => 'Kanban boards',
+                        'description' => 'Drag-and-drop boards for leads and tasks so progress stays visual.',
+                        'highlights' => [
+                            'Lead and task boards',
+                            'Quick stage updates',
+                            'Shared team visibility',
+                        ],
+                    ],
+                    [
+                        'icon' => 'bell',
+                        'title' => 'Notifications',
+                        'description' => 'Stay informed when follow-ups are due and important events happen.',
+                        'highlights' => [
+                            'In-app notification center',
+                            'Mark read / read all',
+                            'Actionable reminders',
+                        ],
+                    ],
+                    [
+                        'icon' => 'search',
+                        'title' => 'Global search',
+                        'description' => 'Find leads, customers, tasks, and users instantly across your workspace.',
+                        'highlights' => [
+                            'Fast workspace search',
+                            'Suggestions as you type',
+                            'Permission-aware results',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'insights',
+                'title' => 'Insights & data',
+                'description' => 'Understand performance and move data in or out with confidence.',
+                'modules' => [
+                    [
+                        'icon' => 'layout-dashboard',
+                        'title' => 'Dashboard analytics',
+                        'description' => 'See pipeline health, workloads, and KPIs the moment you sign in.',
+                        'highlights' => [
+                            'At-a-glance KPIs',
+                            'Pipeline snapshots',
+                            'Team-ready overview',
+                        ],
+                    ],
+                    [
+                        'icon' => 'bar-chart',
+                        'title' => 'Reports',
+                        'description' => 'Filter and export the metrics that matter for revenue operations.',
+                        'highlights' => [
+                            'Filtered reporting views',
+                            'Export-ready outputs',
+                            'Ops-friendly insights',
+                        ],
+                    ],
+                    [
+                        'icon' => 'file-up',
+                        'title' => 'CSV import / export',
+                        'description' => 'Migrate and extract leads, customers, tasks, and users without friction.',
+                        'highlights' => [
+                            'Sample CSV templates',
+                            'Bulk import flows',
+                            'List exports on demand',
+                        ],
+                    ],
+                    [
+                        'icon' => 'scroll-text',
+                        'title' => 'Activity logs',
+                        'description' => 'Audit important changes across the workspace for accountability.',
+                        'highlights' => [
+                            'Searchable event history',
+                            'User and entity context',
+                            'Operational transparency',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'platform',
+                'title' => 'Platform & administration',
+                'description' => 'Security, tenancy, and control built into the product.',
+                'modules' => [
+                    [
+                        'icon' => 'shield',
+                        'title' => 'Role & permission management',
+                        'description' => 'Grant precise access so every teammate sees only what they should.',
+                        'highlights' => [
+                            'Custom roles per company',
+                            'Granular permissions',
+                            'Safe admin workflows',
+                        ],
+                    ],
+                    [
+                        'icon' => 'layers',
+                        'title' => 'Multi-tenant architecture',
+                        'description' => 'Isolate each company’s data and settings on a shared platform.',
+                        'highlights' => [
+                            'Company-scoped records',
+                            'Tenant-safe queries',
+                            'Scalable workspace model',
+                        ],
+                    ],
+                    [
+                        'icon' => 'crown',
+                        'title' => 'Super Admin',
+                        'description' => 'Operate the platform across companies with dedicated admin tools.',
+                        'highlights' => [
+                            'Company oversight',
+                            'Platform settings',
+                            'Impersonation controls',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+
 ];
+
