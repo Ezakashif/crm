@@ -495,5 +495,67 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | About page
+    |--------------------------------------------------------------------------
+    */
+
+    'about' => [
+        'headline' => 'Built for teams who deserve a calmer CRM',
+        'subheadline' => 'Algos started with a simple belief: revenue software should feel clear, trustworthy, and fast to adopt—not heavy, noisy, or confusing.',
+        'mission' => [
+            'title' => 'Mission',
+            'body' => 'Help growing teams close more deals with a CRM that stays out of the way—clear pipelines, accountable follow-ups, and data every stakeholder can trust.',
+        ],
+        'vision' => [
+            'title' => 'Vision',
+            'body' => 'Become the operating system for modern revenue teams: multi-tenant by design, permission-aware by default, and delightful enough that people actually want to use it every day.',
+        ],
+        'why' => [
+            'title' => 'Why we built Algos',
+            'body' => 'Too many CRMs force teams to choose between power and usability. Spreadsheets break under pressure. Enterprise tools drown reps in configuration. We built Algos so sales and ops can share one workspace—leads, customers, tasks, reports, and admin controls—without the clutter.',
+            'points' => [
+                'Clarity over feature theater',
+                'Tenant isolation and permissions from day one',
+                'Importable data and exportable truth',
+                'A product path from first lead to platform admin',
+            ],
+        ],
+        'timeline' => [
+            [
+                'year' => '2024',
+                'title' => 'Problem framing',
+                'description' => 'Interviewed founders and revenue leads stuck between sheets and bloated CRMs.',
+            ],
+            [
+                'year' => '2025',
+                'title' => 'Core CRM foundation',
+                'description' => 'Shipped multi-tenant leads, customers, tasks, roles, and company isolation.',
+            ],
+            [
+                'year' => '2025',
+                'title' => 'Ops & insights',
+                'description' => 'Added boards, reporting, CSV flows, search, notifications, and activity logs.',
+            ],
+            [
+                'year' => '2026',
+                'title' => 'Public launch path',
+                'description' => 'Building the marketing site, packaging plans, and preparing broader onboarding.',
+            ],
+        ],
+        'stack' => [
+            ['name' => 'Laravel', 'role' => 'Application framework'],
+            ['name' => 'PHP 8.2+', 'role' => 'Backend runtime'],
+            ['name' => 'Blade', 'role' => 'Server-rendered UI'],
+            ['name' => 'Tailwind CSS', 'role' => 'Design system styling'],
+            ['name' => 'Alpine.js', 'role' => 'Light interactivity'],
+            ['name' => 'Vite', 'role' => 'Asset pipeline'],
+            ['name' => 'SQLite / SQL', 'role' => 'Persistent data'],
+            ['name' => 'AdminLTE', 'role' => 'Authenticated CRM shell'],
+        ],
+    ],
+
 ];
+
 
