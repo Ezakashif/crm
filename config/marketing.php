@@ -54,6 +54,8 @@ return [
     'pricing' => [
         'currency' => 'USD',
         'annual_discount_label' => 'Save 20%',
+        'headline' => 'Simple pricing for growing teams',
+        'subheadline' => 'Start with a free trial. Upgrade when your pipeline and team need more power. Prices are placeholders until billing goes live.',
         'plans' => [
             [
                 'id' => 'starter',
@@ -63,6 +65,7 @@ return [
                 'annual' => 23,
                 'highlighted' => false,
                 'cta' => 'Start Free Trial',
+                'cta_type' => 'trial',
                 'features' => [
                     'Up to 5 users',
                     'Lead & customer management',
@@ -78,6 +81,7 @@ return [
                 'annual' => 63,
                 'highlighted' => true,
                 'cta' => 'Start Free Trial',
+                'cta_type' => 'trial',
                 'features' => [
                     'Up to 25 users',
                     'Kanban pipelines',
@@ -94,6 +98,7 @@ return [
                 'annual' => 119,
                 'highlighted' => false,
                 'cta' => 'Contact Sales',
+                'cta_type' => 'demo',
                 'features' => [
                     'Unlimited users',
                     'Role & permission management',
@@ -103,6 +108,54 @@ return [
                 ],
             ],
         ],
+        'comparison' => [
+            ['feature' => 'Users', 'starter' => 'Up to 5', 'professional' => 'Up to 25', 'enterprise' => 'Unlimited'],
+            ['feature' => 'Lead management', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Customer management', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Task management', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Kanban boards', 'starter' => 'Basic', 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Dashboard analytics', 'starter' => 'Core', 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Reports', 'starter' => false, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'CSV import / export', 'starter' => false, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Global search', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Notifications', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Role & permissions', 'starter' => 'Basic', 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Activity logs', 'starter' => false, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Company management', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Multi-tenant architecture', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Super Admin tools', 'starter' => false, 'professional' => false, 'enterprise' => true],
+            ['feature' => 'Dedicated onboarding', 'starter' => false, 'professional' => false, 'enterprise' => true],
+            ['feature' => 'SSO / SLA (coming soon)', 'starter' => false, 'professional' => false, 'enterprise' => 'Roadmap'],
+            ['feature' => 'Support', 'starter' => 'Email', 'professional' => 'Priority', 'enterprise' => 'Dedicated'],
+        ],
+        'faqs' => [
+            [
+                'id' => 'billing',
+                'question' => 'Can I switch between monthly and annual billing?',
+                'answer' => 'Yes. Choose monthly or annual when you start. Annual billing reduces the per-user monthly rate.',
+            ],
+            [
+                'id' => 'trial-pricing',
+                'question' => 'Do plans include a free trial?',
+                'answer' => 'Starter and Professional include a free trial so you can evaluate Algos before paying. Enterprise starts with a guided demo.',
+            ],
+            [
+                'id' => 'limits',
+                'question' => 'What happens if we outgrow a plan?',
+                'answer' => 'You can move up anytime. User and feature limits expand with Professional and Enterprise.',
+            ],
+            [
+                'id' => 'placeholders',
+                'question' => 'Are these final prices?',
+                'answer' => 'Not yet. Current numbers are placeholders for launch planning. Final billing will connect to live plans later.',
+            ],
+            [
+                'id' => 'future',
+                'question' => 'Will more plans be added?',
+                'answer' => 'Possibly. Future tiers (for example industry packs or add-ons) may appear as placeholders as the product roadmap expands.',
+            ],
+        ],
+        'future_note' => 'Future add-ons—such as advanced automation packs or industry templates—may appear here as the roadmap grows.',
     ],
 
     /*
