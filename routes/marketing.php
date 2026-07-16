@@ -12,3 +12,6 @@ Route::get('/features', [FeaturesController::class, 'index'])->name('marketing.f
 Route::get('/pricing', [PricingController::class, 'index'])->name('marketing.pricing');
 Route::get('/about', [AboutController::class, 'index'])->name('marketing.about');
 Route::get('/contact', [ContactController::class, 'create'])->name('marketing.contact');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:6,1')
+    ->name('marketing.contact.store');
