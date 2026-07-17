@@ -12,9 +12,11 @@
 
             <nav class="hidden items-center gap-6 lg:flex" aria-label="Primary">
                 @foreach ($navItems as $item)
+                    @php $active = request()->routeIs($item['route']); @endphp
                     <a
                         href="{{ route($item['route']) }}"
-                        class="mk-nav-link {{ request()->routeIs($item['route']) ? 'is-active' : '' }}"
+                        class="mk-nav-link {{ $active ? 'is-active' : '' }}"
+                        @if ($active) aria-current="page" @endif
                     >
                         {{ $item['label'] }}
                     </a>
@@ -67,9 +69,11 @@
     >
         <nav class="mk-container flex flex-col gap-1 py-4" aria-label="Mobile">
             @foreach ($navItems as $item)
+                @php $active = request()->routeIs($item['route']); @endphp
                 <a
                     href="{{ route($item['route']) }}"
-                    class="rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50"
+                    class="rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 {{ $active ? 'bg-slate-50 text-slate-900' : '' }}"
+                    @if ($active) aria-current="page" @endif
                     @click="close()"
                 >
                     {{ $item['label'] }}

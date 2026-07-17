@@ -486,4 +486,48 @@
     .mk-compare-table tbody tr:hover {
         background: #f0f9ff;
     }
+
+    /* Accessibility helpers */
+    .mk-sr-only,
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+
+        .mk-fade-up,
+        .mk-fade-in,
+        .mk-float-soft,
+        .mk-card-interactive,
+        .mk-btn {
+            animation: none !important;
+            transition: none !important;
+        }
+
+        .mk-card-interactive:hover {
+            transform: none;
+        }
+    }
+
+    /* Responsive auth / form comfort */
+    @media (max-width: 640px) {
+        .mk-hero {
+            padding-top: 2.5rem;
+        }
+
+        .mk-brand-hero {
+            font-size: 2.25rem;
+        }
+    }
 }

@@ -1,94 +1,77 @@
-@extends('adminlte::auth.auth-page', ['authType' => 'login'])
-
-@section('adminlte_css_pre')
-    <link rel="stylesheet" href="{{ asset('vendor/icheck-bootstrap/icheck-bootstrap.min.css') }}">
-@stop
-
-@php
-    $loginUrl = route('login');
-    $passResetUrl = route('password.request');
-@endphp
-
-@section('auth_header', __('Sign in'))
-
-@section('auth_body')
+<x-marketing-auth-layout
+    title="Sign in"
+    heading="Sign in"
+    subheading="Enter your credentials to continue to your Algos workspace."
+>
     @if (session('status'))
-        <div class="alert alert-info crm-keep-alert">
+        <div class="mb-5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900" role="status">
             {{ session('status') }}
         </div>
     @endif
 
-    <p class="crm-auth-lead">{{ __('Enter your workspace and credentials to continue.') }}</p>
-
-    <form action="{{ $loginUrl }}" method="post" class="crm-auth-form">
+    <form method="POST" action="{{ route('login') }}" class="space-y-5" novalidate>
         @csrf
 
-        <div class="input-group mb-3">
-            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                   value="{{ old('email') }}" placeholder="{{ __('adminlte::adminlte.email') }}"
-                   autocomplete="username" autofocus>
-
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-envelope {{ config('adminlte.classes_auth_icon', '') }}"></span>
-                </div>
-                @error('email')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
+        <div>
+            <label for="email" class="mk-label">Email</label>
+            <input
+                id="email"
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                required
+                autofocus
+                autocomplete="username"
+                class="mk-input @error('email') border-red-400 @enderror"
+                placeholder="you@company.com"
+            >
+            @error('email')
+                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="form-group mb-3">
-            <label class="crm-auth-label" for="password">{{ __('Password') }}</label>
-            <div class="input-group">
-                <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                       placeholder="{{ __('adminlte::adminlte.password') }}" autocomplete="current-password" required>
-                <div class="input-group-append">
-                    <div class="input-group-text">
-                        <span class="fas fa-lock {{ config('adminlte.classes_auth_icon', '') }}" aria-hidden="true"></span>
-                    </div>
-                </div>
-                @error('password')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
+        <div>
+            <div class="mb-1.5 flex items-center justify-between gap-3">
+                <label for="password" class="mk-label mb-0">Password</label>
+                <a href="{{ route('password.request') }}" class="text-sm font-medium text-sky-700 hover:text-sky-800">
+                    Forgot password?
+                </a>
             </div>
+            <input
+                id="password"
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                class="mk-input @error('password') border-red-400 @enderror"
+                placeholder="••••••••"
+            >
+            @error('password')
+                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="row align-items-center mb-3">
-            <div class="col-7">
-                <div class="icheck-primary" title="{{ __('adminlte::adminlte.remember_me_hint') }}">
-                    <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <label for="remember">
-                        {{ __('adminlte::adminlte.remember_me') }}
-                    </label>
-                </div>
-            </div>
-            <div class="col-5">
-                <button type="submit" class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-primary') }}">
-                    <span class="fas fa-sign-in-alt" aria-hidden="true"></span>
-                    {{ __('adminlte::adminlte.sign_in') }}
-                </button>
-            </div>
+        <div class="flex items-center gap-2">
+            <input
+                id="remember"
+                type="checkbox"
+                name="remember"
+                value="1"
+                class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                {{ old('remember') ? 'checked' : '' }}
+            >
+            <label for="remember" class="text-sm text-slate-600">Remember me</label>
         </div>
+
+        <x-marketing.button type="submit" class="w-full" size="lg">
+            Sign in
+        </x-marketing.button>
     </form>
-@stop
-
-@section('auth_footer')
-    @if ($passResetUrl)
-        <p class="crm-auth-footer-link mb-1">
-            <a href="{{ $passResetUrl }}">
-                {{ __('adminlte::adminlte.i_forgot_my_password') }}
-            </a>
-        </p>
-    @endif
 
     @if (! empty($registrationEnabled))
-        <p class="crm-auth-footer-link mb-0">
-            <a href="{{ route('register') }}">{{ __('Register a new workspace') }}</a>
+        <p class="mt-6 text-center text-sm text-slate-600">
+            New to Algos?
+            <a href="{{ route('register') }}" class="font-semibold text-sky-700 hover:text-sky-800">Create a workspace</a>
         </p>
     @endif
-@stop
+</x-marketing-auth-layout>

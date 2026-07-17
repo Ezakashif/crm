@@ -15,20 +15,19 @@ class UiPhase2CAuthTest extends TestCase
     {
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee('crm-auth-card', false)
-            ->assertSee('crm-auth-label', false)
-            ->assertSee('crm-auth-lead', false)
-            ->assertSee('Workspace slug')
-            ->assertSee('Sign in to your workspace')
-            ->assertSee('css/crm-app.css', false);
+            ->assertSee('mk-label', false)
+            ->assertSee('mk-input', false)
+            ->assertSee('Sign in')
+            ->assertSee('Back to website')
+            ->assertSee('Forgot password?');
     }
 
     public function test_forgot_password_screen_uses_labels_and_footer(): void
     {
         $this->get(route('password.request'))
             ->assertOk()
-            ->assertSee('crm-auth-label', false)
-            ->assertSee('Back to login')
+            ->assertSee('mk-label', false)
+            ->assertSee('Back to sign in')
             ->assertSee('Forgot your password?');
     }
 
@@ -39,9 +38,9 @@ class UiPhase2CAuthTest extends TestCase
         $this->get(route('register'))
             ->assertOk()
             ->assertSee('Create your workspace')
-            ->assertSee('crm-auth-label', false)
+            ->assertSee('mk-label', false)
             ->assertSee('Company name')
-            ->assertSee('I already have an account');
+            ->assertSee('Already have an account?');
     }
 
     public function test_confirm_password_screen_uses_lockscreen_polish(): void
@@ -51,7 +50,7 @@ class UiPhase2CAuthTest extends TestCase
         $this->actingAs($user)
             ->get(route('password.confirm'))
             ->assertOk()
-            ->assertSee('crm-auth-lockscreen', false)
-            ->assertSee('Confirm your password to continue.');
+            ->assertSee('Confirm password')
+            ->assertSee('This is a secure area');
     }
 }

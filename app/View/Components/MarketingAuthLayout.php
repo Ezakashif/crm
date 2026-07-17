@@ -12,6 +12,8 @@ class MarketingAuthLayout extends Component
         public ?string $description = null,
         public ?string $heading = null,
         public ?string $subheading = null,
+        public bool $wide = false,
+        public bool $robots = false,
     ) {}
 
     public function render(): View
