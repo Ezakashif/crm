@@ -36,7 +36,7 @@ class AuthenticatedSessionController extends Controller
         $user = auth()->user();
 
         if ($user?->isSuperAdmin()) {
-            $user->forceFill(['last_login_at' => now()])->save();
+            $this->recordSuccessfulLogin($user, $request);
             ActivityLogger::log('user.login', $user);
 
             return redirect()->intended(route('superadmin.dashboard', absolute: false));
@@ -68,11 +68,19 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($user) {
-            $user->forceFill(['last_login_at' => now()])->save();
+            $this->recordSuccessfulLogin($user, $request);
             ActivityLogger::log('user.login', $user);
         }
 
         return redirect()->intended(route('dashboard', absolute: false));
+    }
+
+    private function recordSuccessfulLogin($user, Request $request): void
+    {
+        $user->forceFill([
+            'last_login_at' => now(),
+            'last_login_ip' => $request->ip(),
+        ])->save();
     }
 
     private function rejectAuthenticatedSession(Request $request, string $message): RedirectResponse

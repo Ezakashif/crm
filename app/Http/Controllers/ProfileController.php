@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\Auth\SessionManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,10 +14,19 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        private SessionManager $sessions,
+    ) {}
+
     public function edit(Request $request): View
     {
+        $user = $request->user();
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'languages' => User::LANGUAGES,
+            'sessions' => $this->sessions->listForUser($user),
+            'timezones' => timezone_identifiers_list(),
         ]);
     }
 
@@ -33,6 +44,9 @@ class ProfileController extends Controller
         ActivityLogger::log('profile.updated', $user, [
             'name' => $user->name,
             'email' => $user->email,
+            'phone' => $user->phone,
+            'timezone' => $user->timezone,
+            'language' => $user->language,
         ]);
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

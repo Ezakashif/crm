@@ -33,6 +33,8 @@ Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->grou
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
     Route::delete('/profile/photo', [ProfileController::class, 'destroyPhoto'])->name('profile.photo.destroy');
+    Route::delete('/profile/sessions/others', [\App\Http\Controllers\ProfileSessionController::class, 'destroyOthers'])->name('profile.sessions.destroy-others');
+    Route::delete('/profile/sessions/{session}', [\App\Http\Controllers\ProfileSessionController::class, 'destroy'])->name('profile.sessions.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/search', [GlobalSearchController::class, 'index'])

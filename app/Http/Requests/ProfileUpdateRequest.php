@@ -10,8 +10,6 @@ use Illuminate\Validation\Rule;
 class ProfileUpdateRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -26,6 +24,9 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'timezone' => ['nullable', 'timezone:all'],
+            'language' => ['nullable', 'string', Rule::in(array_keys(User::LANGUAGES))],
         ];
     }
 }

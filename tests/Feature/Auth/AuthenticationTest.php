@@ -33,6 +33,10 @@ class AuthenticationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+
+        $user->refresh();
+        $this->assertNotNull($user->last_login_at);
+        $this->assertNotNull($user->last_login_ip);
     }
 
     public function test_super_admin_can_authenticate_with_email_only(): void

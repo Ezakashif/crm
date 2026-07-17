@@ -29,6 +29,9 @@ class User extends Authenticatable implements MustVerifyEmailContract
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'timezone',
+        'language',
         'password',
         'photo_path',
     ];
@@ -36,6 +39,21 @@ class User extends Authenticatable implements MustVerifyEmailContract
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * Supported UI languages (future-ready localization).
+     *
+     * @var array<string, string>
+     */
+    public const LANGUAGES = [
+        'en' => 'English',
+        'es' => 'Spanish',
+        'fr' => 'French',
+        'de' => 'German',
+        'pt' => 'Portuguese',
+        'ar' => 'Arabic',
+        'ur' => 'Urdu',
     ];
 
     protected function casts(): array

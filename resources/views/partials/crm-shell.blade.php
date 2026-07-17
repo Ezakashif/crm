@@ -1,9 +1,11 @@
 @php
     $statusToasts = [
         'profile-updated' => ['type' => 'success', 'message' => 'Profile saved.'],
-        'password-updated' => ['type' => 'success', 'message' => 'Password updated.'],
-        'photo-updated' => ['type' => 'success', 'message' => 'Photo updated.'],
-        'photo-removed' => ['type' => 'success', 'message' => 'Photo removed.'],
+        'password-updated' => ['type' => 'success', 'message' => 'Password updated. Other devices were signed out.'],
+        'session-revoked' => ['type' => 'success', 'message' => 'Session signed out.'],
+        'sessions-revoked' => ['type' => 'success', 'message' => 'Other devices were signed out.'],
+        'photo-updated' => ['type' => 'success', 'message' => 'Profile photo updated.'],
+        'photo-removed' => ['type' => 'success', 'message' => 'Profile photo removed.'],
         'verification-link-sent' => ['type' => 'success', 'message' => 'A new verification link has been sent.'],
     ];
 

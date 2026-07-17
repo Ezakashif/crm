@@ -6,13 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\Auth\SessionManager;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -21,6 +20,10 @@ class NewPasswordController extends Controller
     public const RESET_SUCCESS_MESSAGE = 'Your password has been reset. You can sign in with your new password.';
 
     public const RESET_FAILURE_MESSAGE = 'This password reset link is invalid or has expired. Please request a new one.';
+
+    public function __construct(
+        private SessionManager $sessions,
+    ) {}
 
     /**
      * Display the password reset view.
@@ -46,7 +49,7 @@ class NewPasswordController extends Controller
                     'remember_token' => Str::random(60),
                 ])->save();
 
-                $this->invalidateOtherSessions($user);
+                $this->sessions->destroyAllSessions($user);
 
                 ActivityLogger::log('password.reset', $user, [
                     'email' => $user->email,
@@ -75,18 +78,5 @@ class NewPasswordController extends Controller
         return back()
             ->withInput($request->only('email'))
             ->withErrors(['email' => self::RESET_FAILURE_MESSAGE]);
-    }
-
-    private function invalidateOtherSessions(User $user): void
-    {
-        $table = config('session.table', 'sessions');
-
-        if (! Schema::hasTable($table)) {
-            return;
-        }
-
-        DB::table($table)
-            ->where('user_id', $user->id)
-            ->delete();
     }
 }
