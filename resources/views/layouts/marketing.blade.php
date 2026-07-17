@@ -38,6 +38,15 @@
 
     <x-marketing.footer />
 
+    <a
+        href="#main-content"
+        class="mk-scroll-top"
+        data-mk-scroll-top
+        aria-label="Back to top"
+    >
+        <x-marketing.icon name="arrow-up" size="sm" />
+    </a>
+
     @stack('scripts')
 </body>
 </html>

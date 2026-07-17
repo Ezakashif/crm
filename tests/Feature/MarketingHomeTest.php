@@ -34,7 +34,10 @@ class MarketingHomeTest extends TestCase
             ->assertSee('Algos CRM dashboard preview', false)
             ->assertSee('Starter', false)
             ->assertSee('Professional', false)
-            ->assertSee('Enterprise', false);
+            ->assertSee('Enterprise', false)
+            ->assertSee('data-mk-counter', false)
+            ->assertSee('data-mk-scroll-top', false)
+            ->assertSee('mk-hero-shape', false);
     }
 
     public function test_authenticated_user_is_redirected_from_home_to_dashboard(): void

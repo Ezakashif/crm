@@ -148,7 +148,7 @@
                 </div>
 
                 <aside class="space-y-6">
-                    <div class="mk-card p-6" data-mk-reveal style="--mk-reveal-delay: 80ms">
+                    <div class="mk-card p-6" data-mk-reveal="right" style="--mk-reveal-delay: 200ms">
                         <h2 class="text-lg font-bold tracking-tight text-slate-900">Business information</h2>
                         <ul class="mt-5 space-y-4 text-sm text-slate-600">
                             <li class="flex items-start gap-3">

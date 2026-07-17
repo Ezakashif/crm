@@ -55,7 +55,7 @@
 
                 <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                     @foreach ($group['modules'] as $moduleIndex => $module)
-                        <div data-mk-reveal style="--mk-reveal-delay: {{ $moduleIndex * 70 }}ms">
+                        <div data-mk-reveal style="--mk-reveal-delay: {{ ($moduleIndex + 1) * 100 }}ms">
                             <x-marketing.feature-module
                                 :icon="$module['icon']"
                                 :title="$module['title']"

@@ -33,7 +33,7 @@
                     <h3 class="mk-display text-2xl sm:text-3xl">{{ $about['mission']['title'] }}</h3>
                     <p class="mt-4 text-base leading-relaxed text-slate-600">{{ $about['mission']['body'] }}</p>
                 </article>
-                <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8" data-mk-reveal style="--mk-reveal-delay: 100ms">
+                <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8" data-mk-reveal="right" style="--mk-reveal-delay: 200ms">
                     <h3 class="mk-display text-2xl sm:text-3xl">{{ $about['vision']['title'] }}</h3>
                     <p class="mt-4 text-base leading-relaxed text-slate-600">{{ $about['vision']['body'] }}</p>
                 </article>

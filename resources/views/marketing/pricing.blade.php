@@ -61,7 +61,7 @@
                     @php
                         $planCtaHref = ($plan['cta_type'] ?? 'trial') === 'demo' ? $demoHref : $trialHref;
                     @endphp
-                    <div data-mk-reveal style="--mk-reveal-delay: {{ $index * 90 }}ms">
+                    <div data-mk-reveal style="--mk-reveal-delay: {{ ($index + 1) * 100 }}ms">
                         <div x-show="!isAnnual()">
                             <x-marketing.pricing-card
                                 :name="$plan['name']"

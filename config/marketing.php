@@ -260,9 +260,9 @@ return [
             ],
         ],
         'stats' => [
-            ['value' => '3x', 'label' => 'Faster follow-ups'],
-            ['value' => '98%', 'label' => 'Pipeline visibility'],
-            ['value' => '14+', 'label' => 'CRM modules'],
+            ['value' => '3x', 'count' => 3, 'suffix' => 'x', 'label' => 'Faster follow-ups'],
+            ['value' => '98%', 'count' => 98, 'suffix' => '%', 'label' => 'Pipeline visibility'],
+            ['value' => '14+', 'count' => 14, 'suffix' => '+', 'label' => 'CRM modules'],
             ['value' => '24/7', 'label' => 'Secure access'],
         ],
         'testimonials' => [

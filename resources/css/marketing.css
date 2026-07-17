@@ -160,11 +160,11 @@
     }
 
     .mk-card-interactive {
-        transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+        transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
     }
 
     .mk-card-interactive:hover {
-        transform: translateY(-2px);
+        transform: translateY(-6px);
         border-color: var(--mk-border-strong);
         box-shadow: var(--mk-shadow-lg);
     }
@@ -187,7 +187,7 @@
     }
 
     .mk-btn:hover {
-        transform: translateY(-1px);
+        transform: translateY(-2px);
     }
 
     .mk-btn:active {
@@ -342,10 +342,10 @@
         resize: vertical;
     }
 
-    /* Subtle motion */
+    /* Motion — AOS-style fades (duration ~600ms, ease-in-out) */
     @media (prefers-reduced-motion: no-preference) {
         .mk-fade-up {
-            animation: mk-fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: mk-fade-up 600ms ease-in-out both;
         }
 
         .mk-fade-in {
@@ -358,59 +358,109 @@
 
         .mk-hero-copy > * {
             opacity: 0;
-            animation: mk-fade-up 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: mk-fade-up 600ms ease-in-out both;
         }
 
-        .mk-hero-copy > *:nth-child(1) { animation-delay: 40ms; }
-        .mk-hero-copy > *:nth-child(2) { animation-delay: 140ms; }
-        .mk-hero-copy > *:nth-child(3) { animation-delay: 240ms; }
-        .mk-hero-copy > *:nth-child(4) { animation-delay: 340ms; }
+        .mk-hero-copy > *:nth-child(1) { animation-delay: 100ms; }
+        .mk-hero-copy > *:nth-child(2) { animation-delay: 200ms; }
+        .mk-hero-copy > *:nth-child(3) { animation-delay: 300ms; }
+        .mk-hero-copy > *:nth-child(4) { animation-delay: 400ms; }
 
         .mk-hero-preview {
             opacity: 0;
-            animation: mk-fade-up 900ms 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: mk-fade-up 700ms 500ms ease-in-out both;
+        }
+
+        .mk-hero-shape-1 {
+            animation: mk-morph 15s linear infinite;
+        }
+
+        .mk-hero-shape-2 {
+            animation: mk-morph 20s linear infinite reverse;
         }
 
         [data-mk-reveal] {
             opacity: 0;
-            transform: translateY(22px);
-            transition:
-                opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-                transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+            transform: translate3d(0, 64px, 0);
+            transition-property: opacity, transform;
+            transition-duration: 600ms;
+            transition-timing-function: ease-in-out;
             transition-delay: var(--mk-reveal-delay, 0ms);
             will-change: opacity, transform;
+            pointer-events: none;
         }
 
         [data-mk-reveal].is-visible {
             opacity: 1;
-            transform: translateY(0);
+            transform: none;
+            pointer-events: auto;
         }
 
         [data-mk-reveal="left"] {
-            transform: translateX(-18px);
+            transform: translate3d(-64px, 0, 0);
         }
 
-        [data-mk-reveal="left"].is-visible {
-            transform: translateX(0);
+        [data-mk-reveal="right"] {
+            transform: translate3d(64px, 0, 0);
         }
 
-        [data-mk-reveal="scale"] {
-            transform: translateY(16px) scale(0.98);
+        [data-mk-reveal="down"] {
+            transform: translate3d(0, -48px, 0);
         }
 
-        [data-mk-reveal="scale"].is-visible {
-            transform: translateY(0) scale(1);
+        [data-mk-reveal="scale"],
+        [data-mk-reveal="zoom"] {
+            transform: scale(0.72);
+        }
+
+        [data-mk-reveal="scale"].is-visible,
+        [data-mk-reveal="zoom"].is-visible {
+            transform: none;
+        }
+    }
+
+    .mk-hero-shapes {
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .mk-hero-shape {
+        position: absolute;
+        border-radius: 40% 60% 65% 35% / 45% 40% 60% 55%;
+        filter: blur(2px);
+        opacity: 0.4;
+    }
+
+    .mk-hero-shape-1 {
+        width: min(18rem, 46vw);
+        height: min(18rem, 46vw);
+        top: 12%;
+        left: -4%;
+        background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.55), rgba(2, 132, 199, 0.08) 70%);
+    }
+
+    .mk-hero-shape-2 {
+        width: min(14rem, 38vw);
+        height: min(14rem, 38vw);
+        top: 28%;
+        right: -2%;
+        background: radial-gradient(circle at 70% 40%, rgba(14, 165, 233, 0.4), rgba(2, 132, 199, 0.05) 72%);
+    }
+
+    @media (max-width: 767px) {
+        [data-mk-reveal] {
+            transition-delay: 0ms !important;
         }
     }
 
     @keyframes mk-fade-up {
         from {
             opacity: 0;
-            transform: translateY(16px);
+            transform: translate3d(0, 48px, 0);
         }
         to {
             opacity: 1;
-            transform: translateY(0);
+            transform: none;
         }
     }
 
@@ -422,6 +472,45 @@
     @keyframes mk-drift {
         from { transform: translate3d(0, 0, 0); }
         to { transform: translate3d(-36px, 28px, 0); }
+    }
+
+    @keyframes mk-morph {
+        0%, 100% { border-radius: 40% 60% 65% 35% / 45% 40% 60% 55%; transform: translate3d(0, 0, 0) rotate(0deg); }
+        25% { border-radius: 60% 40% 35% 65% / 55% 45% 55% 45%; transform: translate3d(8px, -10px, 0) rotate(4deg); }
+        50% { border-radius: 45% 55% 50% 50% / 40% 60% 40% 60%; transform: translate3d(-6px, 12px, 0) rotate(-3deg); }
+        75% { border-radius: 55% 45% 60% 40% / 50% 50% 45% 55%; transform: translate3d(10px, 6px, 0) rotate(2deg); }
+    }
+
+    .mk-scroll-top {
+        position: fixed;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        z-index: 60;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 9999px;
+        background: var(--mk-accent);
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(12px);
+        transition: opacity 300ms ease, transform 300ms ease, visibility 300ms ease, background-color 180ms ease;
+        text-decoration: none;
+    }
+
+    .mk-scroll-top.is-active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .mk-scroll-top:hover {
+        background: var(--mk-accent-hover);
+        color: #fff;
     }
 
     /* Skip link */
@@ -576,24 +665,12 @@
         50% { transform: translateY(-8px); }
     }
 
-    /* Stats count-up feel via subtle rise */
-    .mk-stat-value {
-        transition: transform 400ms ease;
+    .mk-stat-item {
+        transition: transform 400ms ease, opacity 400ms ease;
     }
 
-    [data-mk-reveal].is-visible .mk-stat-value {
-        animation: mk-stat-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-
-    @keyframes mk-stat-pop {
-        from {
-            opacity: 0.35;
-            transform: translateY(8px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .mk-stat-item:hover {
+        transform: translateY(-4px);
     }
 
     /* Pricing comparison */
@@ -632,8 +709,9 @@
         .mk-atmosphere::after,
         .mk-hero-copy > *,
         .mk-hero-preview,
-        [data-mk-reveal],
-        [data-mk-reveal].is-visible .mk-stat-value {
+        .mk-hero-shape,
+        .mk-scroll-top,
+        [data-mk-reveal] {
             animation: none !important;
             transition: none !important;
         }
@@ -641,11 +719,19 @@
         [data-mk-reveal] {
             opacity: 1 !important;
             transform: none !important;
+            pointer-events: auto !important;
+        }
+
+        .mk-scroll-top.is-active {
+            opacity: 1;
+            visibility: visible;
+            transform: none;
         }
 
         .mk-card-interactive:hover,
         .mk-btn:hover,
-        .mk-logo-mark:hover {
+        .mk-logo-mark:hover,
+        .mk-stat-item:hover {
             transform: none;
         }
     }

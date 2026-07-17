@@ -20,7 +20,7 @@
     <div class="mk-container">
         <div
             class="relative overflow-hidden rounded-[1.25rem] bg-slate-900 px-6 py-12 text-center sm:px-12 sm:py-16"
-            data-mk-reveal="scale"
+            data-mk-reveal="zoom"
         >
             <div class="pointer-events-none absolute inset-0 opacity-70" aria-hidden="true"
                  style="background: radial-gradient(500px 220px at 20% 0%, rgba(56,189,248,0.28), transparent 60%), radial-gradient(420px 200px at 90% 100%, rgba(2,132,199,0.22), transparent 55%);"></div>
