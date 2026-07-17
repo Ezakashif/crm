@@ -36,6 +36,8 @@ class ActivityLog extends Model
         'user.deleted' => 'User deleted',
         'user.login' => 'User logged in',
         'user.logout' => 'User logged out',
+        'password.reset_requested' => 'Password reset requested',
+        'password.reset' => 'Password reset completed',
         'profile.updated' => 'Profile updated',
         'profile.photo_updated' => 'Profile photo updated',
         'profile.photo_removed' => 'Profile photo removed',

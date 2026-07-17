@@ -3,19 +3,25 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class NewPasswordController extends Controller
 {
+    public const RESET_SUCCESS_MESSAGE = 'Your password has been reset. You can sign in with your new password.';
+
+    public const RESET_FAILURE_MESSAGE = 'This password reset link is invalid or has expired. Please request a new one.';
+
     /**
      * Display the password reset view.
      */
@@ -27,31 +33,60 @@ class NewPasswordController extends Controller
     /**
      * Handle an incoming new password request.
      *
-     * @throws ValidationException
+     * Intentionally does not auto-login after reset. Users must sign in
+     * with the new password so shared/reset-link sessions stay safer.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(ResetPasswordRequest $request): RedirectResponse
     {
-        $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
                 $user->forceFill([
-                    'password' => Hash::make($request->password),
+                    'password' => $request->validated('password'),
                     'remember_token' => Str::random(60),
                 ])->save();
+
+                $this->invalidateOtherSessions($user);
+
+                ActivityLogger::log('password.reset', $user, [
+                    'email' => $user->email,
+                    'user_agent' => $request->userAgent(),
+                ], $user->id);
 
                 event(new PasswordReset($user));
             }
         );
 
-        return $status == Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', __($status))
-            : back()->withInput($request->only('email'))
-                ->withErrors(['email' => __($status)]);
+        if ($status === Password::PASSWORD_RESET) {
+            if (Auth::check()) {
+                Auth::guard('web')->logout();
+            }
+
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
+            return redirect()
+                ->route('login')
+                ->with('status', self::RESET_SUCCESS_MESSAGE);
+        }
+
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => self::RESET_FAILURE_MESSAGE]);
+    }
+
+    private function invalidateOtherSessions(User $user): void
+    {
+        $table = config('session.table', 'sessions');
+
+        if (! Schema::hasTable($table)) {
+            return;
+        }
+
+        DB::table($table)
+            ->where('user_id', $user->id)
+            ->delete();
     }
 }

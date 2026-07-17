@@ -1,7 +1,7 @@
 <x-marketing-auth-layout
     title="Forgot password"
     heading="Forgot your password?"
-    subheading="Enter your email and we’ll send a reset link."
+    subheading="Enter your work email and we’ll send a secure reset link if an account exists."
 >
     @if (session('status'))
         <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">
@@ -34,6 +34,11 @@
             Email reset link
         </x-marketing.button>
     </form>
+
+    <p class="mt-4 text-center text-xs leading-relaxed text-slate-500">
+        For security, we won’t confirm whether that email is registered.
+        Reset links expire after {{ config('auth.passwords.users.expire', 60) }} minutes.
+    </p>
 
     <p class="mt-6 text-center text-sm text-slate-600">
         <a href="{{ route('login') }}" class="font-semibold text-sky-700 hover:text-sky-800">Back to sign in</a>

@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
+    /**
+     * Generic success copy — never reveal whether the email exists.
+     */
+    public const REQUEST_STATUS_MESSAGE = 'If that email is associated with an account, a password reset link has been sent.';
+
     /**
      * Display the password reset link request view.
      */
@@ -21,22 +27,26 @@ class PasswordResetLinkController extends Controller
 
     /**
      * Handle an incoming password reset link request.
-     *
-     * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(ForgotPasswordRequest $request): RedirectResponse
     {
-        $request->validate([
-            'email' => ['required', 'email'],
+        $email = (string) $request->validated('email');
+
+        $status = Password::sendResetLink([
+            'email' => $email,
         ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $user = User::withoutCompanyScope()
+            ->where('email', $email)
+            ->first();
 
-        return $status == Password::RESET_LINK_SENT
-            ? back()->with('status', __($status))
-            : back()->withInput($request->only('email'))
-                ->withErrors(['email' => __($status)]);
+        if ($user && $status === Password::RESET_LINK_SENT) {
+            ActivityLogger::log('password.reset_requested', $user, [
+                'email' => $user->email,
+                'user_agent' => $request->userAgent(),
+            ], $user->id);
+        }
+
+        return back()->with('status', self::REQUEST_STATUS_MESSAGE);
     }
 }
