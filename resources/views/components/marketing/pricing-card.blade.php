@@ -34,9 +34,16 @@
         @endif
     </div>
 
-    <div class="mt-6 flex items-baseline gap-1">
-        <span class="text-4xl font-bold tracking-tight text-slate-900">${{ number_format($price) }}</span>
-        <span class="text-sm text-slate-500">/user/mo</span>
+    <div class="mt-6">
+        <div class="flex items-baseline gap-1">
+            <span class="text-4xl font-bold tracking-tight text-slate-900">${{ number_format($price) }}</span>
+            <span class="text-sm text-slate-500">/user/mo</span>
+        </div>
+        @if ($billing === 'annual')
+            <p class="mt-1 text-xs font-medium text-sky-700">Billed annually</p>
+        @else
+            <p class="mt-1 text-xs text-slate-400">Billed monthly</p>
+        @endif
     </div>
 
     <ul class="mt-6 flex-1 space-y-3">

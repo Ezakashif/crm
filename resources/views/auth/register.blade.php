@@ -1,88 +1,100 @@
-@extends('adminlte::auth.register')
-
-@section('auth_header', __('Create your workspace'))
-
-@section('auth_body')
-    <p class="crm-auth-lead">{{ __('Set up your company account and first admin user.') }}</p>
-
-    <form action="{{ route('register') }}" method="post" class="crm-auth-form">
+<x-marketing-auth-layout
+    title="Create workspace"
+    heading="Create your workspace"
+    subheading="Set up your company account and first admin user."
+    :wide="true"
+>
+    <form method="POST" action="{{ route('register') }}" class="space-y-5" novalidate>
         @csrf
 
-        <div class="form-group mb-3">
-            <label class="crm-auth-label" for="company_name">{{ __('Company name') }}</label>
-            <div class="input-group">
-                <input id="company_name" type="text" name="company_name" class="form-control @error('company_name') is-invalid @enderror"
-                       value="{{ old('company_name') }}" placeholder="{{ __('Company name') }}" required autofocus>
-                <div class="input-group-append">
-                    <div class="input-group-text"><span class="fas fa-building" aria-hidden="true"></span></div>
-                </div>
-                @error('company_name')
-                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                @enderror
-            </div>
+        <div>
+            <label for="company_name" class="mk-label">Company name</label>
+            <input
+                id="company_name"
+                type="text"
+                name="company_name"
+                value="{{ old('company_name') }}"
+                required
+                autofocus
+                autocomplete="organization"
+                class="mk-input @error('company_name') border-red-400 @enderror"
+                placeholder="Acme Corp"
+            >
+            @error('company_name')
+                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="form-group mb-3">
-            <label class="crm-auth-label" for="name">{{ __('Your name') }}</label>
-            <div class="input-group">
-                <input id="name" type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                       value="{{ old('name') }}" placeholder="{{ __('Your name') }}" required autocomplete="name">
-                <div class="input-group-append">
-                    <div class="input-group-text"><span class="fas fa-user" aria-hidden="true"></span></div>
-                </div>
-                @error('name')
-                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                @enderror
-            </div>
+        <div>
+            <label for="name" class="mk-label">Your name</label>
+            <input
+                id="name"
+                type="text"
+                name="name"
+                value="{{ old('name') }}"
+                required
+                autocomplete="name"
+                class="mk-input @error('name') border-red-400 @enderror"
+                placeholder="Alex Morgan"
+            >
+            @error('name')
+                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="form-group mb-3">
-            <label class="crm-auth-label" for="email">{{ __('Email') }}</label>
-            <div class="input-group">
-                <input id="email" type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                       value="{{ old('email') }}" placeholder="{{ __('Email') }}" required autocomplete="username">
-                <div class="input-group-append">
-                    <div class="input-group-text"><span class="fas fa-envelope" aria-hidden="true"></span></div>
-                </div>
-                @error('email')
-                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                @enderror
-            </div>
+        <div>
+            <label for="email" class="mk-label">Email</label>
+            <input
+                id="email"
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                required
+                autocomplete="username"
+                class="mk-input @error('email') border-red-400 @enderror"
+                placeholder="alex@company.com"
+            >
+            @error('email')
+                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="form-group mb-3">
-            <label class="crm-auth-label" for="password">{{ __('Password') }}</label>
-            <div class="input-group">
-                <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                       placeholder="{{ __('Password') }}" required autocomplete="new-password">
-                <div class="input-group-append">
-                    <div class="input-group-text"><span class="fas fa-lock" aria-hidden="true"></span></div>
-                </div>
-                @error('password')
-                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                @enderror
-            </div>
+        <div>
+            <label for="password" class="mk-label">Password</label>
+            <input
+                id="password"
+                type="password"
+                name="password"
+                required
+                autocomplete="new-password"
+                class="mk-input @error('password') border-red-400 @enderror"
+                placeholder="••••••••"
+            >
+            @error('password')
+                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="form-group mb-3">
-            <label class="crm-auth-label" for="password_confirmation">{{ __('Confirm password') }}</label>
-            <div class="input-group">
-                <input id="password_confirmation" type="password" name="password_confirmation" class="form-control"
-                       placeholder="{{ __('Confirm password') }}" required autocomplete="new-password">
-                <div class="input-group-append">
-                    <div class="input-group-text"><span class="fas fa-lock" aria-hidden="true"></span></div>
-                </div>
-            </div>
+        <div>
+            <label for="password_confirmation" class="mk-label">Confirm password</label>
+            <input
+                id="password_confirmation"
+                type="password"
+                name="password_confirmation"
+                required
+                autocomplete="new-password"
+                class="mk-input"
+                placeholder="••••••••"
+            >
         </div>
 
-        <button type="submit" class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-primary') }}">
-            {{ __('Create account') }}
-        </button>
+        <x-marketing.button type="submit" class="w-full" size="lg">
+            Create account
+        </x-marketing.button>
     </form>
-@endsection
 
-@section('auth_footer')
-    <p class="crm-auth-footer-link mb-0">
-        <a href="{{ route('login') }}">{{ __('I already have an account') }}</a>
+    <p class="mt-6 text-center text-sm text-slate-600">
+        Already have an account?
+        <a href="{{ route('login') }}" class="font-semibold text-sky-700 hover:text-sky-800">Sign in</a>
     </p>
-@endsection
+</x-marketing-auth-layout>

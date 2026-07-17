@@ -1,33 +1,41 @@
-@extends('adminlte::auth.auth-page', ['authType' => 'login'])
-
-@section('auth_header', __('Forgot your password?'))
-
-@section('auth_body')
+<x-marketing-auth-layout
+    title="Forgot password"
+    heading="Forgot your password?"
+    subheading="Enter your email and we’ll send a reset link."
+>
     @if (session('status'))
-        <div class="alert alert-info crm-keep-alert">{{ session('status') }}</div>
+        <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">
+            {{ session('status') }}
+        </div>
     @endif
 
-    <p class="login-box-msg">{{ __('Enter your email to receive a reset link.') }}</p>
-
-    <form action="{{ route('password.email') }}" method="post" class="crm-auth-form">
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-5" novalidate>
         @csrf
 
-        <div class="input-group mb-3">
-            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                   value="{{ old('email') }}" placeholder="{{ __('Email') }}" required autofocus>
-            <div class="input-group-append">
-                <div class="input-group-text"><span class="fas fa-envelope"></span></div>
-            </div>
+        <div>
+            <label for="email" class="mk-label">Email</label>
+            <input
+                id="email"
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                required
+                autofocus
+                autocomplete="username"
+                class="mk-input @error('email') border-red-400 @enderror"
+                placeholder="you@company.com"
+            >
+            @error('email')
+                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
+            @enderror
         </div>
 
-        <button type="submit" class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-primary') }}">
-            {{ __('Email Password Reset Link') }}
-        </button>
+        <x-marketing.button type="submit" class="w-full" size="lg">
+            Email reset link
+        </x-marketing.button>
     </form>
-@stop
 
-@section('auth_footer')
-    <p class="crm-auth-footer-link mb-0">
-        <a href="{{ route('login') }}">{{ __('Back to login') }}</a>
+    <p class="mt-6 text-center text-sm text-slate-600">
+        <a href="{{ route('login') }}" class="font-semibold text-sky-700 hover:text-sky-800">Back to sign in</a>
     </p>
-@stop
+</x-marketing-auth-layout>

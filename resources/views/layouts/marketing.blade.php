@@ -4,15 +4,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="format-detection" content="telephone=no">
 
     <x-marketing.seo
         :title="$title ?? null"
         :description="$description ?? null"
         :image="$ogImage ?? null"
     />
+    <x-marketing.json-ld type="organization" />
+    <x-marketing.json-ld type="website" />
 
+    <link rel="icon" href="{{ asset('branding/algos-logo.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap">
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet">
+    </noscript>
 
     @vite(['resources/css/marketing.css', 'resources/js/marketing.js'])
 

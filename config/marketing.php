@@ -54,6 +54,8 @@ return [
     'pricing' => [
         'currency' => 'USD',
         'annual_discount_label' => 'Save 20%',
+        'headline' => 'Simple pricing for growing teams',
+        'subheadline' => 'Start with a free trial. Upgrade when your pipeline and team need more power. Prices are placeholders until billing goes live.',
         'plans' => [
             [
                 'id' => 'starter',
@@ -63,6 +65,7 @@ return [
                 'annual' => 23,
                 'highlighted' => false,
                 'cta' => 'Start Free Trial',
+                'cta_type' => 'trial',
                 'features' => [
                     'Up to 5 users',
                     'Lead & customer management',
@@ -78,6 +81,7 @@ return [
                 'annual' => 63,
                 'highlighted' => true,
                 'cta' => 'Start Free Trial',
+                'cta_type' => 'trial',
                 'features' => [
                     'Up to 25 users',
                     'Kanban pipelines',
@@ -94,6 +98,7 @@ return [
                 'annual' => 119,
                 'highlighted' => false,
                 'cta' => 'Contact Sales',
+                'cta_type' => 'demo',
                 'features' => [
                     'Unlimited users',
                     'Role & permission management',
@@ -103,6 +108,54 @@ return [
                 ],
             ],
         ],
+        'comparison' => [
+            ['feature' => 'Users', 'starter' => 'Up to 5', 'professional' => 'Up to 25', 'enterprise' => 'Unlimited'],
+            ['feature' => 'Lead management', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Customer management', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Task management', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Kanban boards', 'starter' => 'Basic', 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Dashboard analytics', 'starter' => 'Core', 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Reports', 'starter' => false, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'CSV import / export', 'starter' => false, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Global search', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Notifications', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Role & permissions', 'starter' => 'Basic', 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Activity logs', 'starter' => false, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Company management', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Multi-tenant architecture', 'starter' => true, 'professional' => true, 'enterprise' => true],
+            ['feature' => 'Super Admin tools', 'starter' => false, 'professional' => false, 'enterprise' => true],
+            ['feature' => 'Dedicated onboarding', 'starter' => false, 'professional' => false, 'enterprise' => true],
+            ['feature' => 'SSO / SLA (coming soon)', 'starter' => false, 'professional' => false, 'enterprise' => 'Roadmap'],
+            ['feature' => 'Support', 'starter' => 'Email', 'professional' => 'Priority', 'enterprise' => 'Dedicated'],
+        ],
+        'faqs' => [
+            [
+                'id' => 'billing',
+                'question' => 'Can I switch between monthly and annual billing?',
+                'answer' => 'Yes. Choose monthly or annual when you start. Annual billing reduces the per-user monthly rate.',
+            ],
+            [
+                'id' => 'trial-pricing',
+                'question' => 'Do plans include a free trial?',
+                'answer' => 'Starter and Professional include a free trial so you can evaluate Algos before paying. Enterprise starts with a guided demo.',
+            ],
+            [
+                'id' => 'limits',
+                'question' => 'What happens if we outgrow a plan?',
+                'answer' => 'You can move up anytime. User and feature limits expand with Professional and Enterprise.',
+            ],
+            [
+                'id' => 'placeholders',
+                'question' => 'Are these final prices?',
+                'answer' => 'Not yet. Current numbers are placeholders for launch planning. Final billing will connect to live plans later.',
+            ],
+            [
+                'id' => 'future',
+                'question' => 'Will more plans be added?',
+                'answer' => 'Possibly. Future tiers (for example industry packs or add-ons) may appear as placeholders as the product roadmap expands.',
+            ],
+        ],
+        'future_note' => 'Future add-ons—such as advanced automation packs or industry templates—may appear here as the roadmap grows.',
     ],
 
     /*
@@ -442,5 +495,67 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | About page
+    |--------------------------------------------------------------------------
+    */
+
+    'about' => [
+        'headline' => 'Built for teams who deserve a calmer CRM',
+        'subheadline' => 'Algos started with a simple belief: revenue software should feel clear, trustworthy, and fast to adopt—not heavy, noisy, or confusing.',
+        'mission' => [
+            'title' => 'Mission',
+            'body' => 'Help growing teams close more deals with a CRM that stays out of the way—clear pipelines, accountable follow-ups, and data every stakeholder can trust.',
+        ],
+        'vision' => [
+            'title' => 'Vision',
+            'body' => 'Become the operating system for modern revenue teams: multi-tenant by design, permission-aware by default, and delightful enough that people actually want to use it every day.',
+        ],
+        'why' => [
+            'title' => 'Why we built Algos',
+            'body' => 'Too many CRMs force teams to choose between power and usability. Spreadsheets break under pressure. Enterprise tools drown reps in configuration. We built Algos so sales and ops can share one workspace—leads, customers, tasks, reports, and admin controls—without the clutter.',
+            'points' => [
+                'Clarity over feature theater',
+                'Tenant isolation and permissions from day one',
+                'Importable data and exportable truth',
+                'A product path from first lead to platform admin',
+            ],
+        ],
+        'timeline' => [
+            [
+                'year' => '2024',
+                'title' => 'Problem framing',
+                'description' => 'Interviewed founders and revenue leads stuck between sheets and bloated CRMs.',
+            ],
+            [
+                'year' => '2025',
+                'title' => 'Core CRM foundation',
+                'description' => 'Shipped multi-tenant leads, customers, tasks, roles, and company isolation.',
+            ],
+            [
+                'year' => '2025',
+                'title' => 'Ops & insights',
+                'description' => 'Added boards, reporting, CSV flows, search, notifications, and activity logs.',
+            ],
+            [
+                'year' => '2026',
+                'title' => 'Public launch path',
+                'description' => 'Building the marketing site, packaging plans, and preparing broader onboarding.',
+            ],
+        ],
+        'stack' => [
+            ['name' => 'Laravel', 'role' => 'Application framework'],
+            ['name' => 'PHP 8.2+', 'role' => 'Backend runtime'],
+            ['name' => 'Blade', 'role' => 'Server-rendered UI'],
+            ['name' => 'Tailwind CSS', 'role' => 'Design system styling'],
+            ['name' => 'Alpine.js', 'role' => 'Light interactivity'],
+            ['name' => 'Vite', 'role' => 'Asset pipeline'],
+            ['name' => 'SQLite / SQL', 'role' => 'Persistent data'],
+            ['name' => 'AdminLTE', 'role' => 'Authenticated CRM shell'],
+        ],
+    ],
+
 ];
+
 
