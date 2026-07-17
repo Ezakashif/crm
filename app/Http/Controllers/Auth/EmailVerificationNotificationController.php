@@ -29,7 +29,10 @@ class EmailVerificationNotificationController extends Controller
             report($e);
 
             return back()->withErrors([
-                'email' => 'We could not send the verification email. Check your mail configuration and try again.',
+                'email' => EmailVerification::sendFailureMessage(
+                    'We could not send the verification email. Check your mail configuration and try again.',
+                    $e
+                ),
             ]);
         }
 

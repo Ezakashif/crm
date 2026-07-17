@@ -67,7 +67,10 @@ class ProfileController extends Controller
             } catch (Throwable $e) {
                 report($e);
                 $redirect->withErrors([
-                    'email' => 'Your email was updated, but the verification email could not be sent. Use Resend verification email.',
+                    'email' => EmailVerification::sendFailureMessage(
+                        'Your email was updated, but the verification email could not be sent. Use Resend verification email.',
+                        $e
+                    ),
                 ]);
             }
         }
