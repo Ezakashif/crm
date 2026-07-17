@@ -19,11 +19,15 @@
 <section {{ $attributes->class(['mk-section']) }}>
     <div class="mk-container">
         <div
-            class="relative overflow-hidden rounded-[1.25rem] bg-slate-900 px-6 py-12 text-center sm:px-12 sm:py-16"
+            class="relative overflow-hidden px-6 py-12 text-center sm:px-12 sm:py-16"
+            style="border-radius: var(--mk-radius-xl); background: #0f172a;"
             data-mk-reveal="zoom"
         >
-            <div class="pointer-events-none absolute inset-0 opacity-70" aria-hidden="true"
-                 style="background: radial-gradient(500px 220px at 20% 0%, rgba(56,189,248,0.28), transparent 60%), radial-gradient(420px 200px at 90% 100%, rgba(2,132,199,0.22), transparent 55%);"></div>
+            <div
+                class="pointer-events-none absolute inset-0 opacity-80"
+                aria-hidden="true"
+                style="background: radial-gradient(500px 220px at 20% 0%, rgba(56,189,248,0.28), transparent 60%), radial-gradient(420px 200px at 90% 100%, rgba(2,132,199,0.22), transparent 55%);"
+            ></div>
 
             <div class="relative mx-auto max-w-2xl">
                 <h2 class="mk-display text-3xl text-white sm:text-4xl">{{ $title }}</h2>
@@ -35,7 +39,7 @@
                         {{ $primaryLabel }}
                         <x-marketing.icon name="arrow-right" size="sm" />
                     </x-marketing.button>
-                    <x-marketing.button :href="$secondaryHref" variant="secondary" size="lg" class="!bg-white/10 !text-white !border-white/20 hover:!bg-white/15">
+                    <x-marketing.button :href="$secondaryHref" variant="on-dark" size="lg">
                         {{ $secondaryLabel }}
                     </x-marketing.button>
                 </div>

@@ -11,10 +11,10 @@
     <section class="mk-atmosphere">
         <div class="mk-container mk-section pb-12 md:pb-16">
             <div class="mk-hero-copy mx-auto max-w-3xl text-center">
-                <p class="mk-brand-hero mb-5 text-[2.5rem] sm:text-5xl" aria-label="{{ $brand }}">
+                <p class="mk-brand-hero mk-brand-hero-page mb-5" aria-label="{{ $brand }}">
                     {{ strtolower($brand) }}<span class="dot">.</span>
                 </p>
-                <h1 class="mk-display text-3xl sm:text-4xl lg:text-5xl">
+                <h1 class="mk-display mk-page-title">
                     {{ $about['headline'] }}
                 </h1>
                 <p class="mk-lead mx-auto mt-5 max-w-2xl">
@@ -29,11 +29,11 @@
         <div class="mk-container">
             <h2 id="mission-vision-heading" class="sr-only">Mission and vision</h2>
             <div class="grid gap-6 lg:grid-cols-2">
-                <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8" data-mk-reveal="left">
+                <article class="mk-panel p-6 sm:p-8" data-mk-reveal="left">
                     <h3 class="mk-display text-2xl sm:text-3xl">{{ $about['mission']['title'] }}</h3>
                     <p class="mt-4 text-base leading-relaxed text-slate-600">{{ $about['mission']['body'] }}</p>
                 </article>
-                <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8" data-mk-reveal="right" style="--mk-reveal-delay: 200ms">
+                <article class="mk-panel p-6 sm:p-8" data-mk-reveal="right" style="--mk-reveal-delay: 200ms">
                     <h3 class="mk-display text-2xl sm:text-3xl">{{ $about['vision']['title'] }}</h3>
                     <p class="mt-4 text-base leading-relaxed text-slate-600">{{ $about['vision']['body'] }}</p>
                 </article>
@@ -54,8 +54,8 @@
             </div>
             <ul class="space-y-3">
                 @foreach ($about['why']['points'] as $point)
-                    <li class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium text-slate-800">
-                        <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <li class="flex items-start gap-3 border-b border-slate-200/80 px-1 py-3.5 text-sm font-medium text-slate-800 last:border-b-0">
+                        <span class="mk-icon-well mt-0.5 h-5 w-5 shrink-0 text-emerald-700" style="background: #ecfdf5;">
                             <x-marketing.icon name="check" size="sm" />
                         </span>
                         <span>{{ $point }}</span>
@@ -74,7 +74,6 @@
                 title="How Algos took shape"
                 description="A short path from the problem to a product ready for growing teams."
                 align="center"
-                class="mb-12"
             />
 
             <ol class="relative mx-auto max-w-3xl space-y-0">
@@ -106,7 +105,6 @@
                 title="The stack behind Algos"
                 description="A practical Laravel foundation—modern frontend for marketing, proven CRM shell for authenticated work."
                 align="center"
-                class="mb-10"
             />
 
             <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -10,7 +10,7 @@
     $alignClass = $align === 'center' ? 'text-center mx-auto' : 'text-left';
 @endphp
 
-<div {{ $attributes->class(['max-w-2xl', $alignClass]) }}>
+<div {{ $attributes->class(['max-w-2xl mb-10', $alignClass]) }}>
     @if ($eyebrow)
         <p class="mk-eyebrow mb-3">{{ $eyebrow }}</p>
     @endif

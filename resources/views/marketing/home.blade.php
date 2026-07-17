@@ -48,11 +48,11 @@
     </section>
 
     {{-- Trusted by --}}
-    <section class="border-y border-slate-200/80 bg-white py-10" aria-labelledby="trusted-by-heading">
+    <section class="border-y border-slate-200/70 bg-white py-8" aria-labelledby="trusted-by-heading">
         <div class="mk-container">
             <h2
                 id="trusted-by-heading"
-                class="text-center text-sm font-semibold uppercase tracking-wide text-slate-500"
+                class="text-center text-xs font-semibold uppercase tracking-[0.14em] text-slate-400"
                 data-mk-reveal
             >
                 Trusted by growing revenue teams
@@ -80,7 +80,6 @@
                     title="Everything your pipeline needs"
                     description="From first lead to closed customer—modules that keep sales and ops aligned."
                     align="center"
-                    class="mb-10"
                 />
             </div>
             <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -113,14 +112,13 @@
                     title="Up and running in four steps"
                     description="A simple path from empty workspace to a team that never drops a follow-up."
                     align="center"
-                    class="mb-10"
                 />
             </div>
-            <ol class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <ol class="mk-steps grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
                 @foreach ($home['how_it_works'] as $index => $step)
                     <li class="mk-step" data-mk-reveal style="--mk-reveal-delay: {{ $index * 100 }}ms">
                         <div class="mk-step-num">{{ $step['step'] }}</div>
-                        <h3 class="mt-3 text-lg font-semibold tracking-tight text-slate-900">{{ $step['title'] }}</h3>
+                        <h3 class="mt-4 text-lg font-semibold tracking-tight text-slate-900">{{ $step['title'] }}</h3>
                         <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ $step['description'] }}</p>
                     </li>
                 @endforeach
@@ -139,14 +137,14 @@
                     description="Modern CRM structure without the noise—so your team spends time selling, not configuring."
                 />
             </div>
-            <div class="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+            <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                 @foreach ($home['why_us'] as $index => $item)
                     <div
-                        class="flex gap-4 rounded-xl border border-slate-200 bg-slate-50/80 p-5"
+                        class="mk-panel flex gap-4 p-5"
                         data-mk-reveal="right"
                         style="--mk-reveal-delay: {{ ($index + 1) * 100 }}ms"
                     >
-                        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
+                        <span class="mk-icon-well h-10 w-10 shrink-0">
                             <x-marketing.icon :name="$item['icon']" />
                         </span>
                         <div>
@@ -160,8 +158,8 @@
     </section>
 
     {{-- Statistics --}}
-    <section class="mk-section border-y border-slate-200 bg-slate-900" aria-labelledby="stats-heading">
-        <div class="mk-container">
+    <section class="mk-section mk-section-dark" aria-labelledby="stats-heading">
+        <div class="mk-container relative">
             <h2 id="stats-heading" class="sr-only">Algos at a glance</h2>
             <div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
                 @foreach ($home['stats'] as $index => $stat)
@@ -181,7 +179,7 @@
                         @else
                             <div class="mk-stat-value text-white">{{ $stat['value'] }}</div>
                         @endif
-                        <div class="mt-2 text-sm font-medium text-slate-400">{{ $stat['label'] }}</div>
+                        <div class="mt-2 text-sm font-medium text-slate-300/80">{{ $stat['label'] }}</div>
                     </div>
                 @endforeach
             </div>
@@ -198,7 +196,6 @@
                     title="Teams that switched to Algos"
                     description="Placeholder stories from revenue teams using a clearer CRM workflow."
                     align="center"
-                    class="mb-10"
                 />
             </div>
             <div class="grid gap-5 lg:grid-cols-3">
@@ -229,8 +226,8 @@
                 />
             </div>
 
-            <div class="mt-8 flex justify-center" data-mk-reveal>
-                <div class="inline-flex items-center rounded-xl border border-slate-200 bg-white p-1" role="group" aria-label="Billing period">
+            <div class="flex justify-center" data-mk-reveal>
+                <div class="inline-flex items-center rounded-xl border border-slate-200 bg-white p-1 shadow-sm" role="group" aria-label="Billing period">
                     <button
                         type="button"
                         class="rounded-lg px-4 py-2 text-sm font-semibold transition"

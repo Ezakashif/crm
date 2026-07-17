@@ -13,10 +13,10 @@
     <section class="mk-atmosphere">
         <div class="mk-container mk-section pb-12 md:pb-16">
             <div class="mk-hero-copy mx-auto max-w-3xl text-center">
-                <p class="mk-brand-hero mb-5 text-[2.5rem] sm:text-5xl" aria-label="{{ config('marketing.name') }}">
+                <p class="mk-brand-hero mk-brand-hero-page mb-5" aria-label="{{ config('marketing.name') }}">
                     {{ strtolower(config('marketing.name')) }}<span class="dot">.</span>
                 </p>
-                <h1 class="mk-display text-3xl sm:text-4xl lg:text-5xl">
+                <h1 class="mk-display mk-page-title">
                     {{ $page['headline'] }}
                 </h1>
                 <p class="mk-lead mx-auto mt-5 max-w-2xl">
@@ -49,7 +49,6 @@
                         eyebrow="Modules"
                         :title="$group['title']"
                         :description="$group['description']"
-                        class="mb-10"
                     />
                 </div>
 

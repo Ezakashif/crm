@@ -24,7 +24,7 @@
             </nav>
         </div>
 
-        <div class="hidden items-center gap-2 lg:flex">
+        <div class="hidden items-center gap-3 lg:flex">
             @auth
                 <x-marketing.button
                     href="{{ auth()->user()->isSuperAdmin() ? route('superadmin.dashboard') : route('dashboard') }}"
@@ -34,11 +34,11 @@
                     Go to app
                 </x-marketing.button>
             @else
+                <a href="{{ route($demoRoute, $demoQuery) }}" class="mk-nav-link">
+                    Book demo
+                </a>
                 <x-marketing.button href="{{ route('login') }}" variant="ghost" size="sm">
                     Log in
-                </x-marketing.button>
-                <x-marketing.button href="{{ route($demoRoute, $demoQuery) }}" variant="secondary" size="sm">
-                    Book demo
                 </x-marketing.button>
                 <x-marketing.button href="{{ Route::has($trialRoute) ? route($trialRoute) : route('login') }}" size="sm">
                     Start free trial
@@ -90,11 +90,11 @@
                         Go to app
                     </x-marketing.button>
                 @else
-                    <x-marketing.button href="{{ route('login') }}" variant="ghost" class="w-full">
-                        Log in
-                    </x-marketing.button>
-                    <x-marketing.button href="{{ route($demoRoute, $demoQuery) }}" variant="secondary" class="w-full">
+                    <x-marketing.button href="{{ route($demoRoute, $demoQuery) }}" variant="ghost" class="w-full">
                         Book demo
+                    </x-marketing.button>
+                    <x-marketing.button href="{{ route('login') }}" variant="secondary" class="w-full">
+                        Log in
                     </x-marketing.button>
                     <x-marketing.button href="{{ Route::has($trialRoute) ? route($trialRoute) : route('login') }}" class="w-full">
                         Start free trial

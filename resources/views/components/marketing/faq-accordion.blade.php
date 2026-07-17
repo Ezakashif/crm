@@ -4,7 +4,7 @@
 ])
 
 <div
-    {{ $attributes->class(['mk-card p-2 sm:p-4']) }}
+    {{ $attributes->class(['mk-faq']) }}
     x-data="faqAccordion(@js($open))"
 >
     @foreach ($items as $index => $item)

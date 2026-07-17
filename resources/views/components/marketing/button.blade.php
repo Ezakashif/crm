@@ -11,6 +11,7 @@
         'secondary' => 'mk-btn-secondary',
         'ghost' => 'mk-btn-ghost',
         'soft' => 'mk-btn-accent-soft',
+        'on-dark' => 'mk-btn-on-dark',
     ];
     $sizes = [
         'sm' => 'mk-btn-sm',

@@ -3,11 +3,11 @@
     'question',
 ])
 
-<div class="border-b border-slate-200 py-1">
+<div class="border-b border-slate-200">
     <h3>
         <button
             type="button"
-            class="flex w-full items-center justify-between gap-4 py-4 text-left"
+            class="flex w-full items-center justify-between gap-4 py-5 text-left"
             @click="toggle('{{ $id }}')"
             :aria-expanded="isOpen('{{ $id }}').toString()"
             :id="'faq-button-{{ $id }}'"
@@ -29,7 +29,7 @@
         id="faq-panel-{{ $id }}"
         role="region"
         aria-labelledby="faq-button-{{ $id }}"
-        class="pb-4 pr-10 text-sm leading-relaxed text-slate-600"
+        class="pb-5 pr-10 text-sm leading-relaxed text-slate-600"
     >
         {{ $slot }}
     </div>

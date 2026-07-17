@@ -1,7 +1,7 @@
 @props([])
 
-<div {{ $attributes->class(['mk-dashboard-preview relative w-full']) }} role="img" aria-label="Algos CRM dashboard preview showing pipeline, tasks, and analytics">
-    <div class="mk-dashboard-chrome overflow-hidden rounded-t-xl border border-b-0 border-slate-200 bg-slate-100 shadow-mk-lg">
+<div {{ $attributes->class(['mk-dashboard-preview relative w-full overflow-hidden']) }} role="img" aria-label="Algos CRM dashboard preview showing pipeline, tasks, and analytics">
+    <div class="mk-dashboard-chrome overflow-hidden rounded-t-xl border border-b-0 border-slate-200 bg-slate-100">
         <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
             <span class="h-2.5 w-2.5 rounded-full bg-slate-300"></span>
             <span class="h-2.5 w-2.5 rounded-full bg-slate-300"></span>
@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div class="overflow-hidden rounded-b-xl border border-slate-200 bg-[#f8fafc] shadow-mk-lg">
+    <div class="mk-dashboard-body overflow-hidden rounded-b-xl border border-slate-200" style="background: var(--mk-bg);">
         <div class="grid min-h-[280px] grid-cols-[56px_1fr] sm:min-h-[340px] sm:grid-cols-[200px_1fr]">
             {{-- Sidebar --}}
             <aside class="border-r border-slate-200 bg-slate-900 p-3 text-slate-300 sm:p-4">

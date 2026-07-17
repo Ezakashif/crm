@@ -15,10 +15,10 @@
     <section class="mk-atmosphere">
         <div class="mk-container mk-section pb-10 md:pb-12">
             <div class="mk-hero-copy mx-auto max-w-3xl text-center">
-                <p class="mk-brand-hero mb-5 text-[2.5rem] sm:text-5xl" aria-label="{{ $brand }}">
+                <p class="mk-brand-hero mk-brand-hero-page mb-5" aria-label="{{ $brand }}">
                     {{ strtolower($brand) }}<span class="dot">.</span>
                 </p>
-                <h1 class="mk-display text-3xl sm:text-4xl lg:text-5xl">
+                <h1 class="mk-display mk-page-title">
                     {{ $isDemo ? 'Book a demo' : 'Talk with our team' }}
                 </h1>
                 <p class="mk-lead mx-auto mt-5 max-w-2xl">

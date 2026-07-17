@@ -14,10 +14,10 @@
     <section class="mk-atmosphere">
         <div class="mk-container mk-section pb-10 md:pb-12">
             <div class="mk-hero-copy mx-auto max-w-3xl text-center">
-                <p class="mk-brand-hero mb-5 text-[2.5rem] sm:text-5xl" aria-label="{{ config('marketing.name') }}">
+                <p class="mk-brand-hero mk-brand-hero-page mb-5" aria-label="{{ config('marketing.name') }}">
                     {{ strtolower(config('marketing.name')) }}<span class="dot">.</span>
                 </p>
-                <h1 class="mk-display text-3xl sm:text-4xl lg:text-5xl">
+                <h1 class="mk-display mk-page-title">
                     {{ $pricing['headline'] }}
                 </h1>
                 <p class="mk-lead mx-auto mt-5 max-w-2xl">
@@ -28,12 +28,12 @@
     </section>
 
     {{-- Plans --}}
-    <section class="bg-white pb-16 pt-2 md:pb-20" aria-labelledby="plans-heading" x-data="pricingToggle('monthly')">
+    <section class="bg-white pb-16 pt-4 md:pb-20" aria-labelledby="plans-heading" x-data="pricingToggle('monthly')">
         <div class="mk-container">
             <h2 id="plans-heading" class="sr-only">Pricing plans</h2>
 
             <div class="flex justify-center" data-mk-reveal>
-                <div class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1" role="group" aria-label="Billing period">
+                <div class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 shadow-sm" role="group" aria-label="Billing period">
                     <button
                         type="button"
                         class="rounded-lg px-4 py-2 text-sm font-semibold transition"
@@ -107,7 +107,6 @@
                 title="Feature comparison"
                 description="See what’s included in Starter, Professional, and Enterprise at a glance."
                 align="center"
-                class="mb-10"
             />
 
             <x-marketing.pricing-comparison
