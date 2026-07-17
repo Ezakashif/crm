@@ -2,10 +2,14 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\ActivityLog;
 use App\Models\User;
+use App\Services\SuperAdmin\PlatformSettingsService;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -15,15 +19,20 @@ class EmailVerificationTest extends TestCase
 
     public function test_email_verification_screen_can_be_rendered(): void
     {
+        app(PlatformSettingsService::class)->setMany(['email_verification_required' => true]);
+
         $user = User::factory()->unverified()->create();
 
         $response = $this->actingAs($user)->get('/verify-email');
 
         $response->assertStatus(200);
+        $response->assertSee($user->email, false);
     }
 
     public function test_email_can_be_verified(): void
     {
+        app(PlatformSettingsService::class)->setMany(['email_verification_required' => true]);
+
         $user = User::factory()->unverified()->create();
 
         Event::fake();
@@ -39,6 +48,11 @@ class EmailVerificationTest extends TestCase
         Event::assertDispatched(Verified::class);
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
         $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+
+        $this->assertDatabaseHas('activity_logs', [
+            'user_id' => $user->id,
+            'action' => 'email.verified',
+        ]);
     }
 
     public function test_email_is_not_verified_with_invalid_hash(): void
@@ -54,5 +68,90 @@ class EmailVerificationTest extends TestCase
         $this->actingAs($user)->get($verificationUrl);
 
         $this->assertFalse($user->fresh()->hasVerifiedEmail());
+    }
+
+    public function test_verification_can_be_resent(): void
+    {
+        Notification::fake();
+        app(PlatformSettingsService::class)->setMany(['email_verification_required' => true]);
+
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user)
+            ->post(route('verification.send'))
+            ->assertRedirect()
+            ->assertSessionHas('status', 'verification-link-sent');
+
+        Notification::assertSentTo($user, VerifyEmail::class);
+
+        $this->assertTrue(
+            ActivityLog::withoutCompanyScope()
+                ->where('user_id', $user->id)
+                ->where('action', 'email.verification_resent')
+                ->exists()
+        );
+    }
+
+    public function test_unverified_user_can_access_crm_when_verification_disabled(): void
+    {
+        app(PlatformSettingsService::class)->setMany(['email_verification_required' => false]);
+
+        $user = User::factory()->unverified()->admin()->create();
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk();
+    }
+
+    public function test_public_registration_skips_verification_when_disabled(): void
+    {
+        Notification::fake();
+
+        app(PlatformSettingsService::class)->setMany([
+            'registration_enabled' => true,
+            'email_verification_required' => false,
+        ]);
+
+        $this->post(route('register'), [
+            'company_name' => 'No Verify Co',
+            'name' => 'Owner',
+            'email' => 'owner@noverify.test',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertRedirect(route('dashboard'));
+
+        $user = User::withoutCompanyScope()->where('email', 'owner@noverify.test')->first();
+
+        $this->assertNotNull($user);
+        $this->assertTrue($user->hasVerifiedEmail());
+        Notification::assertNothingSent();
+    }
+
+    public function test_public_registration_requires_verification_when_enabled(): void
+    {
+        Notification::fake();
+
+        app(PlatformSettingsService::class)->setMany([
+            'registration_enabled' => true,
+            'email_verification_required' => true,
+        ]);
+
+        $this->post(route('register'), [
+            'company_name' => 'Verify Co',
+            'name' => 'Owner',
+            'email' => 'owner@verify.test',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertRedirect(route('verification.notice'));
+
+        $user = User::withoutCompanyScope()->where('email', 'owner@verify.test')->first();
+
+        $this->assertNotNull($user);
+        $this->assertFalse($user->hasVerifiedEmail());
+        Notification::assertSentTo($user, VerifyEmail::class);
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertRedirect(route('verification.notice'));
     }
 }

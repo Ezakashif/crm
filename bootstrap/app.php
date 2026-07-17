@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'website-lead-webhook' => \App\Http\Middleware\VerifyWebsiteLeadWebhook::class,
             'registration.enabled' => \App\Http\Middleware\EnsurePlatformRegistrationEnabled::class,
+            'verified.when_required' => \App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired::class,
         ]);
 
         $middleware->appendToGroup('web', [

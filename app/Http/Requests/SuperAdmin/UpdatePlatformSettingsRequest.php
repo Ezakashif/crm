@@ -27,6 +27,7 @@ class UpdatePlatformSettingsRequest extends FormRequest
             'mail_from_name' => ['nullable', 'string', 'max:255'],
             'mail_from_address' => ['nullable', 'email', 'max:255'],
             'registration_enabled' => ['nullable', 'boolean'],
+            'email_verification_required' => ['nullable', 'boolean'],
             'maintenance_mode' => ['nullable', 'boolean'],
             'trial_duration_days' => ['required', 'integer', 'min:1', 'max:365'],
             'default_company_status' => ['required', Rule::in(array_keys(Company::STATUSES))],

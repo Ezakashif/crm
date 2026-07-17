@@ -47,6 +47,16 @@ class PlatformSettingsService
         return in_array((string) $value, ['1', 'true', 'yes', 'on'], true);
     }
 
+    /**
+     * Whether CRM users must verify email before accessing tenant routes.
+     *
+     * Defaults to enabled when the setting has not been seeded yet.
+     */
+    public function emailVerificationRequired(): bool
+    {
+        return $this->getBool('email_verification_required', true);
+    }
+
     public function getInt(string $key, int $default = 0): int
     {
         $value = $this->get($key);

@@ -121,6 +121,8 @@ class UserCsvImporter
                 'password' => Hash::make($validated['password']),
                 'role' => 'user',
                 'status' => $validated['status'],
+                // Admin-provisioned CSV users are trusted and marked verified.
+                'email_verified_at' => now(),
                 'is_super_admin' => false,
             ]);
             $user->company_id = $actor->company_id;

@@ -38,6 +38,8 @@ class ActivityLog extends Model
         'user.logout' => 'User logged out',
         'password.reset_requested' => 'Password reset requested',
         'password.reset' => 'Password reset completed',
+        'email.verified' => 'Email verified',
+        'email.verification_resent' => 'Verification email resent',
         'profile.updated' => 'Profile updated',
         'profile.photo_updated' => 'Profile photo updated',
         'profile.photo_removed' => 'Profile photo removed',

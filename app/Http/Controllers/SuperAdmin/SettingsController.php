@@ -46,14 +46,25 @@ class SettingsController extends Controller
 
         unset($validated['platform_logo'], $validated['remove_logo']);
 
+        $registrationEnabled = $request->has('registration_enabled')
+            ? $request->boolean('registration_enabled')
+            : $this->settings->getBool('registration_enabled');
+        $emailVerificationRequired = $request->has('email_verification_required')
+            ? $request->boolean('email_verification_required')
+            : $this->settings->emailVerificationRequired();
+        $maintenanceMode = $request->has('maintenance_mode')
+            ? $request->boolean('maintenance_mode')
+            : $this->settings->getBool('maintenance_mode');
+
         $this->settings->setMany([
             'platform_name' => $validated['platform_name'],
             'default_timezone' => $validated['default_timezone'],
             'default_currency' => $validated['default_currency'],
             'mail_from_name' => $validated['mail_from_name'] ?? null,
             'mail_from_address' => $validated['mail_from_address'] ?? null,
-            'registration_enabled' => $request->boolean('registration_enabled'),
-            'maintenance_mode' => $request->boolean('maintenance_mode'),
+            'registration_enabled' => $registrationEnabled,
+            'email_verification_required' => $emailVerificationRequired,
+            'maintenance_mode' => $maintenanceMode,
             'trial_duration_days' => $validated['trial_duration_days'],
             'default_company_status' => $validated['default_company_status'],
             'platform_logo_path' => array_key_exists('platform_logo_path', $validated)
@@ -65,8 +76,9 @@ class SettingsController extends Controller
 
         ActivityLogger::log('platform.settings_updated', null, [
             'keys' => array_keys($validated),
-            'registration_enabled' => $request->boolean('registration_enabled'),
-            'maintenance_mode' => $request->boolean('maintenance_mode'),
+            'registration_enabled' => $registrationEnabled,
+            'email_verification_required' => $emailVerificationRequired,
+            'maintenance_mode' => $maintenanceMode,
         ]);
 
         return back()->with('success', 'Platform settings saved.');

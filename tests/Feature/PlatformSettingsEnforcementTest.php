@@ -28,7 +28,10 @@ class PlatformSettingsEnforcementTest extends TestCase
 
     public function test_enabled_registration_creates_company_and_admin(): void
     {
-        app(PlatformSettingsService::class)->setMany(['registration_enabled' => true]);
+        app(PlatformSettingsService::class)->setMany([
+            'registration_enabled' => true,
+            'email_verification_required' => true,
+        ]);
         app(PlatformSettingsService::class)->applyBranding();
 
         $this->get(route('register'))->assertOk();
@@ -39,7 +42,7 @@ class PlatformSettingsEnforcementTest extends TestCase
             'email' => 'owner@acme.test',
             'password' => 'password',
             'password_confirmation' => 'password',
-        ])->assertRedirect(route('dashboard'));
+        ])->assertRedirect(route('verification.notice'));
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas('companies', ['name' => 'Acme Labs']);
@@ -51,6 +54,7 @@ class PlatformSettingsEnforcementTest extends TestCase
         $user = User::withoutCompanyScope()->where('email', 'owner@acme.test')->first();
         $this->assertNotNull($user?->company_id);
         $this->assertTrue($user->hasRole('admin'));
+        $this->assertFalse($user->hasVerifiedEmail());
     }
 
     public function test_super_admin_can_toggle_registration_setting(): void
@@ -65,6 +69,7 @@ class PlatformSettingsEnforcementTest extends TestCase
                 'trial_duration_days' => 14,
                 'default_company_status' => 'active',
                 'registration_enabled' => '1',
+                'email_verification_required' => '1',
                 'maintenance_mode' => '0',
             ])
             ->assertRedirect();
@@ -83,6 +88,7 @@ class PlatformSettingsEnforcementTest extends TestCase
                 'trial_duration_days' => 14,
                 'default_company_status' => 'active',
                 'registration_enabled' => '0',
+                'email_verification_required' => '1',
                 'maintenance_mode' => '0',
             ])
             ->assertRedirect();
@@ -144,6 +150,7 @@ class PlatformSettingsEnforcementTest extends TestCase
                 'trial_duration_days' => 14,
                 'default_company_status' => 'active',
                 'registration_enabled' => '0',
+                'email_verification_required' => '1',
                 'maintenance_mode' => '1',
             ])
             ->assertRedirect();
@@ -162,6 +169,7 @@ class PlatformSettingsEnforcementTest extends TestCase
                 'trial_duration_days' => 14,
                 'default_company_status' => 'active',
                 'registration_enabled' => '0',
+                'email_verification_required' => '1',
                 'maintenance_mode' => '0',
             ])
             ->assertRedirect();

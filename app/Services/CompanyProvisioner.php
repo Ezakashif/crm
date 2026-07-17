@@ -30,7 +30,8 @@ class CompanyProvisioner
      *     trial_ends_at?: string|null,
      *     admin_name?: string|null,
      *     admin_email?: string|null,
-     *     admin_password?: string|null
+     *     admin_password?: string|null,
+     *     mark_admin_email_verified?: bool
      * }  $data
      * @return array{company: Company, admin: User|null}
      */
@@ -65,6 +66,10 @@ class CompanyProvisioner
             $admin = null;
 
             if (filled($data['admin_email'] ?? null)) {
+                // Admin/Super Admin provisioning marks verified by default.
+                // Public self-registration opts out so MustVerifyEmail is real.
+                $markVerified = (bool) ($data['mark_admin_email_verified'] ?? true);
+
                 $admin = new User;
                 $admin->forceFill([
                     'name' => $data['admin_name'] ?: 'Administrator',
@@ -72,7 +77,7 @@ class CompanyProvisioner
                     'password' => $data['admin_password'] ?: Str::password(12),
                     'role' => 'admin',
                     'status' => 'active',
-                    'email_verified_at' => now(),
+                    'email_verified_at' => $markVerified ? now() : null,
                     'is_super_admin' => false,
                 ]);
                 $admin->company_id = $company->id;

@@ -34,6 +34,8 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
+        $requiresVerification = $settings->emailVerificationRequired();
+
         $result = $provisioner->provision([
             'name' => $validated['company_name'],
             'status' => $settings->get('default_company_status', Company::STATUS_ACTIVE),
@@ -41,6 +43,7 @@ class RegisteredUserController extends Controller
             'admin_name' => $validated['name'],
             'admin_email' => $validated['email'],
             'admin_password' => $validated['password'],
+            'mark_admin_email_verified' => ! $requiresVerification,
         ]);
 
         $admin = $result['admin'];
@@ -49,6 +52,12 @@ class RegisteredUserController extends Controller
 
         Auth::login($admin);
         $request->session()->regenerate();
+
+        if ($requiresVerification && ! $admin->hasVerifiedEmail()) {
+            return redirect()
+                ->route('verification.notice')
+                ->with('status', 'verification-link-sent');
+        }
 
         return redirect()
             ->route('dashboard')
