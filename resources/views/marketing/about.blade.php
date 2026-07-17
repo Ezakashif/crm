@@ -10,7 +10,7 @@
     {{-- Hero --}}
     <section class="mk-atmosphere">
         <div class="mk-container mk-section pb-12 md:pb-16">
-            <div class="mk-fade-up mx-auto max-w-3xl text-center">
+            <div class="mk-hero-copy mx-auto max-w-3xl text-center">
                 <p class="mk-brand-hero mb-5 text-[2.5rem] sm:text-5xl" aria-label="{{ $brand }}">
                     {{ strtolower($brand) }}<span class="dot">.</span>
                 </p>
@@ -29,11 +29,11 @@
         <div class="mk-container">
             <h2 id="mission-vision-heading" class="sr-only">Mission and vision</h2>
             <div class="grid gap-6 lg:grid-cols-2">
-                <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8">
+                <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8" data-mk-reveal="left">
                     <h3 class="mk-display text-2xl sm:text-3xl">{{ $about['mission']['title'] }}</h3>
                     <p class="mt-4 text-base leading-relaxed text-slate-600">{{ $about['mission']['body'] }}</p>
                 </article>
-                <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8">
+                <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8" data-mk-reveal style="--mk-reveal-delay: 100ms">
                     <h3 class="mk-display text-2xl sm:text-3xl">{{ $about['vision']['title'] }}</h3>
                     <p class="mt-4 text-base leading-relaxed text-slate-600">{{ $about['vision']['body'] }}</p>
                 </article>

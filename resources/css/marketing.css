@@ -113,6 +113,18 @@
         pointer-events: none;
     }
 
+    .mk-atmosphere::after {
+        content: "";
+        position: absolute;
+        width: 42rem;
+        height: 42rem;
+        top: -18rem;
+        right: -10rem;
+        border-radius: 9999px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 68%);
+        pointer-events: none;
+    }
+
     /* Typography */
     .mk-display {
         font-family: var(--mk-font-display);
@@ -168,14 +180,22 @@
         line-height: 1;
         border-radius: var(--mk-radius);
         border: 1px solid transparent;
-        transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+        transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
         text-decoration: none;
         white-space: nowrap;
         cursor: pointer;
     }
 
+    .mk-btn:hover {
+        transform: translateY(-1px);
+    }
+
     .mk-btn:active {
         transform: translateY(1px);
+    }
+
+    .mk-btn-primary:hover {
+        box-shadow: 0 2px 4px rgba(2, 132, 199, 0.28), 0 12px 28px rgba(2, 132, 199, 0.22);
     }
 
     .mk-btn-md {
@@ -249,6 +269,13 @@
         backdrop-filter: blur(14px);
         background: rgba(245, 248, 252, 0.82);
         border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+        transition: background-color 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    }
+
+    .mk-nav.is-scrolled {
+        background: rgba(255, 255, 255, 0.92);
+        border-bottom-color: rgba(226, 232, 240, 1);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
     }
 
     .mk-nav-link {
@@ -318,18 +345,68 @@
     /* Subtle motion */
     @media (prefers-reduced-motion: no-preference) {
         .mk-fade-up {
-            animation: mk-fade-up 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: mk-fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         .mk-fade-in {
-            animation: mk-fade-in 480ms ease both;
+            animation: mk-fade-in 560ms ease both;
+        }
+
+        .mk-atmosphere::after {
+            animation: mk-drift 14s ease-in-out infinite alternate;
+        }
+
+        .mk-hero-copy > * {
+            opacity: 0;
+            animation: mk-fade-up 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .mk-hero-copy > *:nth-child(1) { animation-delay: 40ms; }
+        .mk-hero-copy > *:nth-child(2) { animation-delay: 140ms; }
+        .mk-hero-copy > *:nth-child(3) { animation-delay: 240ms; }
+        .mk-hero-copy > *:nth-child(4) { animation-delay: 340ms; }
+
+        .mk-hero-preview {
+            opacity: 0;
+            animation: mk-fade-up 900ms 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        [data-mk-reveal] {
+            opacity: 0;
+            transform: translateY(22px);
+            transition:
+                opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+            transition-delay: var(--mk-reveal-delay, 0ms);
+            will-change: opacity, transform;
+        }
+
+        [data-mk-reveal].is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        [data-mk-reveal="left"] {
+            transform: translateX(-18px);
+        }
+
+        [data-mk-reveal="left"].is-visible {
+            transform: translateX(0);
+        }
+
+        [data-mk-reveal="scale"] {
+            transform: translateY(16px) scale(0.98);
+        }
+
+        [data-mk-reveal="scale"].is-visible {
+            transform: translateY(0) scale(1);
         }
     }
 
     @keyframes mk-fade-up {
         from {
             opacity: 0;
-            transform: translateY(12px);
+            transform: translateY(16px);
         }
         to {
             opacity: 1;
@@ -340,6 +417,11 @@
     @keyframes mk-fade-in {
         from { opacity: 0; }
         to { opacity: 1; }
+    }
+
+    @keyframes mk-drift {
+        from { transform: translate3d(0, 0, 0); }
+        to { transform: translate3d(-36px, 28px, 0); }
     }
 
     /* Skip link */
@@ -440,6 +522,14 @@
         font-size: 0.875rem;
         font-weight: 700;
         letter-spacing: -0.02em;
+        transition: color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .mk-logo-mark:hover {
+        color: var(--mk-ink-soft);
+        border-color: var(--mk-border-strong);
+        transform: translateY(-2px);
+        box-shadow: var(--mk-shadow-sm);
     }
 
     /* How it works */
@@ -466,16 +556,44 @@
         line-height: 1;
     }
 
-    /* Dashboard preview motion (transform only — keep opacity solid for first paint) */
+    /* Dashboard preview motion */
     @media (prefers-reduced-motion: no-preference) {
         .mk-float-soft {
             animation: mk-float-soft 7s ease-in-out infinite;
+        }
+
+        .mk-dashboard-preview .mk-dashboard-chrome {
+            transition: transform 400ms ease;
+        }
+
+        .mk-float-soft:hover .mk-dashboard-preview {
+            transform: translateY(-4px);
         }
     }
 
     @keyframes mk-float-soft {
         0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-6px); }
+        50% { transform: translateY(-8px); }
+    }
+
+    /* Stats count-up feel via subtle rise */
+    .mk-stat-value {
+        transition: transform 400ms ease;
+    }
+
+    [data-mk-reveal].is-visible .mk-stat-value {
+        animation: mk-stat-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes mk-stat-pop {
+        from {
+            opacity: 0.35;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     /* Pricing comparison */
@@ -510,12 +628,24 @@
         .mk-fade-in,
         .mk-float-soft,
         .mk-card-interactive,
-        .mk-btn {
+        .mk-btn,
+        .mk-atmosphere::after,
+        .mk-hero-copy > *,
+        .mk-hero-preview,
+        [data-mk-reveal],
+        [data-mk-reveal].is-visible .mk-stat-value {
             animation: none !important;
             transition: none !important;
         }
 
-        .mk-card-interactive:hover {
+        [data-mk-reveal] {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        .mk-card-interactive:hover,
+        .mk-btn:hover,
+        .mk-logo-mark:hover {
             transform: none;
         }
     }

@@ -12,7 +12,7 @@
     {{-- Hero --}}
     <section class="mk-atmosphere">
         <div class="mk-container mk-section pb-12 md:pb-16">
-            <div class="mk-fade-up mx-auto max-w-3xl text-center">
+            <div class="mk-hero-copy mx-auto max-w-3xl text-center">
                 <p class="mk-brand-hero mb-5 text-[2.5rem] sm:text-5xl" aria-label="{{ config('marketing.name') }}">
                     {{ strtolower(config('marketing.name')) }}<span class="dot">.</span>
                 </p>
@@ -43,22 +43,26 @@
             aria-labelledby="group-{{ $group['id'] }}"
         >
             <div class="mk-container">
-                <x-marketing.section-heading
-                    :heading-id="'group-'.$group['id']"
-                    eyebrow="Modules"
-                    :title="$group['title']"
-                    :description="$group['description']"
-                    class="mb-10"
-                />
+                <div data-mk-reveal>
+                    <x-marketing.section-heading
+                        :heading-id="'group-'.$group['id']"
+                        eyebrow="Modules"
+                        :title="$group['title']"
+                        :description="$group['description']"
+                        class="mb-10"
+                    />
+                </div>
 
                 <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    @foreach ($group['modules'] as $module)
-                        <x-marketing.feature-module
-                            :icon="$module['icon']"
-                            :title="$module['title']"
-                            :description="$module['description']"
-                            :highlights="$module['highlights']"
-                        />
+                    @foreach ($group['modules'] as $moduleIndex => $module)
+                        <div data-mk-reveal style="--mk-reveal-delay: {{ $moduleIndex * 70 }}ms">
+                            <x-marketing.feature-module
+                                :icon="$module['icon']"
+                                :title="$module['title']"
+                                :description="$module['description']"
+                                :highlights="$module['highlights']"
+                            />
+                        </div>
                     @endforeach
                 </div>
             </div>

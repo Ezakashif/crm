@@ -13,7 +13,7 @@
     {{-- Hero --}}
     <section class="mk-atmosphere">
         <div class="mk-container mk-section pb-10 md:pb-12">
-            <div class="mk-fade-up mx-auto max-w-3xl text-center">
+            <div class="mk-hero-copy mx-auto max-w-3xl text-center">
                 <p class="mk-brand-hero mb-5 text-[2.5rem] sm:text-5xl" aria-label="{{ config('marketing.name') }}">
                     {{ strtolower(config('marketing.name')) }}<span class="dot">.</span>
                 </p>
@@ -32,7 +32,7 @@
         <div class="mk-container">
             <h2 id="plans-heading" class="sr-only">Pricing plans</h2>
 
-            <div class="flex justify-center">
+            <div class="flex justify-center" data-mk-reveal>
                 <div class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1" role="group" aria-label="Billing period">
                     <button
                         type="button"
@@ -57,11 +57,11 @@
             </div>
 
             <div class="mt-10 grid gap-6 lg:grid-cols-3">
-                @foreach ($plans as $plan)
+                @foreach ($plans as $index => $plan)
                     @php
                         $planCtaHref = ($plan['cta_type'] ?? 'trial') === 'demo' ? $demoHref : $trialHref;
                     @endphp
-                    <div>
+                    <div data-mk-reveal style="--mk-reveal-delay: {{ $index * 90 }}ms">
                         <div x-show="!isAnnual()">
                             <x-marketing.pricing-card
                                 :name="$plan['name']"

@@ -14,7 +14,7 @@
     {{-- Hero --}}
     <section class="mk-atmosphere mk-hero">
         <div class="mk-container">
-            <div class="mk-fade-up mx-auto max-w-3xl text-center">
+            <div class="mk-hero-copy mx-auto max-w-3xl text-center">
                 <p class="mk-brand-hero mb-6" aria-label="{{ $brand }}">
                     {{ strtolower($brand) }}<span class="dot">.</span>
                 </p>
@@ -46,12 +46,21 @@
     {{-- Trusted by --}}
     <section class="border-y border-slate-200/80 bg-white py-10" aria-labelledby="trusted-by-heading">
         <div class="mk-container">
-            <h2 id="trusted-by-heading" class="text-center text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2
+                id="trusted-by-heading"
+                class="text-center text-sm font-semibold uppercase tracking-wide text-slate-500"
+                data-mk-reveal
+            >
                 Trusted by growing revenue teams
             </h2>
             <div class="mk-logo-row mt-6">
-                @foreach ($home['trusted_by'] as $logo)
-                    <div class="mk-logo-mark" aria-hidden="true">{{ $logo }}</div>
+                @foreach ($home['trusted_by'] as $index => $logo)
+                    <div
+                        class="mk-logo-mark"
+                        data-mk-reveal
+                        style="--mk-reveal-delay: {{ $index * 60 }}ms"
+                        aria-hidden="true"
+                    >{{ $logo }}</div>
                 @endforeach
             </div>
         </div>
@@ -60,24 +69,28 @@
     {{-- Features overview --}}
     <section class="mk-section" aria-labelledby="features-heading">
         <div class="mk-container">
-            <x-marketing.section-heading
-                heading-id="features-heading"
-                eyebrow="Features"
-                title="Everything your pipeline needs"
-                description="From first lead to closed customer—modules that keep sales and ops aligned."
-                align="center"
-                class="mb-10"
-            />
+            <div data-mk-reveal>
+                <x-marketing.section-heading
+                    heading-id="features-heading"
+                    eyebrow="Features"
+                    title="Everything your pipeline needs"
+                    description="From first lead to closed customer—modules that keep sales and ops aligned."
+                    align="center"
+                    class="mb-10"
+                />
+            </div>
             <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($home['features'] as $feature)
-                    <x-marketing.feature-card
-                        :icon="$feature['icon']"
-                        :title="$feature['title']"
-                        :description="$feature['description']"
-                    />
+                @foreach ($home['features'] as $index => $feature)
+                    <div data-mk-reveal style="--mk-reveal-delay: {{ $index * 70 }}ms">
+                        <x-marketing.feature-card
+                            :icon="$feature['icon']"
+                            :title="$feature['title']"
+                            :description="$feature['description']"
+                        />
+                    </div>
                 @endforeach
             </div>
-            <div class="mt-10 text-center">
+            <div class="mt-10 text-center" data-mk-reveal>
                 <x-marketing.button href="{{ route('marketing.features') }}" variant="secondary">
                     Explore all features
                     <x-marketing.icon name="arrow-right" size="sm" />
@@ -89,17 +102,19 @@
     {{-- How it works --}}
     <section class="mk-section mk-section-muted" aria-labelledby="how-heading">
         <div class="mk-container">
-            <x-marketing.section-heading
-                heading-id="how-heading"
-                eyebrow="How it works"
-                title="Up and running in four steps"
-                description="A simple path from empty workspace to a team that never drops a follow-up."
-                align="center"
-                class="mb-10"
-            />
+            <div data-mk-reveal>
+                <x-marketing.section-heading
+                    heading-id="how-heading"
+                    eyebrow="How it works"
+                    title="Up and running in four steps"
+                    description="A simple path from empty workspace to a team that never drops a follow-up."
+                    align="center"
+                    class="mb-10"
+                />
+            </div>
             <ol class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach ($home['how_it_works'] as $step)
-                    <li class="mk-step">
+                @foreach ($home['how_it_works'] as $index => $step)
+                    <li class="mk-step" data-mk-reveal style="--mk-reveal-delay: {{ $index * 80 }}ms">
                         <div class="mk-step-num">{{ $step['step'] }}</div>
                         <h3 class="mt-3 text-lg font-semibold tracking-tight text-slate-900">{{ $step['title'] }}</h3>
                         <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ $step['description'] }}</p>
@@ -112,15 +127,21 @@
     {{-- Why choose us --}}
     <section class="mk-section bg-white" aria-labelledby="why-heading">
         <div class="mk-container grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
-            <x-marketing.section-heading
-                heading-id="why-heading"
-                eyebrow="Why Algos"
-                title="Built for teams that outgrow spreadsheets"
-                description="Modern CRM structure without the noise—so your team spends time selling, not configuring."
-            />
+            <div data-mk-reveal="left">
+                <x-marketing.section-heading
+                    heading-id="why-heading"
+                    eyebrow="Why Algos"
+                    title="Built for teams that outgrow spreadsheets"
+                    description="Modern CRM structure without the noise—so your team spends time selling, not configuring."
+                />
+            </div>
             <div class="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-                @foreach ($home['why_us'] as $item)
-                    <div class="flex gap-4 rounded-xl border border-slate-200 bg-slate-50/80 p-5">
+                @foreach ($home['why_us'] as $index => $item)
+                    <div
+                        class="flex gap-4 rounded-xl border border-slate-200 bg-slate-50/80 p-5"
+                        data-mk-reveal
+                        style="--mk-reveal-delay: {{ $index * 90 }}ms"
+                    >
                         <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
                             <x-marketing.icon :name="$item['icon']" />
                         </span>
@@ -135,12 +156,12 @@
     </section>
 
     {{-- Statistics --}}
-    <section class="mk-section border-y border-slate-200 bg-slate-900" aria-labelledby="stats-heading">
+    <section class="mk-section border-y border-slate-200 bg-slate-900" aria-labelledby="stats-heading" data-mk-reveal>
         <div class="mk-container">
             <h2 id="stats-heading" class="sr-only">Algos at a glance</h2>
             <div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
-                @foreach ($home['stats'] as $stat)
-                    <div class="text-center lg:text-left">
+                @foreach ($home['stats'] as $index => $stat)
+                    <div class="text-center lg:text-left" style="--mk-reveal-delay: {{ $index * 70 }}ms">
                         <div class="mk-stat-value text-white">{{ $stat['value'] }}</div>
                         <div class="mt-2 text-sm font-medium text-slate-400">{{ $stat['label'] }}</div>
                     </div>
@@ -152,22 +173,26 @@
     {{-- Testimonials --}}
     <section class="mk-section" aria-labelledby="testimonials-heading">
         <div class="mk-container">
-            <x-marketing.section-heading
-                heading-id="testimonials-heading"
-                eyebrow="Customers"
-                title="Teams that switched to Algos"
-                description="Placeholder stories from revenue teams using a clearer CRM workflow."
-                align="center"
-                class="mb-10"
-            />
+            <div data-mk-reveal>
+                <x-marketing.section-heading
+                    heading-id="testimonials-heading"
+                    eyebrow="Customers"
+                    title="Teams that switched to Algos"
+                    description="Placeholder stories from revenue teams using a clearer CRM workflow."
+                    align="center"
+                    class="mb-10"
+                />
+            </div>
             <div class="grid gap-5 lg:grid-cols-3">
-                @foreach ($home['testimonials'] as $item)
-                    <x-marketing.testimonial-card
-                        :quote="$item['quote']"
-                        :name="$item['name']"
-                        :role="$item['role']"
-                        :company="$item['company']"
-                    />
+                @foreach ($home['testimonials'] as $index => $item)
+                    <div data-mk-reveal style="--mk-reveal-delay: {{ $index * 90 }}ms">
+                        <x-marketing.testimonial-card
+                            :quote="$item['quote']"
+                            :name="$item['name']"
+                            :role="$item['role']"
+                            :company="$item['company']"
+                        />
+                    </div>
                 @endforeach
             </div>
         </div>
@@ -176,15 +201,17 @@
     {{-- Pricing preview --}}
     <section class="mk-section mk-section-muted" aria-labelledby="pricing-heading" x-data="pricingToggle('monthly')">
         <div class="mk-container">
-            <x-marketing.section-heading
-                heading-id="pricing-heading"
-                eyebrow="Pricing"
-                title="Plans that scale with your team"
-                description="Simple monthly or annual pricing. Full comparison on the pricing page."
-                align="center"
-            />
+            <div data-mk-reveal>
+                <x-marketing.section-heading
+                    heading-id="pricing-heading"
+                    eyebrow="Pricing"
+                    title="Plans that scale with your team"
+                    description="Simple monthly or annual pricing. Full comparison on the pricing page."
+                    align="center"
+                />
+            </div>
 
-            <div class="mt-8 flex justify-center">
+            <div class="mt-8 flex justify-center" data-mk-reveal>
                 <div class="inline-flex items-center rounded-xl border border-slate-200 bg-white p-1" role="group" aria-label="Billing period">
                     <button
                         type="button"
@@ -209,11 +236,11 @@
             </div>
 
             <div class="mt-10 grid gap-6 lg:grid-cols-3">
-                @foreach ($plans as $plan)
+                @foreach ($plans as $index => $plan)
                     @php
                         $planCtaHref = $plan['id'] === 'enterprise' ? $demoHref : $trialHref;
                     @endphp
-                    <div>
+                    <div data-mk-reveal style="--mk-reveal-delay: {{ $index * 90 }}ms">
                         <div x-show="!isAnnual()">
                             <x-marketing.pricing-card
                                 :name="$plan['name']"
@@ -244,7 +271,7 @@
                 @endforeach
             </div>
 
-            <div class="mt-10 text-center">
+            <div class="mt-10 text-center" data-mk-reveal>
                 <x-marketing.button href="{{ route('marketing.pricing') }}" variant="secondary">
                     Compare plans
                     <x-marketing.icon name="arrow-right" size="sm" />
@@ -256,13 +283,17 @@
     {{-- FAQ --}}
     <section class="mk-section bg-white" aria-labelledby="faq-heading">
         <div class="mk-container grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-start">
-            <x-marketing.section-heading
-                heading-id="faq-heading"
-                eyebrow="FAQ"
-                title="Questions, answered"
-                description="Quick answers about trials, data, and how Algos fits your team."
-            />
-            <x-marketing.faq-accordion :items="$home['faqs']" open="trial" />
+            <div data-mk-reveal="left">
+                <x-marketing.section-heading
+                    heading-id="faq-heading"
+                    eyebrow="FAQ"
+                    title="Questions, answered"
+                    description="Quick answers about trials, data, and how Algos fits your team."
+                />
+            </div>
+            <div data-mk-reveal style="--mk-reveal-delay: 100ms">
+                <x-marketing.faq-accordion :items="$home['faqs']" open="trial" />
+            </div>
         </div>
     </section>
 

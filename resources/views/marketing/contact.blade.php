@@ -14,7 +14,7 @@
 >
     <section class="mk-atmosphere">
         <div class="mk-container mk-section pb-10 md:pb-12">
-            <div class="mk-fade-up mx-auto max-w-3xl text-center">
+            <div class="mk-hero-copy mx-auto max-w-3xl text-center">
                 <p class="mk-brand-hero mb-5 text-[2.5rem] sm:text-5xl" aria-label="{{ $brand }}">
                     {{ strtolower($brand) }}<span class="dot">.</span>
                 </p>
@@ -33,7 +33,7 @@
     <section class="bg-white pb-16 md:pb-20" aria-labelledby="contact-form-heading">
         <div class="mk-container">
             <div class="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-                <div class="mk-card p-6 sm:p-8">
+                <div class="mk-card p-6 sm:p-8" data-mk-reveal="left">
                     <h2 id="contact-form-heading" class="text-xl font-bold tracking-tight text-slate-900">
                         {{ $isDemo ? 'Request a demo' : 'Send a message' }}
                     </h2>
@@ -148,7 +148,7 @@
                 </div>
 
                 <aside class="space-y-6">
-                    <div class="mk-card p-6">
+                    <div class="mk-card p-6" data-mk-reveal style="--mk-reveal-delay: 80ms">
                         <h2 class="text-lg font-bold tracking-tight text-slate-900">Business information</h2>
                         <ul class="mt-5 space-y-4 text-sm text-slate-600">
                             <li class="flex items-start gap-3">

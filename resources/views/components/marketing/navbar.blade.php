@@ -5,7 +5,7 @@
     $demoQuery = config('marketing.cta.demo_query', []);
 @endphp
 
-<header class="mk-nav" x-data="marketingNav" @keydown.escape.window="close()">
+<header class="mk-nav" data-mk-nav x-data="marketingNav" @keydown.escape.window="close()">
     <div class="mk-container flex h-full items-center justify-between gap-4">
         <div class="flex items-center gap-8">
             <x-marketing.logo />
