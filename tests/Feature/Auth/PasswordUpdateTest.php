@@ -45,8 +45,8 @@ class PasswordUpdateTest extends TestCase
             ->from('/profile')
             ->put('/password', [
                 'current_password' => 'password',
-                'password' => 'new-password',
-                'password_confirmation' => 'new-password',
+                'password' => 'SecurePass1!',
+                'password_confirmation' => 'SecurePass1!',
             ]);
 
         $response
@@ -56,7 +56,7 @@ class PasswordUpdateTest extends TestCase
 
         $user->refresh();
 
-        $this->assertTrue(Hash::check('new-password', $user->password));
+        $this->assertTrue(Hash::check('SecurePass1!', $user->password));
         $this->assertNotSame($oldRemember, $user->remember_token);
         $this->assertDatabaseMissing('sessions', ['id' => 'stale-session']);
         $this->assertDatabaseHas('activity_logs', [
@@ -74,8 +74,8 @@ class PasswordUpdateTest extends TestCase
             ->from('/profile')
             ->put('/password', [
                 'current_password' => 'wrong-password',
-                'password' => 'new-password',
-                'password_confirmation' => 'new-password',
+                'password' => 'SecurePass1!',
+                'password_confirmation' => 'SecurePass1!',
             ]);
 
         $response

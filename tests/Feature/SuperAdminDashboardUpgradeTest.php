@@ -269,8 +269,8 @@ class SuperAdminDashboardUpgradeTest extends TestCase
             ->post(route('superadmin.super-admins.store'), [
                 'name' => 'Second Admin',
                 'email' => 'second@platform.test',
-                'password' => 'password',
-                'password_confirmation' => 'password',
+                'password' => 'SecurePass1!',
+                'password_confirmation' => 'SecurePass1!',
             ])
             ->assertRedirect(route('superadmin.super-admins.index'));
 

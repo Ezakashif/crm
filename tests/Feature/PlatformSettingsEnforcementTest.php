@@ -40,8 +40,8 @@ class PlatformSettingsEnforcementTest extends TestCase
             'company_name' => 'Acme Labs',
             'name' => 'Acme Owner',
             'email' => 'owner@acme.test',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'SecurePass1!',
+            'password_confirmation' => 'SecurePass1!',
         ])->assertRedirect(route('verification.notice'));
 
         $this->assertAuthenticated();

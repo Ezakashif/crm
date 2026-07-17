@@ -35,7 +35,11 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFour();
 
         Password::defaults(function () {
-            $rule = Password::min(8)->letters();
+            // Company admin provisioning, user invites, register/reset all share this.
+            $rule = Password::min(10)
+                ->mixedCase()
+                ->numbers()
+                ->symbols();
 
             return $this->app->isProduction()
                 ? $rule->uncompromised()

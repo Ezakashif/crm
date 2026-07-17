@@ -74,7 +74,7 @@ class CompanyProvisioner
                 $admin->forceFill([
                     'name' => $data['admin_name'] ?: 'Administrator',
                     'email' => $data['admin_email'],
-                    'password' => $data['admin_password'] ?: Str::password(12),
+                    'password' => $data['admin_password'] ?: Str::password(16),
                     'role' => 'admin',
                     'status' => 'active',
                     'email_verified_at' => $markVerified ? now() : null,

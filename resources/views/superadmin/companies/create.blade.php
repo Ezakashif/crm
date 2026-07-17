@@ -95,7 +95,14 @@
 
             <div class="form-group mb-0">
                 <label>Admin password</label>
-                <input type="password" name="admin_password" class="form-control">
+                <input type="password" name="admin_password" class="form-control @error('admin_password') is-invalid @enderror" autocomplete="new-password">
+                <small class="form-text text-muted">
+                    At least 10 characters, with upper and lower case, a number, and a symbol.
+                    Leave blank to auto-generate a strong password.
+                </small>
+                @error('admin_password')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
             </div>
         </div>
 

@@ -165,8 +165,8 @@ class TenancyPhase1EIsolationTest extends TestCase
             ->post(route('users.store'), [
                 'name' => 'Local Shared',
                 'email' => 'shared@example.com',
-                'password' => 'password',
-                'password_confirmation' => 'password',
+                'password' => 'SecurePass1!',
+                'password_confirmation' => 'SecurePass1!',
                 'roles' => [$salesRole->id],
                 'status' => 'active',
             ])

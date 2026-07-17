@@ -70,6 +70,9 @@
                 class="mk-input @error('password') border-red-400 @enderror"
                 placeholder="••••••••"
             >
+            <p class="mt-1.5 text-xs text-slate-500">
+                At least 10 characters, with upper and lower case, a number, and a symbol.
+            </p>
             @error('password')
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
             @enderror

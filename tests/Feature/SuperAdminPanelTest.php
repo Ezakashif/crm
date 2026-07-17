@@ -69,7 +69,7 @@ class SuperAdminPanelTest extends TestCase
             'status' => 'active',
             'admin_name' => 'Acme Admin',
             'admin_email' => 'admin@acme.test',
-            'admin_password' => 'password',
+            'admin_password' => 'SecurePass1!',
         ]);
 
         $company = Company::query()->where('slug', 'acme')->first();
@@ -83,6 +83,26 @@ class SuperAdminPanelTest extends TestCase
         $this->assertSame($company->id, $admin->company_id);
         $this->assertTrue($admin->hasRole('admin'));
         $this->assertFalse($admin->isSuperAdmin());
+    }
+
+    public function test_company_admin_password_must_be_strong(): void
+    {
+        $superAdmin = User::factory()->superAdmin()->create();
+
+        $this->actingAs($superAdmin)
+            ->from(route('superadmin.companies.create'))
+            ->post(route('superadmin.companies.store'), [
+                'name' => 'Weak Pass Co',
+                'slug' => 'weak-pass',
+                'status' => 'active',
+                'admin_name' => 'Weak Admin',
+                'admin_email' => 'weak@acme.test',
+                'admin_password' => 'password',
+            ])
+            ->assertRedirect(route('superadmin.companies.create'))
+            ->assertSessionHasErrors('admin_password');
+
+        $this->assertNull(Company::query()->where('slug', 'weak-pass')->first());
     }
 
     public function test_super_admin_can_suspend_company(): void

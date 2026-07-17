@@ -113,8 +113,8 @@ class HighPriorityAuditFixesTest extends TestCase
             ->post(route('users.store'), [
                 'name' => 'Extra User',
                 'email' => 'extra@example.com',
-                'password' => 'password',
-                'password_confirmation' => 'password',
+                'password' => 'SecurePass1!',
+                'password_confirmation' => 'SecurePass1!',
                 'roles' => [$salesRoleId],
                 'status' => 'active',
             ])

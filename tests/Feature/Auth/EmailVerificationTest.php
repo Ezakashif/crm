@@ -135,8 +135,8 @@ class EmailVerificationTest extends TestCase
             'company_name' => 'No Verify Co',
             'name' => 'Owner',
             'email' => 'owner@noverify.test',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'SecurePass1!',
+            'password_confirmation' => 'SecurePass1!',
         ])->assertRedirect(route('dashboard'));
 
         $user = User::withoutCompanyScope()->where('email', 'owner@noverify.test')->first();
@@ -159,8 +159,8 @@ class EmailVerificationTest extends TestCase
             'company_name' => 'Verify Co',
             'name' => 'Owner',
             'email' => 'owner@verify.test',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'SecurePass1!',
+            'password_confirmation' => 'SecurePass1!',
         ])->assertRedirect(route('verification.notice'));
 
         $user = User::withoutCompanyScope()->where('email', 'owner@verify.test')->first();

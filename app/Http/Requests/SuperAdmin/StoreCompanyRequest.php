@@ -42,4 +42,14 @@ class StoreCompanyRequest extends FormRequest
             'admin_password' => ['nullable', 'required_with:admin_email', Password::defaults()],
         ];
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'admin_password.required_with' => 'An admin password is required when creating a company admin account.',
+        ];
+    }
 }

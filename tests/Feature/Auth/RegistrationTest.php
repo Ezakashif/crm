@@ -18,8 +18,8 @@ class RegistrationTest extends TestCase
             'company_name' => 'Test Co',
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'SecurePass1!',
+            'password_confirmation' => 'SecurePass1!',
         ])->assertNotFound();
 
         $this->assertGuest();

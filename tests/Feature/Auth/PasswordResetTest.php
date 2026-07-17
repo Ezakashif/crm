@@ -112,8 +112,8 @@ class PasswordResetTest extends TestCase
             $response = $this->post('/reset-password', [
                 'token' => $notification->token,
                 'email' => $user->email,
-                'password' => 'new-password',
-                'password_confirmation' => 'new-password',
+                'password' => 'SecurePass1!',
+                'password_confirmation' => 'SecurePass1!',
             ]);
 
             $response
@@ -123,7 +123,7 @@ class PasswordResetTest extends TestCase
 
             $user->refresh();
 
-            $this->assertTrue(Hash::check('new-password', $user->password));
+            $this->assertTrue(Hash::check('SecurePass1!', $user->password));
             $this->assertNotSame($oldRememberToken, $user->remember_token);
             $this->assertGuest();
 
@@ -147,8 +147,8 @@ class PasswordResetTest extends TestCase
         $response = $this->from('/reset-password/invalid-token')->post('/reset-password', [
             'token' => 'invalid-token',
             'email' => $user->email,
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'password' => 'SecurePass1!',
+            'password_confirmation' => 'SecurePass1!',
         ]);
 
         $response

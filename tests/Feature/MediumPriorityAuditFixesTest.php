@@ -43,11 +43,11 @@ class MediumPriorityAuditFixesTest extends TestCase
         $this->post(route('password.store'), [
             'token' => $token,
             'email' => 'reset-me@example.com',
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'password' => 'SecurePass1!',
+            'password_confirmation' => 'SecurePass1!',
         ])->assertRedirect(route('login'));
 
-        $this->assertTrue(Hash::check('new-password', $user->fresh()->password));
+        $this->assertTrue(Hash::check('SecurePass1!', $user->fresh()->password));
     }
 
     public function test_default_company_cannot_be_suspended(): void
