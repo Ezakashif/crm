@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Services\SuperAdmin\PlatformSettingsService;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
@@ -32,6 +35,9 @@ class ProfileTest extends TestCase
 
     public function test_profile_information_can_be_updated(): void
     {
+        Notification::fake();
+        app(PlatformSettingsService::class)->setMany(['email_verification_required' => true]);
+
         $user = User::factory()->create();
 
         $response = $this
@@ -46,7 +52,8 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/profile')
+            ->assertSessionHas('status', 'verification-link-sent');
 
         $user->refresh();
 
@@ -56,6 +63,7 @@ class ProfileTest extends TestCase
         $this->assertSame('America/New_York', $user->timezone);
         $this->assertSame('en', $user->language);
         $this->assertNull($user->email_verified_at);
+        Notification::assertSentTo($user, VerifyEmail::class);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void

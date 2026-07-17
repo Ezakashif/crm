@@ -27,6 +27,11 @@ class EmailVerificationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee($user->email, false);
+        $response->assertSee('Verification preview link', false);
+        $response->assertSee(route('verification.verify', [
+            'id' => $user->id,
+            'hash' => sha1($user->email),
+        ], false), false);
     }
 
     public function test_email_can_be_verified(): void
@@ -80,7 +85,8 @@ class EmailVerificationTest extends TestCase
         $this->actingAs($user)
             ->post(route('verification.send'))
             ->assertRedirect()
-            ->assertSessionHas('status', 'verification-link-sent');
+            ->assertSessionHas('status', 'verification-link-sent')
+            ->assertSessionHas('verification_preview_url');
 
         Notification::assertSentTo($user, VerifyEmail::class);
 
@@ -90,6 +96,19 @@ class EmailVerificationTest extends TestCase
                 ->where('action', 'email.verification_resent')
                 ->exists()
         );
+    }
+
+    public function test_verification_preview_link_is_hidden_when_smtp_mailer_is_configured(): void
+    {
+        config(['mail.default' => 'smtp']);
+        app(PlatformSettingsService::class)->setMany(['email_verification_required' => true]);
+
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user)
+            ->get('/verify-email')
+            ->assertOk()
+            ->assertDontSee('Verification preview link', false);
     }
 
     public function test_unverified_user_can_access_crm_when_verification_disabled(): void

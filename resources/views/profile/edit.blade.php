@@ -148,6 +148,12 @@
                                     <button form="send-verification" type="submit" class="btn btn-link btn-sm p-0 align-baseline">
                                         Resend verification email
                                     </button>
+                                    @if (session('verification_preview_url'))
+                                        <div class="mt-2 mb-0">
+                                            Mail delivery may be disabled locally.
+                                            <a href="{{ session('verification_preview_url') }}">Open verification preview link</a>
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
                         </x-form-section>

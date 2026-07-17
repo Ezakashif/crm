@@ -6,11 +6,14 @@ use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\Auth\SessionManager;
+use App\Services\SuperAdmin\PlatformSettingsService;
+use App\Support\EmailVerification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Throwable;
 
 class ProfileController extends Controller
 {
@@ -30,12 +33,14 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, PlatformSettingsService $settings): RedirectResponse
     {
         $user = $request->user();
         $user->fill($request->validated());
 
-        if ($user->isDirty('email')) {
+        $emailChanged = $user->isDirty('email');
+
+        if ($emailChanged) {
             $user->email_verified_at = null;
         }
 
@@ -49,7 +54,25 @@ class ProfileController extends Controller
             'language' => $user->language,
         ]);
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $redirect = Redirect::route('profile.edit')->with('status', 'profile-updated');
+
+        if ($emailChanged && $settings->emailVerificationRequired() && ! $user->hasVerifiedEmail()) {
+            try {
+                $user->sendEmailVerificationNotification();
+                $redirect->with('status', 'verification-link-sent');
+
+                if ($preview = EmailVerification::previewUrlFor($user)) {
+                    $redirect->with('verification_preview_url', $preview);
+                }
+            } catch (Throwable $e) {
+                report($e);
+                $redirect->withErrors([
+                    'email' => 'Your email was updated, but the verification email could not be sent. Use Resend verification email.',
+                ]);
+            }
+        }
+
+        return $redirect;
     }
 
     public function updatePhoto(Request $request): RedirectResponse

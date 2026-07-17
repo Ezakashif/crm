@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Services\ActivityLogger;
 use App\Services\SuperAdmin\PlatformSettingsService;
+use App\Support\EmailVerification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 class EmailVerificationNotificationController extends Controller
 {
@@ -21,13 +23,28 @@ class EmailVerificationNotificationController extends Controller
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
-        $user->sendEmailVerificationNotification();
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()->withErrors([
+                'email' => 'We could not send the verification email. Check your mail configuration and try again.',
+            ]);
+        }
 
         ActivityLogger::log('email.verification_resent', $user, [
             'email' => $user->email,
             'user_agent' => $request->userAgent(),
+            'mailer' => config('mail.default'),
         ], $user->id);
 
-        return back()->with('status', 'verification-link-sent');
+        $redirect = back()->with('status', 'verification-link-sent');
+
+        if ($preview = EmailVerification::previewUrlFor($user)) {
+            $redirect->with('verification_preview_url', $preview);
+        }
+
+        return $redirect;
     }
 }
