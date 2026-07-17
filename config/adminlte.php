@@ -430,9 +430,19 @@ return [
                     'location' => 'css/crm-app.css',
                 ],
                 [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => 'css/password-field.css',
+                ],
+                [
                     'type' => 'js',
                     'asset' => true,
                     'location' => 'js/crm-ui.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => 'js/password-toggle.js',
                 ],
             ],
         ],

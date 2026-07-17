@@ -94,8 +94,13 @@
             </div>
 
             <div class="form-group mb-0">
-                <label>Admin password</label>
-                <input type="password" name="admin_password" class="form-control @error('admin_password') is-invalid @enderror" autocomplete="new-password">
+                <label for="admin_password">Admin password</label>
+                <x-password-input
+                    name="admin_password"
+                    id="admin_password"
+                    autocomplete="new-password"
+                    class="@error('admin_password') is-invalid @enderror"
+                />
                 <small class="form-text text-muted">
                     At least 10 characters, with upper and lower case, a number, and a symbol.
                     Leave blank to auto-generate a strong password.

@@ -23,6 +23,9 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertDontSee('name="company"', false);
+        $response->assertSee('data-password-toggle', false);
+        $response->assertSee('js/password-toggle.js', false);
+        $response->assertSee('css/password-field.css', false);
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void

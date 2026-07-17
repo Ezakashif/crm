@@ -180,23 +180,37 @@
                         >
                             <div class="form-group">
                                 <x-form-label for="update_password_current_password" :required="true">Current password</x-form-label>
-                                <input id="update_password_current_password" name="current_password" type="password"
-                                       class="form-control @error('current_password', 'updatePassword') is-invalid @enderror"
-                                       autocomplete="current-password" required>
-                                @error('current_password', 'updatePassword')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                <x-password-input
+                                    name="current_password"
+                                    id="update_password_current_password"
+                                    autocomplete="current-password"
+                                    :required="true"
+                                    class="@error('current_password', 'updatePassword') is-invalid @enderror"
+                                />
+                                @error('current_password', 'updatePassword')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                             <div class="form-group">
                                 <x-form-label for="update_password_password" :required="true">New password</x-form-label>
-                                <input id="update_password_password" name="password" type="password"
-                                       class="form-control @error('password', 'updatePassword') is-invalid @enderror"
-                                       autocomplete="new-password" required>
-                                <small class="form-text text-muted">At least 8 characters.</small>
-                                @error('password', 'updatePassword')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                <x-password-input
+                                    name="password"
+                                    id="update_password_password"
+                                    autocomplete="new-password"
+                                    :required="true"
+                                    class="@error('password', 'updatePassword') is-invalid @enderror"
+                                />
+                                <small class="form-text text-muted">
+                                    At least 10 characters, with upper and lower case, a number, and a symbol.
+                                </small>
+                                @error('password', 'updatePassword')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                             <div class="form-group mb-0">
                                 <x-form-label for="update_password_password_confirmation" :required="true">Confirm password</x-form-label>
-                                <input id="update_password_password_confirmation" name="password_confirmation" type="password"
-                                       class="form-control" autocomplete="new-password" required>
+                                <x-password-input
+                                    name="password_confirmation"
+                                    id="update_password_password_confirmation"
+                                    autocomplete="new-password"
+                                    :required="true"
+                                />
                             </div>
                         </x-form-section>
                     </div>
@@ -311,10 +325,14 @@
                     <p class="mb-3">Enter your password to confirm you want to permanently delete your account.</p>
                     <div class="form-group mb-0">
                         <x-form-label for="password" :required="true">Password</x-form-label>
-                        <input id="password" name="password" type="password"
-                               class="form-control @error('password', 'userDeletion') is-invalid @enderror"
-                               autocomplete="current-password" required>
-                        @error('password', 'userDeletion')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        <x-password-input
+                            name="password"
+                            id="password"
+                            autocomplete="current-password"
+                            :required="true"
+                            class="@error('password', 'userDeletion') is-invalid @enderror"
+                        />
+                        @error('password', 'userDeletion')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                     </div>
                 </div>
                 <div class="modal-footer">

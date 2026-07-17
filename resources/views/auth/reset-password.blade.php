@@ -27,16 +27,17 @@
 
         <div>
             <label for="password" class="mk-label">New password</label>
-            <input
-                id="password"
-                type="password"
+            <x-password-input
                 name="password"
-                required
+                id="password"
+                variant="marketing"
                 autocomplete="new-password"
-                class="mk-input @error('password') border-red-400 @enderror"
-                placeholder="••••••••"
-            >
-            <p class="mt-1.5 text-xs text-slate-500">Use at least 8 characters.</p>
+                :required="true"
+                class="@error('password') border-red-400 @enderror"
+            />
+            <p class="mt-1.5 text-xs text-slate-500">
+                At least 10 characters, with upper and lower case, a number, and a symbol.
+            </p>
             @error('password')
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
             @enderror
@@ -44,15 +45,14 @@
 
         <div>
             <label for="password_confirmation" class="mk-label">Confirm password</label>
-            <input
-                id="password_confirmation"
-                type="password"
+            <x-password-input
                 name="password_confirmation"
-                required
+                id="password_confirmation"
+                variant="marketing"
                 autocomplete="new-password"
-                class="mk-input @error('password_confirmation') border-red-400 @enderror"
-                placeholder="••••••••"
-            >
+                :required="true"
+                class="@error('password_confirmation') border-red-400 @enderror"
+            />
             @error('password_confirmation')
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
             @enderror

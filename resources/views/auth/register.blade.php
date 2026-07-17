@@ -61,15 +61,14 @@
 
         <div>
             <label for="password" class="mk-label">Password</label>
-            <input
-                id="password"
-                type="password"
+            <x-password-input
                 name="password"
-                required
+                id="password"
+                variant="marketing"
                 autocomplete="new-password"
-                class="mk-input @error('password') border-red-400 @enderror"
-                placeholder="••••••••"
-            >
+                :required="true"
+                class="@error('password') border-red-400 @enderror"
+            />
             <p class="mt-1.5 text-xs text-slate-500">
                 At least 10 characters, with upper and lower case, a number, and a symbol.
             </p>
@@ -80,15 +79,13 @@
 
         <div>
             <label for="password_confirmation" class="mk-label">Confirm password</label>
-            <input
-                id="password_confirmation"
-                type="password"
+            <x-password-input
                 name="password_confirmation"
-                required
+                id="password_confirmation"
+                variant="marketing"
                 autocomplete="new-password"
-                class="mk-input"
-                placeholder="••••••••"
-            >
+                :required="true"
+            />
         </div>
 
         <x-marketing.button type="submit" class="w-full" size="lg">

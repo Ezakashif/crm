@@ -37,15 +37,14 @@
                     Forgot password?
                 </a>
             </div>
-            <input
-                id="password"
-                type="password"
+            <x-password-input
                 name="password"
-                required
+                id="password"
+                variant="marketing"
                 autocomplete="current-password"
-                class="mk-input @error('password') border-red-400 @enderror"
-                placeholder="••••••••"
-            >
+                :required="true"
+                class="@error('password') border-red-400 @enderror"
+            />
             @error('password')
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>
             @enderror

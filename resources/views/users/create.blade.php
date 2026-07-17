@@ -45,20 +45,28 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <x-form-label for="password" :required="true">Password</x-form-label>
-                                <input id="password" name="password" type="password"
-                                       class="form-control @error('password') is-invalid @enderror"
-                                       required autocomplete="new-password">
+                                <x-password-input
+                                    name="password"
+                                    id="password"
+                                    autocomplete="new-password"
+                                    :required="true"
+                                    class="@error('password') is-invalid @enderror"
+                                />
                                 <small class="form-text text-muted">
                                     At least 10 characters, with upper and lower case, a number, and a symbol.
                                 </small>
-                                @error('password')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                @error('password')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-0">
                                 <x-form-label for="password_confirmation" :required="true">Confirm password</x-form-label>
-                                <input id="password_confirmation" name="password_confirmation" type="password"
-                                       class="form-control" required autocomplete="new-password">
+                                <x-password-input
+                                    name="password_confirmation"
+                                    id="password_confirmation"
+                                    autocomplete="new-password"
+                                    :required="true"
+                                />
                             </div>
                         </div>
                     </div>

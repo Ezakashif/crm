@@ -54,17 +54,23 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <x-form-label for="password">New password</x-form-label>
-                                <input id="password" name="password" type="password"
-                                       class="form-control @error('password') is-invalid @enderror"
-                                       autocomplete="new-password">
-                                @error('password')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                <x-password-input
+                                    name="password"
+                                    id="password"
+                                    autocomplete="new-password"
+                                    class="@error('password') is-invalid @enderror"
+                                />
+                                @error('password')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-0">
                                 <x-form-label for="password_confirmation">Confirm new password</x-form-label>
-                                <input id="password_confirmation" name="password_confirmation" type="password"
-                                       class="form-control" autocomplete="new-password">
+                                <x-password-input
+                                    name="password_confirmation"
+                                    id="password_confirmation"
+                                    autocomplete="new-password"
+                                />
                             </div>
                         </div>
                     </div>

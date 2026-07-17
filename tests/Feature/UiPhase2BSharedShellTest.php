@@ -26,6 +26,8 @@ class UiPhase2BSharedShellTest extends TestCase
         $response->assertSee('id="crm-confirm-backdrop"', false);
         $response->assertSee('id="crm-flash-data"', false);
         $response->assertSee('js/crm-ui.js', false);
+        $response->assertSee('js/password-toggle.js', false);
+        $response->assertSee('css/password-field.css', false);
         $response->assertSee('css/crm-tokens.css', false);
         $response->assertSee('css/crm-app.css', false);
     }

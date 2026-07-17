@@ -17,6 +17,7 @@
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
 
     @vite(['resources/css/marketing.css', 'resources/js/marketing.js'])
+    <link rel="stylesheet" href="{{ asset('css/password-field.css') }}">
 </head>
 <body class="marketing-body antialiased">
     <a class="mk-skip-link" href="#main-content">Skip to content</a>
@@ -44,5 +45,7 @@
             </div>
         </main>
     </div>
+
+    <script src="{{ asset('js/password-toggle.js') }}" defer></script>
 </body>
 </html>

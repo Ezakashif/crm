@@ -21,12 +21,26 @@
                 <input type="email" name="email" value="{{ old('email') }}" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="sa-required">Password</label>
-                <input type="password" name="password" class="form-control" required>
+                <label class="sa-required" for="password">Password</label>
+                <x-password-input
+                    name="password"
+                    id="password"
+                    autocomplete="new-password"
+                    :required="true"
+                    class="@error('password') is-invalid @enderror"
+                />
+                @error('password')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
             </div>
             <div class="form-group mb-0">
-                <label class="sa-required">Confirm password</label>
-                <input type="password" name="password_confirmation" class="form-control" required>
+                <label class="sa-required" for="password_confirmation">Confirm password</label>
+                <x-password-input
+                    name="password_confirmation"
+                    id="password_confirmation"
+                    autocomplete="new-password"
+                    :required="true"
+                />
             </div>
         </div>
         <div class="d-flex">
