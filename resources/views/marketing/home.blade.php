@@ -158,7 +158,7 @@
     </section>
 
     {{-- Statistics --}}
-    <section class="mk-section mk-section-dark" aria-labelledby="stats-heading">
+    <section class="mk-stats-band" aria-labelledby="stats-heading">
         <div class="mk-container relative">
             <h2 id="stats-heading" class="sr-only">Algos at a glance</h2>
             <div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
@@ -170,16 +170,16 @@
                     >
                         @if (! empty($stat['count']))
                             <div
-                                class="mk-stat-value text-white"
+                                class="mk-stat-value"
                                 data-mk-counter
                                 data-mk-target="{{ $stat['count'] }}"
                                 data-mk-suffix="{{ $stat['suffix'] ?? '' }}"
                                 data-mk-prefix="{{ $stat['prefix'] ?? '' }}"
                             >{{ $stat['value'] }}</div>
                         @else
-                            <div class="mk-stat-value text-white">{{ $stat['value'] }}</div>
+                            <div class="mk-stat-value">{{ $stat['value'] }}</div>
                         @endif
-                        <div class="mt-2 text-sm font-medium text-slate-300/80">{{ $stat['label'] }}</div>
+                        <div class="mk-stat-label">{{ $stat['label'] }}</div>
                     </div>
                 @endforeach
             </div>

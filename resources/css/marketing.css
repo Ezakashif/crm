@@ -370,6 +370,32 @@
         color: #fff;
     }
 
+    /* Full-bleed dark stats band */
+    .mk-stats-band {
+        position: relative;
+        overflow: hidden;
+        padding-block: 4.5rem;
+        background:
+            radial-gradient(720px 320px at 8% 0%, rgba(56, 189, 248, 0.28), transparent 58%),
+            radial-gradient(640px 300px at 92% 100%, rgba(2, 132, 199, 0.22), transparent 55%),
+            linear-gradient(180deg, #0b1220 0%, #0f172a 45%, #0b1628 100%);
+        color: #f8fafc;
+    }
+
+    @media (min-width: 768px) {
+        .mk-stats-band {
+            padding-block: 5.75rem;
+        }
+    }
+
+    .mk-stats-band .mk-stat-value {
+        color: #ffffff;
+    }
+
+    .mk-stats-band .mk-stat-label {
+        color: rgba(186, 230, 253, 0.82);
+    }
+
     /* Form controls (auth + contact) */
     .mk-label {
         display: block;
@@ -756,11 +782,19 @@
     /* Stats */
     .mk-stat-value {
         font-family: var(--mk-font-display);
-        font-size: clamp(2rem, 4vw, 2.75rem);
+        font-size: clamp(2.35rem, 4.5vw, 3.15rem);
         font-weight: 800;
         letter-spacing: -0.04em;
         color: var(--mk-ink);
         line-height: 1;
+    }
+
+    .mk-stat-label {
+        margin-top: 0.55rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: var(--mk-muted);
     }
 
     /* Dashboard preview motion */
