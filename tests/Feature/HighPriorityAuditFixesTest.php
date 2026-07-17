@@ -191,7 +191,7 @@ class HighPriorityAuditFixesTest extends TestCase
             'email' => 'expired@example.com',
             'password' => 'password',
         ])->assertSessionHasErrors([
-            'email' => 'Your company subscription has expired. Please contact support to renew access.',
+            'email' => 'Your free trial has expired.',
         ]);
     }
 

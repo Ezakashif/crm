@@ -61,12 +61,10 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($company && $company->isSubscriptionExpired()) {
+            $message = $company->expiredAccessMessage();
             $this->markSubscriptionExpired($company);
 
-            return $this->rejectAuthenticatedSession(
-                $request,
-                'Your company subscription has expired. Please contact support to renew access.',
-            );
+            return $this->rejectAuthenticatedSession($request, $message);
         }
 
         if ($user) {

@@ -137,6 +137,25 @@ class Company extends Model
             && $this->trial_ends_at->isPast();
     }
 
+    public function isTrialExpired(): bool
+    {
+        return $this->subscription_status === self::SUBSCRIPTION_TRIAL
+            && $this->trial_ends_at !== null
+            && $this->trial_ends_at->isPast();
+    }
+
+    public function expiredAccessMessage(): string
+    {
+        if ($this->isTrialExpired()
+            || ($this->subscription_status === self::SUBSCRIPTION_EXPIRED
+                && $this->trial_ends_at !== null
+                && $this->trial_ends_at->isPast())) {
+            return 'Your free trial has expired.';
+        }
+
+        return 'Your company subscription has expired. Please contact support to renew access.';
+    }
+
     public function logoUrl(): ?string
     {
         if (! filled($this->logo_path)) {

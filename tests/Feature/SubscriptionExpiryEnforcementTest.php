@@ -28,7 +28,9 @@ class SubscriptionExpiryEnforcementTest extends TestCase
         $this->actingAs($user)
             ->get(route('dashboard'))
             ->assertRedirect(route('login'))
-            ->assertSessionHasErrors('email');
+            ->assertSessionHasErrors([
+                'email' => 'Your free trial has expired.',
+            ]);
 
         $this->assertGuest();
     }
@@ -43,9 +45,35 @@ class SubscriptionExpiryEnforcementTest extends TestCase
 
         $this->actingAs($user)
             ->get(route('dashboard'))
-            ->assertRedirect(route('login'));
+            ->assertRedirect(route('login'))
+            ->assertSessionHasErrors([
+                'email' => 'Your free trial has expired.',
+            ]);
 
         $this->assertSame(Company::SUBSCRIPTION_EXPIRED, $company->fresh()->subscription_status);
+        $this->assertGuest();
+    }
+
+    public function test_login_shows_free_trial_expired_message(): void
+    {
+        $company = Company::factory()->create([
+            'subscription_status' => Company::SUBSCRIPTION_TRIAL,
+            'trial_ends_at' => now()->subDay(),
+            'slug' => 'trial-expired-co',
+        ]);
+        User::factory()->admin()->create([
+            'company_id' => $company->id,
+            'email' => 'trial-expired@example.com',
+        ]);
+
+        $this->post('/login', [
+            'email' => 'trial-expired@example.com',
+            'password' => 'password',
+        ])->assertRedirect(route('login'))
+            ->assertSessionHasErrors([
+                'email' => 'Your free trial has expired.',
+            ]);
+
         $this->assertGuest();
     }
 
@@ -61,7 +89,9 @@ class SubscriptionExpiryEnforcementTest extends TestCase
             'email' => 'expired@example.com',
             'password' => 'password',
         ])->assertRedirect(route('login'))
-            ->assertSessionHasErrors('email');
+            ->assertSessionHasErrors([
+                'email' => 'Your free trial has expired.',
+            ]);
 
         $this->assertGuest();
     }

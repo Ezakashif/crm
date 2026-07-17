@@ -53,12 +53,10 @@ class EnsureCompanyContext
         $impersonating = app(ImpersonationService::class)->isImpersonating($request);
 
         if ($company->isSubscriptionExpired() && ! $impersonating) {
+            $message = $company->expiredAccessMessage();
             $this->markSubscriptionExpired($company);
 
-            return $this->deny(
-                $request,
-                'Your company subscription has expired. Please contact support to renew access.',
-            );
+            return $this->deny($request, $message);
         }
 
         $this->currentCompany->set($company);
