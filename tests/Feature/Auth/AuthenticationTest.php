@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\ActivityLog;
 use App\Models\Company;
 use App\Models\User;
+use App\Services\Auth\LoginSecurityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
@@ -24,7 +27,9 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'failed_login_attempts' => 2,
+        ]);
 
         $response = $this->post('/login', [
             'email' => $user->email,
@@ -37,6 +42,15 @@ class AuthenticationTest extends TestCase
         $user->refresh();
         $this->assertNotNull($user->last_login_at);
         $this->assertNotNull($user->last_login_ip);
+        $this->assertSame(0, $user->failed_login_attempts);
+        $this->assertNull($user->locked_until);
+
+        $this->assertTrue(
+            ActivityLog::withoutCompanyScope()
+                ->where('user_id', $user->id)
+                ->where('action', 'user.login')
+                ->exists()
+        );
     }
 
     public function test_super_admin_can_authenticate_with_email_only(): void
@@ -75,12 +89,82 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->post('/login', [
+        $this->from('/login')->post('/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
-        ]);
+        ])->assertRedirect('/login')
+            ->assertSessionHasErrors('email');
 
         $this->assertGuest();
+        $this->assertSame(1, $user->fresh()->failed_login_attempts);
+        $this->assertDatabaseHas('activity_logs', [
+            'user_id' => $user->id,
+            'action' => 'user.login_failed',
+        ]);
+    }
+
+    public function test_inactive_user_gets_generic_failed_message(): void
+    {
+        $user = User::factory()->inactive()->create();
+
+        $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect('/login')
+            ->assertSessionHasErrors([
+                'email' => trans('auth.failed'),
+            ]);
+
+        $this->assertGuest();
+    }
+
+    public function test_account_locks_after_repeated_failed_logins(): void
+    {
+        $user = User::factory()->create();
+
+        for ($i = 0; $i < LoginSecurityService::MAX_ATTEMPTS; $i++) {
+            $this->from('/login')->post('/login', [
+                'email' => $user->email,
+                'password' => 'wrong-password',
+            ]);
+        }
+
+        $user->refresh();
+        $this->assertSame(LoginSecurityService::MAX_ATTEMPTS, $user->failed_login_attempts);
+        $this->assertNotNull($user->locked_until);
+        $this->assertTrue($user->locked_until->isFuture());
+
+        $this->assertDatabaseHas('activity_logs', [
+            'user_id' => $user->id,
+            'action' => 'user.locked_out',
+        ]);
+
+        $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect('/login')
+            ->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+        $this->assertStringContainsString('Too many failed sign-in attempts', session('errors')->first('email'));
+    }
+
+    public function test_lockout_clears_after_expiry_and_allows_login(): void
+    {
+        $user = User::factory()->create([
+            'failed_login_attempts' => LoginSecurityService::MAX_ATTEMPTS,
+            'locked_until' => now()->subMinute(),
+        ]);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertAuthenticated();
+        $user->refresh();
+        $this->assertSame(0, $user->failed_login_attempts);
+        $this->assertNull($user->locked_until);
     }
 
     public function test_users_can_logout(): void
@@ -99,7 +183,6 @@ class AuthenticationTest extends TestCase
 
         $this->actingAs($user);
 
-        // Simulate an expired / invalid CSRF token from a stale page.
         $response = $this->post('/logout', ['_token' => 'stale-token']);
 
         $this->assertGuest();
@@ -108,7 +191,6 @@ class AuthenticationTest extends TestCase
 
     public function test_token_mismatch_redirects_to_login(): void
     {
-        // CSRF is skipped during PHPUnit; exercise the 419 / session-expired handler.
         Route::get('/__test/csrf-expired', function () {
             throw new TokenMismatchException('CSRF token mismatch.');
         })->middleware('web');
@@ -129,5 +211,19 @@ class AuthenticationTest extends TestCase
 
         $response->assertRedirect(route('login'));
         $response->assertSessionHas('status');
+    }
+
+    public function test_tenant_user_provider_retrieves_by_id_when_fail_closed(): void
+    {
+        config(['tenancy.fail_closed_without_context' => true]);
+
+        $user = User::factory()->create();
+
+        $provider = Auth::createUserProvider('users');
+
+        $retrieved = $provider->retrieveById($user->id);
+
+        $this->assertNotNull($retrieved);
+        $this->assertTrue($user->is($retrieved));
     }
 }

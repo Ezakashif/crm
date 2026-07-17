@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\Services\Auth\LoginSecurityService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -14,17 +15,12 @@ use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -38,19 +34,51 @@ class LoginRequest extends FormRequest
     /**
      * Attempt to authenticate the request's credentials.
      *
-     * Emails are globally unique, so login is email + password only.
-     *
      * @throws ValidationException
      */
     public function authenticate(): void
     {
-        $this->ensureIsNotRateLimited();
+        /** @var LoginSecurityService $security */
+        $security = app(LoginSecurityService::class);
+
+        $email = (string) $this->input('email');
 
         $user = User::withoutCompanyScope()
-            ->where('email', (string) $this->input('email'))
+            ->where('email', $email)
             ->first();
 
-        if (! $user || ! Hash::check($this->input('password'), $user->password)) {
+        // Persistent lockout takes priority over short-lived cache throttling.
+        if ($user) {
+            $security->assertNotLocked($user);
+        }
+
+        $this->ensureIsNotRateLimited();
+
+        $passwordValid = $user && Hash::check((string) $this->input('password'), $user->password);
+
+        if (! $passwordValid) {
+            RateLimiter::hit($this->throttleKey());
+
+            if ($user) {
+                $newlyLocked = $security->recordFailedAttempt($user, $this);
+                $fresh = $user->fresh();
+
+                if ($newlyLocked || $security->isLocked($fresh)) {
+                    throw ValidationException::withMessages([
+                        'email' => $security->lockoutMessage($fresh),
+                    ]);
+                }
+            } else {
+                $security->logUnknownEmailFailure($this, $email);
+            }
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed'),
+            ]);
+        }
+
+        // Soften account-status enumeration: same message as bad credentials.
+        if (! $user->isActive()) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -58,11 +86,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        if (! $user->isActive()) {
-            throw ValidationException::withMessages([
-                'email' => 'Your account is not active. Please contact an administrator.',
-            ]);
-        }
+        $security->clearFailures($user);
 
         Auth::login($user, $this->boolean('remember'));
 
@@ -70,8 +94,6 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Ensure the login request is not rate limited.
-     *
      * @throws ValidationException
      */
     public function ensureIsNotRateLimited(): void
@@ -92,9 +114,6 @@ class LoginRequest extends FormRequest
         ]);
     }
 
-    /**
-     * Get the rate limiting throttle key for the request.
-     */
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());

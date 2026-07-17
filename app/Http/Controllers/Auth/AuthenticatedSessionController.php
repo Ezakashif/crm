@@ -37,7 +37,9 @@ class AuthenticatedSessionController extends Controller
 
         if ($user?->isSuperAdmin()) {
             $this->recordSuccessfulLogin($user, $request);
-            ActivityLogger::log('user.login', $user);
+            ActivityLogger::log('user.login', $user, [
+                'user_agent' => $request->userAgent(),
+            ]);
 
             return redirect()->intended(route('superadmin.dashboard', absolute: false));
         }
@@ -69,7 +71,9 @@ class AuthenticatedSessionController extends Controller
 
         if ($user) {
             $this->recordSuccessfulLogin($user, $request);
-            ActivityLogger::log('user.login', $user);
+            ActivityLogger::log('user.login', $user, [
+                'user_agent' => $request->userAgent(),
+            ]);
         }
 
         return redirect()->intended(route('dashboard', absolute: false));

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFour();
+
+        Password::defaults(function () {
+            $rule = Password::min(8)->letters();
+
+            return $this->app->isProduction()
+                ? $rule->uncompromised()
+                : $rule;
+        });
 
         Auth::provider('tenant-eloquent', function ($app, array $config) {
             return new TenantUserProvider($app['hash'], $config['model']);

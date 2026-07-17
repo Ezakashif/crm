@@ -61,8 +61,10 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'locked_until' => 'datetime',
             'password' => 'hashed',
             'is_super_admin' => 'boolean',
+            'failed_login_attempts' => 'integer',
         ];
     }
 

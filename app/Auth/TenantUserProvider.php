@@ -2,38 +2,38 @@
 
 namespace App\Auth;
 
-use App\Models\User;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
 
 class TenantUserProvider extends EloquentUserProvider
 {
     /**
-     * Retrieve a user by credentials without CompanyScope leakage.
+     * Auth runs before tenant middleware sets CurrentCompany.
+     * Always query users without CompanyScope so session/remember
+     * rehydration works under production fail-closed tenancy.
      *
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  TModel|null  $model
+     * @return \Illuminate\Database\Eloquent\Builder<TModel>
+     */
+    protected function newModelQuery($model = null)
+    {
+        /** @var \App\Models\User $instance */
+        $instance = is_null($model) ? $this->createModel() : $model;
+
+        $query = $instance->newQuery()->withoutCompanyScope();
+
+        with($query, $this->queryCallback);
+
+        return $query;
+    }
+
+    /**
      * @param  array<string, mixed>  $credentials
      */
     public function retrieveByCredentials(array $credentials): ?Authenticatable
     {
-        $credentials = array_filter(
-            $credentials,
-            fn ($key) => ! str_contains($key, 'password'),
-            ARRAY_FILTER_USE_KEY,
-        );
-
-        if ($credentials === []) {
-            return null;
-        }
-
-        /** @var User $model */
-        $model = $this->createModel();
-
-        $query = $model->newQuery()->withoutCompanyScope();
-
-        foreach ($credentials as $key => $value) {
-            $query->where($key, $value);
-        }
-
-        return $query->first();
+        return parent::retrieveByCredentials($credentials);
     }
 }
