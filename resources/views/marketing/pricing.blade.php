@@ -9,129 +9,72 @@
 <x-marketing-layout
     title="Pricing"
     description="Algos CRM pricing for Starter, Professional, and Enterprise—with monthly or annual billing."
+    body-class="starter-page-page"
 >
-    {{-- Hero --}}
-    <section class="mk-atmosphere">
-        <div class="mk-container mk-section pb-10 md:pb-12">
-            <div class="mk-hero-copy mx-auto max-w-3xl text-center">
-                <p class="mk-brand-hero mk-brand-hero-page mb-5" aria-label="{{ config('marketing.name') }}">
-                    {{ strtolower(config('marketing.name')) }}<span class="dot">.</span>
-                </p>
-                <h1 class="mk-display mk-page-title">
-                    {{ $pricing['headline'] }}
-                </h1>
-                <p class="mk-lead mx-auto mt-5 max-w-2xl">
-                    {{ $pricing['subheadline'] }}
-                </p>
-            </div>
+    @include('marketing.partials.page-title', [
+        'title' => 'Pricing',
+        'subtitle' => $pricing['headline'],
+    ])
+
+    <section id="pricing" class="pricing section">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>{{ $pricing['headline'] }}</h2>
+            <p>{{ $pricing['subheadline'] }}</p>
+            <p class="mt-2"><span class="badge text-bg-primary">{{ $pricing['annual_discount_label'] }}</span> on annual billing</p>
         </div>
-    </section>
 
-    {{-- Plans --}}
-    <section class="bg-white pb-16 pt-4 md:pb-20" aria-labelledby="plans-heading" x-data="pricingToggle('monthly')">
-        <div class="mk-container">
-            <h2 id="plans-heading" class="sr-only">Pricing plans</h2>
-
-            <div class="flex justify-center" data-mk-reveal>
-                <div class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 shadow-sm" role="group" aria-label="Billing period">
-                    <button
-                        type="button"
-                        class="rounded-lg px-4 py-2 text-sm font-semibold transition"
-                        :class="!isAnnual() ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500'"
-                        @click="setBilling('monthly')"
-                    >
-                        Monthly
-                    </button>
-                    <button
-                        type="button"
-                        class="rounded-lg px-4 py-2 text-sm font-semibold transition"
-                        :class="isAnnual() ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500'"
-                        @click="setBilling('annual')"
-                    >
-                        Annual
-                        <span class="ml-1 text-xs font-medium text-sky-600" :class="isAnnual() ? '!text-sky-300' : ''">
-                            {{ $pricing['annual_discount_label'] }}
-                        </span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="mt-10 grid gap-6 lg:grid-cols-3">
-                @foreach ($plans as $index => $plan)
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row gy-4 justify-content-center">
+                @foreach ($plans as $plan)
                     @php
                         $planCtaHref = ($plan['cta_type'] ?? 'trial') === 'demo' ? $demoHref : $trialHref;
                     @endphp
-                    <div data-mk-reveal style="--mk-reveal-delay: {{ ($index + 1) * 100 }}ms">
-                        <div x-show="!isAnnual()">
-                            <x-marketing.pricing-card
-                                :name="$plan['name']"
-                                :description="$plan['description']"
-                                :monthly="$plan['monthly']"
-                                :annual="$plan['annual']"
-                                :features="$plan['features']"
-                                :cta="$plan['cta']"
-                                :highlighted="$plan['highlighted']"
-                                :cta-href="$planCtaHref"
-                                billing="monthly"
-                            />
-                        </div>
-                        <div x-cloak x-show="isAnnual()">
-                            <x-marketing.pricing-card
-                                :name="$plan['name']"
-                                :description="$plan['description']"
-                                :monthly="$plan['monthly']"
-                                :annual="$plan['annual']"
-                                :features="$plan['features']"
-                                :cta="$plan['cta']"
-                                :highlighted="$plan['highlighted']"
-                                :cta-href="$planCtaHref"
-                                billing="annual"
-                            />
+                    <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="150">
+                        <div class="pricing-item {{ ! empty($plan['highlighted']) ? 'featured' : '' }} h-100">
+                            <h3>{{ $plan['name'] }}</h3>
+                            <p>{{ $plan['description'] }}</p>
+                            <h4>
+                                <sup>$</sup>{{ $plan['monthly'] }}
+                                <span> / month</span>
+                            </h4>
+                            <p class="text-secondary small">or ${{ $plan['annual'] }}/mo billed annually</p>
+                            <ul>
+                                @foreach ($plan['features'] as $feature)
+                                    <li><i class="bi bi-check"></i> <span>{{ $feature }}</span></li>
+                                @endforeach
+                            </ul>
+                            <a href="{{ $planCtaHref }}" class="buy-btn">{{ $plan['cta'] }}</a>
                         </div>
                     </div>
                 @endforeach
             </div>
 
-            <p class="mt-8 text-center text-sm text-slate-500">
-                {{ $pricing['future_note'] }}
-            </p>
+            <p class="text-center text-secondary mt-5 mb-0">{{ $pricing['future_note'] }}</p>
         </div>
     </section>
 
-    {{-- Comparison --}}
-    <section class="mk-section mk-section-muted" aria-labelledby="compare-heading">
-        <div class="mk-container">
-            <x-marketing.section-heading
-                heading-id="compare-heading"
-                eyebrow="Compare"
-                title="Feature comparison"
-                description="See what’s included in Starter, Professional, and Enterprise at a glance."
-                align="center"
-            />
-
-            <x-marketing.pricing-comparison
-                :rows="$pricing['comparison']"
-                :plans="$plans"
-            />
-        </div>
-    </section>
-
-    {{-- FAQ --}}
-    <section class="mk-section bg-white" aria-labelledby="pricing-faq-heading">
-        <div class="mk-container grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-start">
-            <x-marketing.section-heading
-                heading-id="pricing-faq-heading"
-                eyebrow="FAQ"
-                title="Pricing questions"
-                description="Billing, trials, and what to expect before launch."
-            />
-            <x-marketing.faq-accordion :items="$pricing['faqs']" open="billing" />
-        </div>
-    </section>
-
-    {{-- CTA --}}
-    <x-marketing.cta
-        title="Pick a plan and get your team live"
-        description="Start a free trial on Starter or Professional, or talk with us about Enterprise."
-    />
+    @if (! empty($pricing['faqs']))
+        <section id="faq" class="faq section light-background">
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Pricing FAQ</h2>
+            </div>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="faq-container">
+                            @foreach ($pricing['faqs'] as $index => $faq)
+                                <div class="faq-item {{ $index === 0 ? 'faq-active' : '' }}" data-aos="fade-up" data-aos-delay="{{ 100 + ($index * 50) }}">
+                                    <h3>{{ $faq['question'] }}</h3>
+                                    <div class="faq-content">
+                                        <p>{{ $faq['answer'] }}</p>
+                                    </div>
+                                    <i class="faq-toggle bi bi-chevron-right"></i>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
 </x-marketing-layout>

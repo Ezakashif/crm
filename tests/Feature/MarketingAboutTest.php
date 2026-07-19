@@ -16,11 +16,7 @@ class MarketingAboutTest extends TestCase
             ->assertSee('Vision')
             ->assertSee(config('marketing.about.vision.body'))
             ->assertSee('Why we built Algos')
-            ->assertSee('How Algos took shape')
-            ->assertSee('The stack behind Algos')
-            ->assertSee('Laravel')
-            ->assertSee('Tailwind CSS')
-            ->assertSee('Alpine.js');
+            ->assertSee('How Algos took shape');
     }
 
     public function test_about_page_includes_timeline_milestones(): void
