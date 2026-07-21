@@ -11,7 +11,6 @@ class MarketingLayout extends Component
         public ?string $title = null,
         public ?string $description = null,
         public ?string $ogImage = null,
-        public string $bodyClass = 'index-page',
     ) {}
 
     public function render(): View

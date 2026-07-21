@@ -2,9 +2,10 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#0d6efd">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="format-detection" content="telephone=no">
 
     <x-marketing.seo
         :title="$title ?? null"
@@ -14,42 +15,37 @@
     <x-marketing.json-ld type="organization" />
     <x-marketing.json-ld type="website" />
 
-    <link href="{{ asset('marketing/assets/img/favicon.png') }}" rel="icon">
-    <link href="{{ asset('marketing/assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+    <link rel="icon" href="{{ asset('branding/algos-logo.svg') }}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap">
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet">
+    </noscript>
 
-    <link href="https://fonts.googleapis.com" rel="preconnect">
-    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-
-    <link href="{{ asset('marketing/assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('marketing/assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
-    <link href="{{ asset('marketing/assets/vendor/aos/aos.css') }}" rel="stylesheet">
-    <link href="{{ asset('marketing/assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('marketing/assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('marketing/assets/css/main.css') }}" rel="stylesheet">
+    @vite(['resources/css/marketing.css', 'resources/js/marketing.js'])
 
     @stack('head')
 </head>
-<body class="{{ $bodyClass ?? 'index-page' }}">
-    @include('marketing.partials.header')
+<body class="marketing-body antialiased">
+    <a class="mk-skip-link" href="#main-content">Skip to content</a>
 
-    <main class="main">
+    <x-marketing.navbar />
+
+    <main id="main-content">
         {{ $slot }}
     </main>
 
-    @include('marketing.partials.footer')
+    <x-marketing.footer />
 
-    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center" aria-label="Back to top">
-        <i class="bi bi-arrow-up-short"></i>
+    <a
+        href="#main-content"
+        class="mk-scroll-top"
+        data-mk-scroll-top
+        aria-label="Back to top"
+    >
+        <x-marketing.icon name="arrow-up" size="sm" />
     </a>
-
-    <script src="{{ asset('marketing/assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('marketing/assets/vendor/aos/aos.js') }}"></script>
-    <script src="{{ asset('marketing/assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
-    <script src="{{ asset('marketing/assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
-    <script src="{{ asset('marketing/assets/vendor/typed.js/typed.umd.js') }}"></script>
-    <script src="{{ asset('marketing/assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
-    <script src="{{ asset('marketing/assets/js/main.js') }}"></script>
 
     @stack('scripts')
 </body>

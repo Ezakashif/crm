@@ -14,22 +14,31 @@ class MarketingHomeTest extends TestCase
     {
         $this->get(route('marketing.home'))
             ->assertOk()
-            ->assertSee(config('marketing.name'), false)
-            ->assertSee('hero', false)
-            ->assertSee('marketing/assets/css/main.css', false)
-            ->assertSee('Get Started', false)
-            ->assertSee('Contact', false);
+            ->assertSee(config('marketing.home.headline'), false)
+            ->assertSee('Start free trial', false)
+            ->assertSee('Book demo', false)
+            ->assertSee('Trusted by growing revenue teams', false)
+            ->assertSee('Everything your pipeline needs', false)
+            ->assertSee('Up and running in four steps', false)
+            ->assertSee('Why Algos', false)
+            ->assertSee('Teams that switched to Algos', false)
+            ->assertSee('Plans that scale with your team', false)
+            ->assertSee('Questions, answered', false)
+            ->assertSee('Ready to run your pipeline in Algos?', false);
     }
 
-    public function test_home_uses_instant_marketing_template_assets(): void
+    public function test_home_includes_dashboard_preview_and_pricing_plans(): void
     {
         $this->get(route('marketing.home'))
             ->assertOk()
-            ->assertSee('marketing/assets/vendor/bootstrap/css/bootstrap.min.css', false)
-            ->assertSee('marketing/assets/js/main.js', false)
-            ->assertSee('id="header"', false)
-            ->assertSee('id="footer"', false)
-            ->assertSee('scroll-top', false);
+            ->assertSee('Algos CRM dashboard preview', false)
+            ->assertSee('Starter', false)
+            ->assertSee('Professional', false)
+            ->assertSee('Enterprise', false)
+            ->assertSee('data-mk-counter', false)
+            ->assertSee('data-mk-scroll-top', false)
+            ->assertSee('mk-hero-shape', false)
+            ->assertSee('mk-stats-band', false);
     }
 
     public function test_authenticated_user_is_redirected_from_home_to_dashboard(): void
