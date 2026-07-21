@@ -5,6 +5,7 @@
     $trialRoute = config('marketing.cta.trial_route', 'register');
     $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
     $demoHref = route(config('marketing.cta.demo_route'), config('marketing.cta.demo_query', []));
+    $showcase = $home['product_showcase'] ?? [];
 @endphp
 
 <x-marketing-layout
@@ -37,12 +38,16 @@
                         Book demo
                     </x-marketing.button>
                 </div>
+                <p class="mt-3 text-sm text-slate-500">No credit card required</p>
+                <div class="mt-6 flex justify-center" data-mk-reveal>
+                    <x-marketing.trust-chips :items="$home['trust_chips'] ?? []" />
+                </div>
             </div>
         </div>
 
-        <div class="mk-hero-preview mk-hero-preview-bleed relative">
+        <div class="mk-hero-preview mk-hero-preview-bleed mk-hero-preview-lg relative">
             <div class="mk-float-soft">
-                <x-marketing.dashboard-preview />
+                <x-marketing.dashboard-preview class="mk-dashboard-preview-lg" />
             </div>
         </div>
     </section>
@@ -70,15 +75,26 @@
         </div>
     </section>
 
+    {{-- Product showcase --}}
+    @if (! empty($showcase['items']))
+        <x-marketing.product-showcase
+            :headline="$showcase['headline'] ?? 'See the CRM in Action'"
+            :subheadline="$showcase['subheadline'] ?? null"
+            :items="$showcase['items']"
+            :trial-href="$trialHref"
+            class="bg-white"
+        />
+    @endif
+
     {{-- Features overview --}}
-    <section class="mk-section" aria-labelledby="features-heading">
+    <section class="mk-section mk-section-muted" aria-labelledby="features-heading">
         <div class="mk-container">
             <div data-mk-reveal>
                 <x-marketing.section-heading
                     heading-id="features-heading"
                     eyebrow="Features"
-                    title="Everything your pipeline needs"
-                    description="From first lead to closed customer—modules that keep sales and ops aligned."
+                    title="Outcomes for every stage of the pipeline"
+                    description="Each module solves a real sales-ops problem—and turns it into measurable team leverage."
                     align="center"
                 />
             </div>
@@ -88,7 +104,10 @@
                         <x-marketing.feature-card
                             :icon="$feature['icon']"
                             :title="$feature['title']"
-                            :description="$feature['description']"
+                            :problem="$feature['problem'] ?? null"
+                            :solution="$feature['solution'] ?? null"
+                            :benefit="$feature['benefit'] ?? null"
+                            :description="$feature['description'] ?? null"
                         />
                     </div>
                 @endforeach
@@ -99,6 +118,22 @@
                     <x-marketing.icon name="arrow-right" size="sm" />
                 </x-marketing.button>
             </div>
+        </div>
+    </section>
+
+    {{-- Trust --}}
+    <section class="mk-section bg-white" aria-labelledby="trust-heading">
+        <div class="mk-container">
+            <div data-mk-reveal>
+                <x-marketing.section-heading
+                    heading-id="trust-heading"
+                    eyebrow="Trust"
+                    title="Built for secure, multi-tenant CRM operations"
+                    description="Replace these badges with customer logos and testimonials when you are ready—without changing the layout."
+                    align="center"
+                />
+            </div>
+            <x-marketing.trust-badges :items="$home['trust_badges'] ?? []" class="mt-10" />
         </div>
     </section>
 
@@ -194,7 +229,7 @@
                     heading-id="testimonials-heading"
                     eyebrow="Customers"
                     title="Teams that switched to Algos"
-                    description="Placeholder stories from revenue teams using a clearer CRM workflow."
+                    description="Early stories from revenue teams using a clearer CRM workflow. Swap in real quotes anytime."
                     align="center"
                 />
             </div>
@@ -221,12 +256,16 @@
                     heading-id="pricing-heading"
                     eyebrow="Pricing"
                     title="Plans that scale with your team"
-                    description="Simple monthly or annual pricing. Full comparison on the pricing page."
+                    description="Simple monthly or annual pricing. Professional is recommended for most growing sales teams."
                     align="center"
                 />
             </div>
 
-            <div class="flex justify-center" data-mk-reveal>
+            <p class="mt-2 text-center text-sm font-medium text-slate-500" data-mk-reveal>
+                {{ config('marketing.pricing.trial_note') }}
+            </p>
+
+            <div class="mt-6 flex justify-center" data-mk-reveal>
                 <div class="inline-flex items-center rounded-xl border border-slate-200 bg-white p-1 shadow-sm" role="group" aria-label="Billing period">
                     <button
                         type="button"
@@ -288,7 +327,7 @@
 
             <div class="mt-10 text-center" data-mk-reveal>
                 <x-marketing.button href="{{ route('marketing.pricing') }}" variant="secondary">
-                    Compare plans
+                    Compare all features
                     <x-marketing.icon name="arrow-right" size="sm" />
                 </x-marketing.button>
             </div>
@@ -314,7 +353,8 @@
 
     {{-- Final CTA --}}
     <x-marketing.cta
-        title="Ready to run your pipeline in Algos?"
-        description="Start a free trial today, or book a demo and we’ll walk you through the workspace."
+        title="Ready to organize your sales pipeline?"
+        description="Start your free trial today. No credit card required—or book a demo and we’ll walk you through the workspace."
+        note="No credit card required"
     />
 </x-marketing-layout>

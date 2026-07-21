@@ -22,7 +22,7 @@
     'mk-card-interactive' => ! $highlighted,
 ])>
     @if ($highlighted)
-        <span class="mk-pricing-badge">Most popular</span>
+        <span class="mk-pricing-badge">{{ config('marketing.pricing.recommended_label', 'Recommended') }}</span>
     @endif
 
     <div>
@@ -55,7 +55,7 @@
         @endforeach
     </ul>
 
-    <div class="mt-8">
+    <div class="mt-8 space-y-2">
         <x-marketing.button
             :href="$ctaHref"
             :variant="$highlighted ? 'primary' : 'secondary'"
@@ -63,5 +63,8 @@
         >
             {{ $cta }}
         </x-marketing.button>
+        @if ($highlighted)
+            <p class="text-center text-xs text-slate-500">{{ config('marketing.pricing.trial_note') }}</p>
+        @endif
     </div>
 </article>

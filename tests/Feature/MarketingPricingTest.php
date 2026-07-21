@@ -29,7 +29,9 @@ class MarketingPricingTest extends TestCase
             ->assertSee('Lead management')
             ->assertSee('Multi-tenant architecture')
             ->assertSee('Pricing questions')
-            ->assertSee('Are these final prices?')
-            ->assertSee(config('marketing.pricing.future_note'));
+            ->assertSee('Do I need a credit card to start?')
+            ->assertSee(config('marketing.pricing.future_note'))
+            ->assertSee('No credit card required', false)
+            ->assertSee('Recommended', false);
     }
 }

@@ -1,6 +1,7 @@
 @props([
-    'title' => 'Ready to grow with Algos?',
-    'description' => 'Start your free trial or book a walkthrough with our team.',
+    'title' => 'Ready to organize your sales pipeline?',
+    'description' => 'Start your free trial today. No credit card required.',
+    'note' => 'No credit card required',
     'primaryLabel' => 'Start free trial',
     'primaryHref' => null,
     'secondaryLabel' => 'Book demo',
@@ -43,6 +44,9 @@
                         {{ $secondaryLabel }}
                     </x-marketing.button>
                 </div>
+                @if ($note)
+                    <p class="mt-4 text-sm font-medium text-slate-400">{{ $note }}</p>
+                @endif
             </div>
         </div>
     </div>

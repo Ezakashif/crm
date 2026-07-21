@@ -23,6 +23,9 @@
                 <p class="mk-lead mx-auto mt-5 max-w-2xl">
                     {{ $pricing['subheadline'] }}
                 </p>
+                <p class="mt-3 text-sm font-medium text-slate-500">
+                    {{ $pricing['trial_note'] ?? 'No credit card required · Cancel anytime during trial' }}
+                </p>
             </div>
         </div>
     </section>
@@ -123,7 +126,7 @@
                 heading-id="pricing-faq-heading"
                 eyebrow="FAQ"
                 title="Pricing questions"
-                description="Billing, trials, and what to expect before launch."
+                description="Billing, trials, and what to expect as you get started."
             />
             <x-marketing.faq-accordion :items="$pricing['faqs']" open="billing" />
         </div>
@@ -131,7 +134,8 @@
 
     {{-- CTA --}}
     <x-marketing.cta
-        title="Pick a plan and get your team live"
-        description="Start a free trial on Starter or Professional, or talk with us about Enterprise."
+        title="Ready to organize your sales pipeline?"
+        description="Start your free trial today. No credit card required—or talk with us about Enterprise."
+        note="No credit card required"
     />
 </x-marketing-layout>

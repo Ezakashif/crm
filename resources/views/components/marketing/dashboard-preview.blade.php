@@ -13,7 +13,7 @@
     </div>
 
     <div class="mk-dashboard-body overflow-hidden rounded-b-xl border border-slate-200" style="background: var(--mk-bg);">
-        <div class="grid min-h-[280px] grid-cols-[56px_1fr] sm:min-h-[340px] sm:grid-cols-[200px_1fr]">
+        <div class="grid min-h-[320px] grid-cols-[56px_1fr] sm:min-h-[400px] sm:grid-cols-[200px_1fr] lg:min-h-[460px]">
             {{-- Sidebar --}}
             <aside class="border-r border-slate-200 bg-slate-900 p-3 text-slate-300 sm:p-4">
                 <div class="mb-5 hidden items-center gap-2 sm:flex">
