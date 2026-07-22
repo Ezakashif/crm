@@ -127,6 +127,17 @@ class PlanController extends Controller
         }, 'subscription-plans-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv']);
     }
 
+    public function sampleImport(): Response
+    {
+        return response()->streamDownload(function (): void {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['name', 'slug', 'short_description', 'monthly_price', 'yearly_price', 'currency', 'billing_cycle', 'trial_days', 'is_free', 'is_featured', 'is_public', 'is_active', 'sort_order']);
+            fputcsv($out, ['Starter', 'starter', 'For small teams getting organized.', '0', '0', 'USD', 'both', '14', '1', '0', '1', '1', '1']);
+            fputcsv($out, ['Professional', 'professional', 'For growing sales teams.', '79', '63', 'USD', 'both', '14', '0', '1', '1', '1', '2']);
+            fclose($out);
+        }, 'subscription-plans-import-sample.csv', ['Content-Type' => 'text/csv']);
+    }
+
     public function import(Request $request, PlanManagementService $plans): RedirectResponse
     {
         $request->validate(['file' => ['required', 'file', 'mimes:csv,txt', 'max:2048']]);
