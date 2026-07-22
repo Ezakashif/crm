@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Marketing;
 
 use App\Http\Controllers\Controller;
 use App\Services\SuperAdmin\PlatformSettingsService;
+use App\Http\Controllers\Marketing\PricingController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -19,8 +20,11 @@ class HomeController extends Controller
             return redirect()->route('dashboard');
         }
 
+        $plans = PricingController::publicPlans();
+
         return view('marketing.home', [
-            'trialDays' => max(1, $settings->getInt('trial_duration_days', 14)),
+            'trialDays' => max(1, (int) ($plans->where('trial_days', '>', 0)->min('trial_days') ?? $settings->getInt('trial_duration_days', 14))),
+            'plans' => $plans,
         ]);
     }
 }

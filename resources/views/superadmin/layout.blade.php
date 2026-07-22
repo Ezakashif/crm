@@ -37,6 +37,9 @@
         <a href="{{ route('superadmin.companies.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.companies.*') ? 'active' : '' }}">
             <i class="fas fa-building" aria-hidden="true"></i> Companies
         </a>
+        <a href="{{ route('superadmin.plans.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.plans.*') ? 'active' : '' }}">
+            <i class="fas fa-layer-group" aria-hidden="true"></i> Subscription Plans
+        </a>
         <a href="{{ route('superadmin.super-admins.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.super-admins.*') ? 'active' : '' }}">
             <i class="fas fa-user-shield" aria-hidden="true"></i> Super Admins
         </a>

@@ -1,7 +1,6 @@
 @php
     $brand = config('marketing.name');
     $home = config('marketing.home');
-    $plans = config('marketing.pricing.plans', []);
     $trialRoute = config('marketing.cta.trial_route', 'register');
     $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
     $demoHref = route(config('marketing.cta.demo_route'), config('marketing.cta.demo_query', []));
@@ -270,41 +269,49 @@
             </div>
 
             <div class="mt-10 grid gap-6 lg:grid-cols-3">
-                @foreach ($plans as $index => $plan)
+                @forelse ($plans as $index => $plan)
                     @php
-                        $planCtaHref = $plan['id'] === 'enterprise' ? $demoHref : $trialHref;
+                        $planCtaHref = $plan->is_free ? $trialHref : $demoHref;
+                        $features = $plan->features->map(fn ($feature) => $feature->feature_value ?: $feature->feature_name)
+                            ->concat($plan->limits->map(fn ($limit) => $limit->limit_name.': '.($limit->isUnlimited() ? 'Unlimited' : trim($limit->limit_value.' '.$limit->unit))))->all();
                     @endphp
                     <div data-mk-reveal style="--mk-reveal-delay: {{ ($index + 1) * 100 }}ms">
                         <div x-show="!isAnnual()">
                             <x-marketing.pricing-card
-                                :name="$plan['name']"
-                                :description="$plan['description']"
-                                :monthly="$plan['monthly']"
-                                :annual="$plan['annual']"
-                                :features="$plan['features']"
-                                :cta="$plan['cta']"
-                                :cta-type="$plan['cta_type'] ?? 'trial'"
-                                :highlighted="$plan['highlighted']"
+                                :name="$plan->name"
+                                :description="$plan->short_description ?: $plan->description"
+                                :monthly="$plan->monthly_price"
+                                :annual="$plan->yearly_price"
+                                :features="$features"
+                                :cta="$plan->is_free ? 'Start Free Trial' : 'Contact Sales'"
+                                :cta-type="$plan->is_free ? 'trial' : 'demo'"
+                                :highlighted="$plan->is_featured"
                                 :cta-href="$planCtaHref"
+                                :currency="$plan->currency"
+                                :trial-days="$plan->trial_days"
                                 billing="monthly"
                             />
                         </div>
                         <div x-cloak x-show="isAnnual()">
                             <x-marketing.pricing-card
-                                :name="$plan['name']"
-                                :description="$plan['description']"
-                                :monthly="$plan['monthly']"
-                                :annual="$plan['annual']"
-                                :features="$plan['features']"
-                                :cta="$plan['cta']"
-                                :cta-type="$plan['cta_type'] ?? 'trial'"
-                                :highlighted="$plan['highlighted']"
+                                :name="$plan->name"
+                                :description="$plan->short_description ?: $plan->description"
+                                :monthly="$plan->monthly_price"
+                                :annual="$plan->yearly_price"
+                                :features="$features"
+                                :cta="$plan->is_free ? 'Start Free Trial' : 'Contact Sales'"
+                                :cta-type="$plan->is_free ? 'trial' : 'demo'"
+                                :highlighted="$plan->is_featured"
                                 :cta-href="$planCtaHref"
+                                :currency="$plan->currency"
+                                :trial-days="$plan->trial_days"
                                 billing="annual"
                             />
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <p class="col-span-full text-center text-slate-500">Pricing is being finalized. <a class="text-sky-700 underline" href="{{ $demoHref }}">Talk to our team</a>.</p>
+                @endforelse
             </div>
 
             <div class="mt-10 text-center" data-mk-reveal>

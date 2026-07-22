@@ -9,6 +9,8 @@
     'ctaHref' => null,
     'highlighted' => false,
     'billing' => 'monthly',
+    'currency' => 'USD',
+    'trialDays' => 0,
 ])
 
 @php
@@ -18,7 +20,7 @@
 @endphp
 
 <article @class([
-    'mk-card relative flex h-full flex-col p-6 sm:p-7',
+    'mk-card relative flex h-full min-h-[32rem] flex-col p-6 sm:p-7',
     'mk-pricing-featured' => $highlighted,
     'mk-card-interactive' => ! $highlighted,
 ])>
@@ -35,7 +37,7 @@
 
     <div class="mt-6">
         <div class="flex items-baseline gap-1">
-            <span class="text-4xl font-bold tracking-tight text-slate-900">${{ number_format($price) }}</span>
+            <span class="text-4xl font-bold tracking-tight text-slate-900">{{ $currency }} {{ number_format((float) $price, 2) }}</span>
             <span class="text-sm text-slate-500">/user/mo</span>
         </div>
         @if ($billing === 'annual')
@@ -45,7 +47,7 @@
         @endif
     </div>
 
-    <ul class="mt-6 flex-1 space-y-3">
+    <ul class="mt-6 max-h-52 flex-1 space-y-3 overflow-y-auto pr-1">
         @foreach ($features as $feature)
             <li class="flex items-start gap-2.5 text-sm text-slate-700">
                 <span class="mk-icon-well mt-0.5 h-5 w-5 text-[0.7rem] text-emerald-700" style="background: #ecfdf5;">
@@ -63,13 +65,13 @@
             class="w-full"
         >
             @if ($ctaType === 'trial')
-                <x-marketing.trial-cta-label />
+                <x-marketing.trial-cta-label :trial-days="$trialDays" />
             @else
                 {{ $cta }}
             @endif
         </x-marketing.button>
         @if ($highlighted)
-            <p class="text-center text-xs text-slate-500">{{ config('marketing.pricing.trial_note') }}</p>
+            <p class="text-center text-xs text-slate-500">{{ $trialDays > 0 ? $trialDays.' '.Illuminate\Support\Str::plural('day', $trialDays).' free trial' : config('marketing.pricing.trial_note') }}</p>
         @endif
     </div>
 </article>

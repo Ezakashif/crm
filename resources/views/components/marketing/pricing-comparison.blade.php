@@ -16,8 +16,8 @@
                     <th scope="col" class="px-4 py-4 text-sm font-semibold text-slate-700 sm:px-6">Feature</th>
                     @foreach ($plans as $plan)
                         <th scope="col" class="px-4 py-4 text-sm font-semibold text-slate-900 sm:px-6">
-                            {{ $plan['name'] }}
-                            @if (! empty($plan['highlighted']))
+                            {{ data_get($plan, 'name') }}
+                            @if (data_get($plan, 'is_featured', data_get($plan, 'highlighted', false)))
                                 <span class="mt-1 block text-xs font-medium text-sky-700">Most popular</span>
                             @endif
                         </th>

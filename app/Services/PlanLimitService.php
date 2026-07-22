@@ -36,8 +36,15 @@ class PlanLimitService
 
     public function remaining(Company $company, string $metric): ?int
     {
+        $company->loadMissing('plan.limits');
         $plan = $company->plan;
-        $max = $plan?->{"max_{$metric}"};
+        $limit = $plan?->limitFor($metric);
+
+        if ($limit?->isUnlimited()) {
+            return null;
+        }
+
+        $max = $limit ? (int) $limit->limit_value : $plan?->{"max_{$metric}"};
 
         if ($max === null) {
             return null;
@@ -50,7 +57,7 @@ class PlanLimitService
             default => 0,
         };
 
-        return max(0, (int) $max - $current);
+        return max(0, $max - $current);
     }
 
     /**
@@ -58,14 +65,15 @@ class PlanLimitService
      */
     private function assertWithinLimit(Company $company, string $metric, int $adding, int $current): void
     {
-        $company->loadMissing('plan');
+        $company->loadMissing('plan.limits');
         $plan = $company->plan;
 
         if (! $plan || $plan->isUnlimited($metric)) {
             return;
         }
 
-        $max = (int) $plan->{"max_{$metric}"};
+        $limit = $plan->limitFor($metric);
+        $max = $limit ? (int) $limit->limit_value : (int) $plan->{"max_{$metric}"};
 
         if (($current + $adding) > $max) {
             throw ValidationException::withMessages([
