@@ -26,6 +26,8 @@ class MarketingHomeTest extends TestCase
             ->assertSee('Lead created', false)
             ->assertSee('Reports & analytics', false)
             ->assertSee('Why Algos', false)
+            ->assertSee('The structure to grow without the CRM complexity', false)
+            ->assertSee('Leave spreadsheets behind', false)
             ->assertSee('Plans that scale with your team', false)
             ->assertSee('Questions, answered', false)
             ->assertSee('Documentation', false)
@@ -70,6 +72,8 @@ class MarketingHomeTest extends TestCase
             ->assertSee('data-mk-scroll-top', false)
             ->assertSee('mk-hero-shape', false)
             ->assertDontSee('mk-stats-band', false)
+            ->assertSee('#product-showcase-heading', false)
+            ->assertSee('#contact', false)
             ->assertSee('Multi-tenant SaaS', false)
             ->assertSee('Role-based access', false);
     }
