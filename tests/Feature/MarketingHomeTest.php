@@ -18,13 +18,11 @@ class MarketingHomeTest extends TestCase
             ->assertSee('Start free trial', false)
             ->assertSee('Book demo', false)
             ->assertSee('No credit card required', false)
-            ->assertSee('Trusted by growing revenue teams', false)
+            ->assertSee('The CRM foundation your team can rely on', false)
             ->assertSee('See the CRM in Action', false)
             ->assertSee('Outcomes for every stage of the pipeline', false)
-            ->assertSee('Built for secure, multi-tenant CRM operations', false)
             ->assertSee('Up and running in four steps', false)
             ->assertSee('Why Algos', false)
-            ->assertSee('Teams that switched to Algos', false)
             ->assertSee('Plans that scale with your team', false)
             ->assertSee('Questions, answered', false)
             ->assertSee('Ready to organize your sales pipeline?', false);
@@ -34,14 +32,13 @@ class MarketingHomeTest extends TestCase
     {
         $this->get(route('marketing.home'))
             ->assertOk()
-            ->assertSee('Algos CRM dashboard preview', false)
+            ->assertSee('overview.PNG', false)
             ->assertSee('Starter', false)
             ->assertSee('Professional', false)
             ->assertSee('Enterprise', false)
-            ->assertSee('data-mk-counter', false)
             ->assertSee('data-mk-scroll-top', false)
             ->assertSee('mk-hero-shape', false)
-            ->assertSee('mk-stats-band', false)
+            ->assertDontSee('mk-stats-band', false)
             ->assertSee('Multi-tenant SaaS', false)
             ->assertSee('Role-based access', false);
     }
