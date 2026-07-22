@@ -65,26 +65,15 @@
         </div>
     </section>
 
-    {{-- Trusted by --}}
-    <section class="border-y border-slate-200/70 bg-white py-8" aria-labelledby="trusted-by-heading">
-        <div class="mk-container">
-            <h2
-                id="trusted-by-heading"
-                class="text-center text-xs font-semibold uppercase tracking-[0.14em] text-slate-400"
-                data-mk-reveal
-            >
-                Trusted by growing revenue teams
-            </h2>
-            <div class="mk-logo-row mt-6">
-                @foreach ($home['trusted_by'] as $index => $logo)
-                    <div
-                        class="mk-logo-mark"
-                        data-mk-reveal
-                        style="--mk-reveal-delay: {{ ($index + 1) * 100 }}ms"
-                        aria-hidden="true"
-                    >{{ $logo }}</div>
-                @endforeach
+    {{-- Trust --}}
+    <section class="mk-trust-strip" aria-labelledby="trust-heading">
+        <div class="mk-container mk-trust-strip-layout">
+            <div class="mk-trust-strip-intro" data-mk-reveal="left">
+                <p class="mk-eyebrow">Built for confident operations</p>
+                <h2 id="trust-heading">The CRM foundation your team can rely on</h2>
+                <p>Clear ownership, controlled access, and the visibility to keep customer work moving.</p>
             </div>
+            <x-marketing.trust-badges :items="$home['trust_badges'] ?? []" class="mk-trust-strip-badges" />
         </div>
     </section>
 
@@ -131,22 +120,6 @@
                     <x-marketing.icon name="arrow-right" size="sm" />
                 </x-marketing.button>
             </div>
-        </div>
-    </section>
-
-    {{-- Trust --}}
-    <section class="mk-section bg-white" aria-labelledby="trust-heading">
-        <div class="mk-container">
-            <div data-mk-reveal>
-                <x-marketing.section-heading
-                    heading-id="trust-heading"
-                    eyebrow="Trust"
-                    title="Built for secure, multi-tenant CRM operations"
-                    description="Replace these badges with customer logos and testimonials when you are ready—without changing the layout."
-                    align="center"
-                />
-            </div>
-            <x-marketing.trust-badges :items="$home['trust_badges'] ?? []" class="mt-10" />
         </div>
     </section>
 
@@ -199,62 +172,6 @@
                             <h3 class="font-semibold text-slate-900">{{ $item['title'] }}</h3>
                             <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $item['description'] }}</p>
                         </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- Statistics --}}
-    <section class="mk-stats-band" aria-labelledby="stats-heading">
-        <div class="mk-container relative">
-            <h2 id="stats-heading" class="sr-only">Algos at a glance</h2>
-            <div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
-                @foreach ($home['stats'] as $index => $stat)
-                    <div
-                        class="mk-stat-item text-center lg:text-left"
-                        data-mk-reveal
-                        style="--mk-reveal-delay: {{ ($index + 1) * 100 }}ms"
-                    >
-                        @if (! empty($stat['count']))
-                            <div
-                                class="mk-stat-value"
-                                data-mk-counter
-                                data-mk-target="{{ $stat['count'] }}"
-                                data-mk-suffix="{{ $stat['suffix'] ?? '' }}"
-                                data-mk-prefix="{{ $stat['prefix'] ?? '' }}"
-                            >{{ $stat['value'] }}</div>
-                        @else
-                            <div class="mk-stat-value">{{ $stat['value'] }}</div>
-                        @endif
-                        <div class="mk-stat-label">{{ $stat['label'] }}</div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- Testimonials --}}
-    <section class="mk-section" aria-labelledby="testimonials-heading">
-        <div class="mk-container">
-            <div data-mk-reveal>
-                <x-marketing.section-heading
-                    heading-id="testimonials-heading"
-                    eyebrow="Customers"
-                    title="Teams that switched to Algos"
-                    description="Early stories from revenue teams using a clearer CRM workflow. Swap in real quotes anytime."
-                    align="center"
-                />
-            </div>
-            <div class="grid gap-5 lg:grid-cols-3">
-                @foreach ($home['testimonials'] as $index => $item)
-                    <div data-mk-reveal style="--mk-reveal-delay: {{ ($index + 1) * 100 }}ms">
-                        <x-marketing.testimonial-card
-                            :quote="$item['quote']"
-                            :name="$item['name']"
-                            :role="$item['role']"
-                            :company="$item['company']"
-                        />
                     </div>
                 @endforeach
             </div>

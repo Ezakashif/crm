@@ -783,6 +783,84 @@
         color: var(--mk-ink-soft);
     }
 
+    /* Trust strip */
+    .mk-trust-strip {
+        position: relative;
+        z-index: 2;
+        padding-block: 3.25rem;
+        border-top: 1px solid rgba(186, 230, 253, 0.68);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+        background:
+            radial-gradient(560px 220px at 8% 100%, rgba(224, 242, 254, 0.8), transparent 72%),
+            linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .mk-trust-strip-layout {
+        display: grid;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .mk-trust-strip-intro {
+        max-width: 26rem;
+    }
+
+    .mk-trust-strip-intro h2 {
+        margin-top: 0.5rem;
+        font-family: var(--mk-font-display);
+        font-size: clamp(1.4rem, 2.4vw, 2rem);
+        font-weight: 800;
+        letter-spacing: -0.035em;
+        line-height: 1.18;
+        color: var(--mk-ink);
+    }
+
+    .mk-trust-strip-intro p:last-child {
+        margin-top: 0.7rem;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        color: var(--mk-muted);
+    }
+
+    .mk-trust-strip-badges {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mk-trust-strip .mk-trust-badge {
+        min-height: 4.15rem;
+        padding: 0.75rem;
+        border-color: rgba(203, 213, 225, 0.86);
+        background: rgba(255, 255, 255, 0.84);
+    }
+
+    .mk-trust-strip .mk-trust-badge .mk-icon-well {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: var(--mk-radius-sm);
+    }
+
+    .mk-trust-strip .mk-trust-badge span:last-child {
+        font-size: 0.8125rem;
+        line-height: 1.35;
+    }
+
+    @media (min-width: 640px) {
+        .mk-trust-strip-badges {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .mk-trust-strip {
+            padding-block: 3.75rem;
+        }
+
+        .mk-trust-strip-layout {
+            grid-template-columns: minmax(15rem, 0.7fr) minmax(0, 1.3fr);
+            gap: 3.5rem;
+        }
+    }
+
     /* How it works */
     .mk-step {
         position: relative;
