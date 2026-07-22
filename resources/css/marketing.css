@@ -787,18 +787,21 @@
     .mk-trust-strip {
         position: relative;
         z-index: 2;
-        padding-block: 3.25rem;
-        border-top: 1px solid rgba(186, 230, 253, 0.68);
-        border-bottom: 1px solid rgba(226, 232, 240, 0.95);
-        background:
-            radial-gradient(560px 220px at 8% 100%, rgba(224, 242, 254, 0.8), transparent 72%),
-            linear-gradient(180deg, #ffffff, #f8fbff);
+        padding-block: 4rem;
+        background: var(--mk-bg-muted);
     }
 
     .mk-trust-strip-layout {
         display: grid;
         gap: 2rem;
         align-items: center;
+        border: 1px solid rgba(203, 213, 225, 0.82);
+        border-radius: var(--mk-radius-xl);
+        padding: 1.5rem;
+        background:
+            radial-gradient(520px 220px at 100% 0%, rgba(224, 242, 254, 0.72), transparent 72%),
+            #ffffff;
+        box-shadow: var(--mk-shadow);
     }
 
     .mk-trust-strip-intro {
@@ -852,12 +855,13 @@
 
     @media (min-width: 1024px) {
         .mk-trust-strip {
-            padding-block: 3.75rem;
+            padding-block: 5rem;
         }
 
         .mk-trust-strip-layout {
             grid-template-columns: minmax(15rem, 0.7fr) minmax(0, 1.3fr);
             gap: 3.5rem;
+            padding: 2.25rem;
         }
     }
 
