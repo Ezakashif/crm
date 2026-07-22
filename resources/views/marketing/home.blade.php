@@ -34,7 +34,7 @@
                 </p>
                 <div class="mk-hero-actions mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                     <x-marketing.button :href="$trialHref" size="lg">
-                        Start free trial
+                        <x-marketing.trial-cta-label />
                         <x-marketing.icon name="arrow-right" size="sm" />
                     </x-marketing.button>
                     <x-marketing.button :href="$demoHref" variant="secondary" size="lg">
@@ -77,7 +77,7 @@
                 <p>Clear ownership, controlled access, and the visibility to keep customer work moving.</p>
                 <div class="mt-6">
                     <x-marketing.button :href="$trialHref">
-                        Start {{ $trialDurationLabel }}
+                        <x-marketing.trial-cta-label />
                         <x-marketing.icon name="arrow-right" size="sm" />
                     </x-marketing.button>
                 </div>
@@ -242,6 +242,7 @@
                                 :annual="$plan['annual']"
                                 :features="$plan['features']"
                                 :cta="$plan['cta']"
+                                :cta-type="$plan['cta_type'] ?? 'trial'"
                                 :highlighted="$plan['highlighted']"
                                 :cta-href="$planCtaHref"
                                 billing="monthly"
@@ -255,6 +256,7 @@
                                 :annual="$plan['annual']"
                                 :features="$plan['features']"
                                 :cta="$plan['cta']"
+                                :cta-type="$plan['cta_type'] ?? 'trial'"
                                 :highlighted="$plan['highlighted']"
                                 :cta-href="$planCtaHref"
                                 billing="annual"
