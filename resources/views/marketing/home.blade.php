@@ -52,7 +52,15 @@
                 CRM workspace
             </div>
             <div class="mk-float-soft relative">
-                <x-marketing.dashboard-preview class="mk-dashboard-preview-lg" />
+                <figure class="mk-dashboard-preview mk-dashboard-preview-lg">
+                    <img
+                        src="{{ asset('marketing/screenshots/overview.PNG') }}"
+                        alt="Algos CRM dashboard showing revenue overview, pipeline stages, and today's tasks"
+                        class="mk-dashboard-preview-image"
+                        fetchpriority="high"
+                        decoding="async"
+                    >
+                </figure>
             </div>
         </div>
     </section>

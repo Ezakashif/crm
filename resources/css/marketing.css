@@ -851,6 +851,12 @@
         box-shadow: none;
     }
 
+    .mk-dashboard-preview-image {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
     .mk-hero-preview-lg {
         max-width: min(88rem, 100%);
         margin-top: 2.75rem;
