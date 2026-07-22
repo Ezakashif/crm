@@ -72,6 +72,12 @@
                 <p class="mk-eyebrow">Built for confident operations</p>
                 <h2 id="trust-heading">The CRM foundation your team can rely on</h2>
                 <p>Clear ownership, controlled access, and the visibility to keep customer work moving.</p>
+                <div class="mt-6">
+                    <x-marketing.button :href="$trialHref">
+                        Start free trial
+                        <x-marketing.icon name="arrow-right" size="sm" />
+                    </x-marketing.button>
+                </div>
             </div>
             <x-marketing.trust-badges :items="$home['trust_badges'] ?? []" class="mk-trust-strip-badges" />
         </div>
