@@ -227,6 +227,13 @@ return [
                     'image' => '/marketing/screenshots/leads.PNG',
                 ],
                 [
+                    'id' => 'kanban',
+                    'title' => 'Kanban board',
+                    'benefit' => 'Move deals through visible stages so pipeline status is obvious at a glance.',
+                    'icon' => 'kanban',
+                    'image' => '/marketing/screenshots/leads.PNG',
+                ],
+                [
                     'id' => 'customers',
                     'title' => 'Customers',
                     'benefit' => 'Keep account history, ownership, and next steps in one place after the deal is won.',
