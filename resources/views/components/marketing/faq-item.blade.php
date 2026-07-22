@@ -3,11 +3,11 @@
     'question',
 ])
 
-<div class="border-b border-slate-200">
+<div class="mk-faq-item">
     <h3>
         <button
             type="button"
-            class="flex w-full items-center justify-between gap-4 py-5 text-left"
+            class="mk-faq-trigger"
             @click="toggle('{{ $id }}')"
             :aria-expanded="isOpen('{{ $id }}').toString()"
             :id="'faq-button-{{ $id }}'"
@@ -24,12 +24,13 @@
         </button>
     </h3>
     <div
+        x-cloak
         x-show="isOpen('{{ $id }}')"
-        x-transition.opacity
+        x-transition.opacity.duration.200ms
         id="faq-panel-{{ $id }}"
         role="region"
         aria-labelledby="faq-button-{{ $id }}"
-        class="pb-5 pr-10 text-sm leading-relaxed text-slate-600"
+        class="mk-faq-panel"
     >
         {{ $slot }}
     </div>

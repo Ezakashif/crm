@@ -283,18 +283,33 @@
     </section>
 
     {{-- FAQ --}}
-    <section class="mk-section bg-white" aria-labelledby="faq-heading">
+    <section class="mk-section mk-faq-section" aria-labelledby="faq-heading">
         <div class="mk-container grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-start">
-            <div data-mk-reveal="left">
+            <div class="mk-faq-intro" data-mk-reveal="left">
                 <x-marketing.section-heading
                     heading-id="faq-heading"
                     eyebrow="FAQ"
                     title="Questions, answered"
-                    description="Quick answers about trials, data, and how Algos fits your team."
+                    description="Straightforward answers about your trial, customer data, team access, and getting started."
                 />
+                <div class="mk-faq-support">
+                    <p class="font-semibold text-slate-900">Need a little more help?</p>
+                    <p>Explore the product, talk to support, or book a walkthrough with our team.</p>
+                    <div class="mk-faq-actions">
+                        <x-marketing.button :href="route('marketing.features')" variant="secondary" size="sm">
+                            Documentation
+                        </x-marketing.button>
+                        <x-marketing.button :href="route('marketing.contact', ['intent' => 'support'])" variant="secondary" size="sm">
+                            Contact support
+                        </x-marketing.button>
+                        <x-marketing.button :href="$demoHref" size="sm">
+                            Book a demo
+                        </x-marketing.button>
+                    </div>
+                </div>
             </div>
             <div data-mk-reveal="right" style="--mk-reveal-delay: 200ms">
-                <x-marketing.faq-accordion :items="$home['faqs']" open="trial" />
+                <x-marketing.faq-accordion :items="$home['faqs']" open="trial" class="mk-faq-surface" />
             </div>
         </div>
     </section>
