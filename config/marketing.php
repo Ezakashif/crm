@@ -187,7 +187,6 @@ return [
             'Secure authentication',
             'Role-based access',
             'Cloud hosted',
-            '30-day free trial',
         ],
         'trust_badges' => [
             ['icon' => 'shield', 'label' => 'Secure authentication'],

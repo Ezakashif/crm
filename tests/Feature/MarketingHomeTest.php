@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Services\SuperAdmin\PlatformSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -26,6 +27,19 @@ class MarketingHomeTest extends TestCase
             ->assertSee('Plans that scale with your team', false)
             ->assertSee('Questions, answered', false)
             ->assertSee('Ready to organize your sales pipeline?', false);
+    }
+
+    public function test_home_uses_the_super_admin_trial_duration_in_trust_cta(): void
+    {
+        app(PlatformSettingsService::class)->setMany([
+            'trial_duration_days' => 21,
+        ]);
+
+        $this->get(route('marketing.home'))
+            ->assertOk()
+            ->assertSee('Start 21-day free trial', false)
+            ->assertSee('21-day free trial', false)
+            ->assertDontSee('30-day free trial', false);
     }
 
     public function test_home_includes_dashboard_preview_and_pricing_plans(): void
