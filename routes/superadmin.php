@@ -67,6 +67,9 @@ Route::middleware(['auth', 'active', 'superadmin'])
             ->name('companies.impersonate');
 
         Route::get('plans/export', [PlanController::class, 'export'])->middleware('throttle:30,1')->name('plans.export');
+        Route::get('plans/import/sample', [PlanController::class, 'sampleImport'])
+            ->middleware('throttle:30,1')
+            ->name('plans.import.sample');
         Route::post('plans/import', [PlanController::class, 'import'])->name('plans.import');
         Route::post('plans/bulk', [PlanController::class, 'bulk'])->name('plans.bulk');
         Route::post('plans/{plan}/duplicate', [PlanController::class, 'duplicate'])->name('plans.duplicate');

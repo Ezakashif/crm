@@ -54,7 +54,7 @@ class PlanController extends Controller
         $plan = $plans->create($request->validated(), $request->user()->id);
         ActivityLogger::log('plan.created', $plan, ['name' => $plan->name, 'slug' => $plan->slug]);
 
-        return redirect()->route('superadmin.plans.edit', $plan)->with('success', 'Subscription plan created.');
+        return redirect()->route('superadmin.plans.index')->with('success', 'Subscription plan created.');
     }
 
     public function edit(Plan $plan): View
@@ -67,7 +67,7 @@ class PlanController extends Controller
         $plan = $plans->update($plan, $request->validated(), $request->user()->id);
         ActivityLogger::log('plan.updated', $plan, ['name' => $plan->name, 'slug' => $plan->slug]);
 
-        return back()->with('success', 'Subscription plan updated.');
+        return redirect()->route('superadmin.plans.index')->with('success', 'Subscription plan updated.');
     }
 
     public function duplicate(Plan $plan, PlanManagementService $plans): RedirectResponse
@@ -125,6 +125,17 @@ class PlanController extends Controller
             });
             fclose($out);
         }, 'subscription-plans-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    public function sampleImport(): Response
+    {
+        return response()->streamDownload(function (): void {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['name', 'slug', 'short_description', 'monthly_price', 'yearly_price', 'currency', 'billing_cycle', 'trial_days', 'is_free', 'is_featured', 'is_public', 'is_active', 'sort_order']);
+            fputcsv($out, ['Starter', 'starter', 'For small teams getting organized.', '0', '0', 'USD', 'both', '14', '1', '0', '1', '1', '1']);
+            fputcsv($out, ['Professional', 'professional', 'For growing sales teams.', '79', '63', 'USD', 'both', '14', '0', '1', '1', '1', '2']);
+            fclose($out);
+        }, 'subscription-plans-import-sample.csv', ['Content-Type' => 'text/csv']);
     }
 
     public function import(Request $request, PlanManagementService $plans): RedirectResponse
