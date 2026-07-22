@@ -13,13 +13,13 @@
     :description="config('marketing.description')"
 >
     {{-- Hero --}}
-    <section class="mk-atmosphere mk-hero">
+    <section class="mk-atmosphere mk-hero mk-hero-refined">
         <div class="mk-hero-shapes absolute inset-0" aria-hidden="true">
             <span class="mk-hero-shape mk-hero-shape-1"></span>
             <span class="mk-hero-shape mk-hero-shape-2"></span>
         </div>
         <div class="mk-container relative">
-            <div class="mk-hero-copy mx-auto max-w-3xl text-center">
+            <div class="mk-hero-copy mx-auto max-w-4xl text-center">
                 <p class="mk-brand-hero mb-6" aria-label="{{ $brand }}">
                     {{ strtolower($brand) }}<span class="dot">.</span>
                 </p>
@@ -29,7 +29,7 @@
                 <p class="mk-lead mx-auto mt-5 max-w-2xl">
                     {{ $home['subheadline'] }}
                 </p>
-                <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <div class="mk-hero-actions mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                     <x-marketing.button :href="$trialHref" size="lg">
                         Start free trial
                         <x-marketing.icon name="arrow-right" size="sm" />
@@ -38,15 +38,20 @@
                         Book demo
                     </x-marketing.button>
                 </div>
-                <p class="mt-3 text-sm text-slate-500">No credit card required</p>
-                <div class="mt-6 flex justify-center" data-mk-reveal>
+                <p class="mk-hero-reassurance mt-3 text-sm text-slate-500">No credit card required</p>
+                <div class="mk-hero-trust mt-7" data-mk-reveal aria-label="Platform capabilities">
                     <x-marketing.trust-chips :items="$home['trust_chips'] ?? []" />
                 </div>
             </div>
         </div>
 
         <div class="mk-hero-preview mk-hero-preview-bleed mk-hero-preview-lg relative">
-            <div class="mk-float-soft">
+            <div class="mk-hero-preview-halo" aria-hidden="true"></div>
+            <div class="mk-hero-product-label">
+                <span class="mk-hero-product-status" aria-hidden="true"></span>
+                CRM workspace
+            </div>
+            <div class="mk-float-soft relative">
                 <x-marketing.dashboard-preview class="mk-dashboard-preview-lg" />
             </div>
         </div>
