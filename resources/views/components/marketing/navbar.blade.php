@@ -41,7 +41,7 @@
                     Log in
                 </x-marketing.button>
                 <x-marketing.button href="{{ Route::has($trialRoute) ? route($trialRoute) : route('login') }}" size="sm">
-                    Start free trial
+                    <x-marketing.trial-cta-label />
                 </x-marketing.button>
             @endauth
         </div>
@@ -97,7 +97,7 @@
                         Log in
                     </x-marketing.button>
                     <x-marketing.button href="{{ Route::has($trialRoute) ? route($trialRoute) : route('login') }}" class="w-full">
-                        Start free trial
+                        <x-marketing.trial-cta-label />
                     </x-marketing.button>
                 @endauth
             </div>

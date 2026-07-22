@@ -2,7 +2,7 @@
     'title' => 'Ready to organize your sales pipeline?',
     'description' => 'Start your free trial today. No credit card required.',
     'note' => 'No credit card required',
-    'primaryLabel' => 'Start free trial',
+    'primaryLabel' => null,
     'primaryHref' => null,
     'secondaryLabel' => 'Book demo',
     'secondaryHref' => null,
@@ -37,7 +37,11 @@
                 </p>
                 <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                     <x-marketing.button :href="$primaryHref" size="lg">
-                        {{ $primaryLabel }}
+                        @if ($primaryLabel)
+                            {{ $primaryLabel }}
+                        @else
+                            <x-marketing.trial-cta-label />
+                        @endif
                         <x-marketing.icon name="arrow-right" size="sm" />
                     </x-marketing.button>
                     <x-marketing.button :href="$secondaryHref" variant="on-dark" size="lg">

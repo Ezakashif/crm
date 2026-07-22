@@ -57,7 +57,7 @@
                         <p class="mk-showcase-benefit">{{ $item['benefit'] }}</p>
                         <div class="mt-6">
                             <x-marketing.button :href="$trialHref">
-                                Start free trial
+                                <x-marketing.trial-cta-label />
                                 <x-marketing.icon name="arrow-right" size="sm" />
                             </x-marketing.button>
                         </div>
@@ -121,7 +121,7 @@
                                 <p class="mk-showcase-benefit">{{ $item['benefit'] }}</p>
                                 <div class="mt-6">
                                     <x-marketing.button :href="$trialHref">
-                                        Start free trial
+                                        <x-marketing.trial-cta-label />
                                         <x-marketing.icon name="arrow-right" size="sm" />
                                     </x-marketing.button>
                                 </div>

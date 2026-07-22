@@ -5,6 +5,7 @@
     'annual' => 0,
     'features' => [],
     'cta' => 'Start free trial',
+    'ctaType' => 'trial',
     'ctaHref' => null,
     'highlighted' => false,
     'billing' => 'monthly',
@@ -61,7 +62,11 @@
             :variant="$highlighted ? 'primary' : 'secondary'"
             class="w-full"
         >
-            {{ $cta }}
+            @if ($ctaType === 'trial')
+                <x-marketing.trial-cta-label />
+            @else
+                {{ $cta }}
+            @endif
         </x-marketing.button>
         @if ($highlighted)
             <p class="text-center text-xs text-slate-500">{{ config('marketing.pricing.trial_note') }}</p>

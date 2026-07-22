@@ -24,7 +24,7 @@
                 </p>
                 <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                     <x-marketing.button :href="$trialHref" size="lg">
-                        Start free trial
+                        <x-marketing.trial-cta-label />
                         <x-marketing.icon name="arrow-right" size="sm" />
                     </x-marketing.button>
                     <x-marketing.button :href="$demoHref" variant="secondary" size="lg">

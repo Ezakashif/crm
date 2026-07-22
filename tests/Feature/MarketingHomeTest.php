@@ -39,6 +39,7 @@ class MarketingHomeTest extends TestCase
             ->assertOk()
             ->assertSee('Start 21-day free trial', false)
             ->assertSee('21-day free trial', false)
+            ->assertDontSee('Start free trial', false)
             ->assertDontSee('30-day free trial', false);
     }
 
