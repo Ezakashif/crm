@@ -28,6 +28,8 @@ class MarketingHomeTest extends TestCase
             ->assertSee('Why Algos', false)
             ->assertSee('Plans that scale with your team', false)
             ->assertSee('Questions, answered', false)
+            ->assertSee('Documentation', false)
+            ->assertSee('Contact support', false)
             ->assertSee('Ready to organize your sales pipeline?', false);
     }
 
