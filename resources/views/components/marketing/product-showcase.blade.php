@@ -8,7 +8,7 @@
 @php
     $trialRoute = config('marketing.cta.trial_route', 'register');
     $trialHref = $trialHref ?? (Route::has($trialRoute) ? route($trialRoute) : route('login'));
-    $priorityIds = ['dashboard', 'leads', 'customers', 'tasks', 'reports', 'superadmin'];
+    $priorityIds = ['dashboard', 'leads', 'customers', 'tasks', 'reports'];
     $itemsById = collect($items)->keyBy('id');
     $featuredItems = collect($priorityIds)
         ->map(fn ($id) => $itemsById->get($id))
