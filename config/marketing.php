@@ -384,6 +384,38 @@ return [
                 'description' => 'Dashboards and boards that surface what matters—nothing more.',
             ],
         ],
+        'small_business_outcomes' => [
+            [
+                'icon' => 'file-up',
+                'title' => 'Leave spreadsheets behind',
+                'description' => 'Keep customer records, ownership, and sales context in one shared system.',
+            ],
+            [
+                'icon' => 'check-square',
+                'title' => 'Keep every follow-up moving',
+                'description' => 'Give every next step an owner and due date before it gets forgotten.',
+            ],
+            [
+                'icon' => 'kanban',
+                'title' => 'Organize the sales pipeline',
+                'description' => 'Make deal stages visible so the team knows what needs attention now.',
+            ],
+            [
+                'icon' => 'scroll-text',
+                'title' => 'Understand team activity',
+                'description' => 'Review calls, changes, and progress without chasing updates across tools.',
+            ],
+            [
+                'icon' => 'bar-chart',
+                'title' => 'See business performance clearly',
+                'description' => 'Use reports to understand what is converting and where work is getting stuck.',
+            ],
+            [
+                'icon' => 'layers',
+                'title' => 'Grow without unnecessary complexity',
+                'description' => 'Add structure, users, and control as your business grows—without a bloated stack.',
+            ],
+        ],
         'faqs' => [
             [
                 'id' => 'trial',

@@ -1,5 +1,12 @@
 @php
-    $navItems = config('marketing.nav', []);
+    $homeUrl = route('marketing.home');
+    $navItems = [
+        ['label' => 'Product', 'href' => $homeUrl.'#product-showcase-heading'],
+        ['label' => 'Features', 'href' => $homeUrl.'#features-heading'],
+        ['label' => 'Pricing', 'href' => $homeUrl.'#pricing-heading'],
+        ['label' => 'FAQ', 'href' => $homeUrl.'#faq-heading'],
+        ['label' => 'Contact', 'href' => $homeUrl.'#contact'],
+    ];
     $trialRoute = config('marketing.cta.trial_route', 'register');
     $demoRoute = config('marketing.cta.demo_route', 'marketing.contact');
     $demoQuery = config('marketing.cta.demo_query', []);
@@ -12,11 +19,9 @@
 
             <nav class="hidden items-center gap-6 lg:flex" aria-label="Primary">
                 @foreach ($navItems as $item)
-                    @php $active = request()->routeIs($item['route']); @endphp
                     <a
-                        href="{{ route($item['route']) }}"
-                        class="mk-nav-link {{ $active ? 'is-active' : '' }}"
-                        @if ($active) aria-current="page" @endif
+                        href="{{ $item['href'] }}"
+                        class="mk-nav-link"
                     >
                         {{ $item['label'] }}
                     </a>
@@ -69,11 +74,9 @@
     >
         <nav class="mk-container flex flex-col gap-1 py-4" aria-label="Mobile">
             @foreach ($navItems as $item)
-                @php $active = request()->routeIs($item['route']); @endphp
                 <a
-                    href="{{ route($item['route']) }}"
-                    class="rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 {{ $active ? 'bg-slate-50 text-slate-900' : '' }}"
-                    @if ($active) aria-current="page" @endif
+                    href="{{ $item['href'] }}"
+                    class="rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50"
                     @click="close()"
                 >
                     {{ $item['label'] }}

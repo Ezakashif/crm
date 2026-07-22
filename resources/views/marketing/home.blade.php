@@ -194,6 +194,40 @@
         </div>
     </section>
 
+    {{-- Small business outcomes --}}
+    <section class="mk-section mk-outcomes-section" aria-labelledby="outcomes-heading">
+        <div class="mk-container">
+            <div data-mk-reveal>
+                <x-marketing.section-heading
+                    heading-id="outcomes-heading"
+                    eyebrow="Built for small businesses"
+                    title="The structure to grow without the CRM complexity"
+                    description="Algos helps small teams replace scattered work with a clearer, more reliable way to run customer relationships."
+                    align="center"
+                />
+            </div>
+            <div class="mk-outcomes-grid">
+                @foreach ($home['small_business_outcomes'] as $index => $outcome)
+                    <article class="mk-outcome-card" data-mk-reveal style="--mk-reveal-delay: {{ ($index + 1) * 70 }}ms">
+                        <span class="mk-icon-well h-10 w-10">
+                            <x-marketing.icon :name="$outcome['icon']" />
+                        </span>
+                        <div>
+                            <h3>{{ $outcome['title'] }}</h3>
+                            <p>{{ $outcome['description'] }}</p>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+            <div class="mt-10 text-center" data-mk-reveal>
+                <x-marketing.button :href="$trialHref">
+                    <x-marketing.trial-cta-label />
+                    <x-marketing.icon name="arrow-right" size="sm" />
+                </x-marketing.button>
+            </div>
+        </div>
+    </section>
+
     {{-- Pricing preview --}}
     <section class="mk-section mk-section-muted" aria-labelledby="pricing-heading" x-data="pricingToggle('monthly')">
         <div class="mk-container">
@@ -316,6 +350,7 @@
 
     {{-- Final CTA --}}
     <x-marketing.cta
+        id="contact"
         title="Ready to organize your sales pipeline?"
         description="Start your free trial today. No credit card required—or book a demo and we’ll walk you through the workspace."
         note="No credit card required"
