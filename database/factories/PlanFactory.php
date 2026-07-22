@@ -24,6 +24,17 @@ class PlanFactory extends Factory
             'max_leads' => 1000,
             'max_customers' => 500,
             'price_cents' => 2900,
+            'short_description' => fake()->sentence(),
+            'description' => fake()->paragraph(),
+            'monthly_price' => 29,
+            'yearly_price' => 290,
+            'currency' => 'USD',
+            'billing_cycle' => 'both',
+            'trial_days' => 14,
+            'is_free' => false,
+            'is_featured' => false,
+            'is_public' => true,
+            'sort_order' => 1,
             'is_default' => false,
             'is_active' => true,
         ];
@@ -35,5 +46,10 @@ class PlanFactory extends Factory
             'is_default' => true,
             'price_cents' => 0,
         ]);
+    }
+
+    public function public(): static
+    {
+        return $this->state(fn () => ['is_active' => true, 'is_public' => true]);
     }
 }
