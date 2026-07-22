@@ -272,7 +272,8 @@
                 @forelse ($plans as $index => $plan)
                     @php
                         $planCtaHref = $plan->is_free ? $trialHref : $demoHref;
-                        $features = $plan->features->map(fn ($feature) => $feature->feature_value ?: $feature->feature_name)->all();
+                        $features = $plan->features->map(fn ($feature) => $feature->feature_value ?: $feature->feature_name)
+                            ->concat($plan->limits->map(fn ($limit) => $limit->limit_name.': '.($limit->isUnlimited() ? 'Unlimited' : trim($limit->limit_value.' '.$limit->unit))))->all();
                     @endphp
                     <div data-mk-reveal style="--mk-reveal-delay: {{ ($index + 1) * 100 }}ms">
                         <div x-show="!isAnnual()">
