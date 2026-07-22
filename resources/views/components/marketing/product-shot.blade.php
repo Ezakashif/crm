@@ -22,11 +22,11 @@
         <div
             class="mk-product-shot-placeholder"
             role="img"
-            aria-label="{{ $altText }} placeholder — replace with a real screenshot"
+            aria-label="{{ $altText }}"
         >
             <div class="mk-product-shot-chrome">
                 <span></span><span></span><span></span>
-                <div class="mk-product-shot-url">app.algos.test/{{ \Illuminate\Support\Str::slug($title) }}</div>
+                <div class="mk-product-shot-url">app.algos.com/{{ \Illuminate\Support\Str::slug($title) }}</div>
             </div>
             <div class="mk-product-shot-body">
                 <div class="mk-product-shot-aside" aria-hidden="true">
@@ -43,7 +43,7 @@
                         </span>
                         <div>
                             <div class="font-semibold text-slate-900">{{ $title }}</div>
-                            <div class="text-xs text-slate-500">Screenshot placeholder</div>
+                            <div class="text-xs text-slate-500">Workspace overview</div>
                         </div>
                     </div>
                     <div class="mk-product-shot-grid" aria-hidden="true">
@@ -53,9 +53,7 @@
                         <div class="span-2"></div>
                         <div></div>
                     </div>
-                    <p class="mk-product-shot-hint">
-                        Drop a real {{ strtolower($title) }} screenshot here when ready.
-                    </p>
+                    <p class="mk-product-shot-hint">A focused view of the information your team needs next.</p>
                 </div>
             </div>
         </div>
