@@ -50,14 +50,14 @@ class RegisteredUserController extends Controller
 
         $admin = $result['admin'];
 
-        $verificationMailFailed = false;
+        $verificationMailError = null;
 
         try {
             event(new Registered($admin));
         } catch (Throwable $e) {
             // Account is created; don't fail registration if outbound mail is broken.
             report($e);
-            $verificationMailFailed = true;
+            $verificationMailError = $e;
         }
 
         Auth::login($admin);
@@ -66,9 +66,12 @@ class RegisteredUserController extends Controller
         if ($requiresVerification && ! $admin->hasVerifiedEmail()) {
             $redirect = redirect()->route('verification.notice');
 
-            if ($verificationMailFailed) {
+            if ($verificationMailError instanceof Throwable) {
                 $redirect->withErrors([
-                    'email' => 'Your workspace was created, but the verification email could not be sent. Check mail configuration or use Resend.',
+                    'email' => EmailVerification::sendFailureMessage(
+                        'Your workspace was created, but the verification email could not be sent. Check mail configuration or use Resend.',
+                        $verificationMailError
+                    ),
                 ]);
             } else {
                 $redirect->with('status', 'verification-link-sent');

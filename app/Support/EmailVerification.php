@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
+use Throwable;
 
 class EmailVerification
 {
@@ -42,5 +43,18 @@ class EmailVerification
         }
 
         return self::signedUrl($user);
+    }
+
+    public static function sendFailureMessage(string $fallback, Throwable $e): string
+    {
+        if (! config('app.debug')) {
+            return $fallback;
+        }
+
+        $detail = trim($e->getMessage());
+
+        return $detail !== ''
+            ? $fallback.' ('.$detail.')'
+            : $fallback;
     }
 }
