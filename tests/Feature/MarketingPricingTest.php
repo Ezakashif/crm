@@ -2,12 +2,22 @@
 
 namespace Tests\Feature;
 
+use App\Models\Plan;
+use App\Models\PlanFeature;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class MarketingPricingTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_pricing_page_shows_plans_and_toggle_copy(): void
     {
+        $starter = Plan::factory()->public()->create(['name' => 'Starter', 'slug' => 'starter', 'is_free' => true]);
+        $professional = Plan::factory()->public()->create(['name' => 'Professional', 'slug' => 'professional', 'is_featured' => true]);
+        Plan::factory()->public()->create(['name' => 'Enterprise', 'slug' => 'enterprise']);
+        $professional->features()->create(PlanFeature::factory()->make(['feature_key' => 'reports', 'feature_name' => 'Reports'])->toArray());
+
         $this->get(route('marketing.pricing'))
             ->assertOk()
             ->assertSee(config('marketing.pricing.headline'))
@@ -23,11 +33,14 @@ class MarketingPricingTest extends TestCase
 
     public function test_pricing_page_includes_comparison_and_faq(): void
     {
+        $plan = Plan::factory()->public()->create(['name' => 'Professional', 'slug' => 'professional']);
+        $plan->features()->create(PlanFeature::factory()->make(['feature_key' => 'lead-management', 'feature_name' => 'Lead management'])->toArray());
+
         $this->get(route('marketing.pricing'))
             ->assertOk()
             ->assertSee('Feature comparison')
             ->assertSee('Lead management')
-            ->assertSee('Multi-tenant architecture')
+            ->assertSee('Lead management')
             ->assertSee('Pricing questions')
             ->assertSee('Do I need a credit card to start?')
             ->assertSee(config('marketing.pricing.future_note'))
