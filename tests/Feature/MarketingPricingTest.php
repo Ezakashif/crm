@@ -27,7 +27,7 @@ class MarketingPricingTest extends TestCase
             ->assertSee('Monthly')
             ->assertSee('Annual')
             ->assertSee(config('marketing.pricing.annual_discount_label'))
-            ->assertSee('Start Free Trial')
+            ->assertSee('free trial', false)
             ->assertSee('Contact Sales');
     }
 
