@@ -7,7 +7,7 @@
     $demoHref = route(config('marketing.cta.demo_route'), config('marketing.cta.demo_query', []));
     $showcase = $home['product_showcase'] ?? [];
     $trialDays = $trialDays ?? 14;
-    $trialDurationLabel = $trialDays.'-day free trial';
+    $trialDurationLabel = $trialDays.' '.\Illuminate\Support\Str::plural('day', $trialDays).' free trial';
     $trustChips = [...($home['trust_chips'] ?? []), $trialDurationLabel];
 @endphp
 

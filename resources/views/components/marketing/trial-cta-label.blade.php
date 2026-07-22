@@ -1,5 +1,6 @@
 @php
     $trialDays = max(1, app(\App\Services\SuperAdmin\PlatformSettingsService::class)->getInt('trial_duration_days', 14));
+    $trialDuration = $trialDays.' '.\Illuminate\Support\Str::plural('day', $trialDays);
 @endphp
 
-Start {{ $trialDays }}-day free trial
+Start {{ $trialDuration }} free trial

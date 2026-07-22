@@ -37,10 +37,22 @@ class MarketingHomeTest extends TestCase
 
         $this->get(route('marketing.home'))
             ->assertOk()
-            ->assertSee('Start 21-day free trial', false)
-            ->assertSee('21-day free trial', false)
+            ->assertSee('Start 21 days free trial', false)
+            ->assertSee('21 days free trial', false)
             ->assertDontSee('Start free trial', false)
             ->assertDontSee('30-day free trial', false);
+    }
+
+    public function test_home_uses_singular_day_in_trial_ctas(): void
+    {
+        app(PlatformSettingsService::class)->setMany([
+            'trial_duration_days' => 1,
+        ]);
+
+        $this->get(route('marketing.home'))
+            ->assertOk()
+            ->assertSee('Start 1 day free trial', false)
+            ->assertDontSee('Start 1 days free trial', false);
     }
 
     public function test_home_includes_dashboard_preview_and_pricing_plans(): void
