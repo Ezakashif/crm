@@ -6,6 +6,9 @@
     $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
     $demoHref = route(config('marketing.cta.demo_route'), config('marketing.cta.demo_query', []));
     $showcase = $home['product_showcase'] ?? [];
+    $trialDays = $trialDays ?? 14;
+    $trialDurationLabel = $trialDays.'-day free trial';
+    $trustChips = [...($home['trust_chips'] ?? []), $trialDurationLabel];
 @endphp
 
 <x-marketing-layout
@@ -40,7 +43,7 @@
                 </div>
                 <p class="mk-hero-reassurance mt-3 text-sm text-slate-500">No credit card required</p>
                 <div class="mk-hero-trust mt-7" data-mk-reveal aria-label="Platform capabilities">
-                    <x-marketing.trust-chips :items="$home['trust_chips'] ?? []" />
+                    <x-marketing.trust-chips :items="$trustChips" />
                 </div>
             </div>
         </div>
@@ -74,7 +77,7 @@
                 <p>Clear ownership, controlled access, and the visibility to keep customer work moving.</p>
                 <div class="mt-6">
                     <x-marketing.button :href="$trialHref">
-                        Start free trial
+                        Start {{ $trialDurationLabel }}
                         <x-marketing.icon name="arrow-right" size="sm" />
                     </x-marketing.button>
                 </div>
