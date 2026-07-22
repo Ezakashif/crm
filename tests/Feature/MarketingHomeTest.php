@@ -56,7 +56,10 @@ class MarketingHomeTest extends TestCase
         }
 
         $response
-            ->assertSee('Screenshot placeholder', false)
+            ->assertSee('Explore every part of the CRM', false)
+            ->assertSee('Workspace overview', false)
+            ->assertDontSee('Screenshot placeholder', false)
+            ->assertDontSee('Drop a real', false)
             ->assertSee('Business benefit', false)
             ->assertSee('Privacy Policy', false)
             ->assertSee('Help Center', false);

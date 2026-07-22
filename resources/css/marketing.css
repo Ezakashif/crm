@@ -1040,6 +1040,93 @@
         max-width: 34rem;
     }
 
+    .mk-showcase-more {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(186, 230, 253, 0.9);
+        border-radius: var(--mk-radius-xl);
+        padding: 1.5rem;
+        background:
+            radial-gradient(520px 220px at 100% 0%, rgba(224, 242, 254, 0.85), transparent 70%),
+            linear-gradient(145deg, #f8fbff, #fff 60%);
+    }
+
+    @media (min-width: 768px) {
+        .mk-showcase-more {
+            padding: 2.25rem;
+        }
+    }
+
+    .mk-showcase-more-intro {
+        max-width: 38rem;
+    }
+
+    .mk-showcase-more-intro h3 {
+        margin-top: 0.5rem;
+        font-family: var(--mk-font-display);
+        font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+        color: var(--mk-ink);
+    }
+
+    .mk-showcase-more-intro p:last-child {
+        margin-top: 0.7rem;
+        color: var(--mk-muted);
+        line-height: 1.65;
+    }
+
+    .mk-showcase-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        scrollbar-width: thin;
+    }
+
+    .mk-showcase-tab {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 0.45rem;
+        border: 1px solid var(--mk-border);
+        border-radius: var(--mk-radius);
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--mk-muted);
+        padding: 0.6rem 0.75rem;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        line-height: 1;
+        transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .mk-showcase-tab:hover {
+        border-color: rgba(2, 132, 199, 0.32);
+        color: var(--mk-ink);
+    }
+
+    .mk-showcase-tab[aria-selected="true"] {
+        border-color: rgba(2, 132, 199, 0.42);
+        background: var(--mk-accent-soft);
+        color: var(--mk-accent-hover);
+        box-shadow: 0 5px 14px rgba(2, 132, 199, 0.1);
+    }
+
+    .mk-showcase-more-panel {
+        display: grid;
+        gap: 1.75rem;
+        align-items: center;
+    }
+
+    @media (min-width: 1024px) {
+        .mk-showcase-more-panel {
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 3rem;
+        }
+    }
+
     .mk-product-shot {
         margin: 0;
         border-radius: var(--mk-radius-xl);
