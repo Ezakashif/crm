@@ -54,7 +54,7 @@ class PlanController extends Controller
         $plan = $plans->create($request->validated(), $request->user()->id);
         ActivityLogger::log('plan.created', $plan, ['name' => $plan->name, 'slug' => $plan->slug]);
 
-        return redirect()->route('superadmin.plans.edit', $plan)->with('success', 'Subscription plan created.');
+        return redirect()->route('superadmin.plans.index')->with('success', 'Subscription plan created.');
     }
 
     public function edit(Plan $plan): View
@@ -67,7 +67,7 @@ class PlanController extends Controller
         $plan = $plans->update($plan, $request->validated(), $request->user()->id);
         ActivityLogger::log('plan.updated', $plan, ['name' => $plan->name, 'slug' => $plan->slug]);
 
-        return back()->with('success', 'Subscription plan updated.');
+        return redirect()->route('superadmin.plans.index')->with('success', 'Subscription plan updated.');
     }
 
     public function duplicate(Plan $plan, PlanManagementService $plans): RedirectResponse
