@@ -7,12 +7,12 @@ use App\Http\Requests\SuperAdmin\PlanRequest;
 use App\Models\Plan;
 use App\Services\ActivityLogger;
 use App\Services\SuperAdmin\PlanManagementService;
-use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PlanController extends Controller
 {
@@ -115,7 +115,7 @@ class PlanController extends Controller
         return back()->with('success', Str::ucfirst($data['action']).'d '.$plans->count().' subscription plan(s).');
     }
 
-    public function export(): Response
+    public function export(): StreamedResponse
     {
         return response()->streamDownload(function (): void {
             $out = fopen('php://output', 'w');
@@ -127,7 +127,7 @@ class PlanController extends Controller
         }, 'subscription-plans-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv']);
     }
 
-    public function sampleImport(): Response
+    public function sampleImport(): StreamedResponse
     {
         return response()->streamDownload(function (): void {
             $out = fopen('php://output', 'w');
