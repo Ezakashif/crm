@@ -7,6 +7,7 @@ use App\Http\Controllers\SuperAdmin\CompanyExportController;
 use App\Http\Controllers\SuperAdmin\CompanyImportController;
 use App\Http\Controllers\SuperAdmin\DashboardController;
 use App\Http\Controllers\SuperAdmin\ImpersonationController;
+use App\Http\Controllers\SuperAdmin\PlanController;
 use App\Http\Controllers\SuperAdmin\SearchController;
 use App\Http\Controllers\SuperAdmin\SettingsController;
 use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
@@ -64,6 +65,9 @@ Route::middleware(['auth', 'active', 'superadmin'])
         Route::post('companies/{company}/impersonate', [ImpersonationController::class, 'store'])
             ->middleware('throttle:10,1')
             ->name('companies.impersonate');
+
+        Route::post('plans/{plan}/duplicate', [PlanController::class, 'duplicate'])->name('plans.duplicate');
+        Route::resource('plans', PlanController::class)->except(['show']);
 
         Route::get('super-admins', [SuperAdminUserController::class, 'index'])->name('super-admins.index');
         Route::get('super-admins/create', [SuperAdminUserController::class, 'create'])->name('super-admins.create');
