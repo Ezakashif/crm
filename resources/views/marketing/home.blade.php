@@ -133,23 +133,30 @@
     </section>
 
     {{-- How it works --}}
-    <section class="mk-section mk-section-muted" aria-labelledby="how-heading">
-        <div class="mk-container">
-            <div data-mk-reveal>
+    <section class="mk-section mk-workflow-section" aria-labelledby="how-heading">
+        <div class="mk-container mk-workflow-layout">
+            <div class="mk-workflow-intro" data-mk-reveal="left">
                 <x-marketing.section-heading
                     heading-id="how-heading"
                     eyebrow="How it works"
-                    title="Up and running in four steps"
-                    description="A simple path from empty workspace to a team that never drops a follow-up."
-                    align="center"
+                    title="One connected workflow from first lead to clear decisions"
+                    description="Algos keeps the customer journey moving in one shared workspace—without losing context between sales, service, and reporting."
                 />
             </div>
-            <ol class="mk-steps grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            <ol class="mk-workflow">
                 @foreach ($home['how_it_works'] as $index => $step)
-                    <li class="mk-step" data-mk-reveal style="--mk-reveal-delay: {{ $index * 100 }}ms">
-                        <div class="mk-step-num">{{ $step['step'] }}</div>
-                        <h3 class="mt-4 text-lg font-semibold tracking-tight text-slate-900">{{ $step['title'] }}</h3>
-                        <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ $step['description'] }}</p>
+                    <li class="mk-workflow-step" data-mk-reveal="right" style="--mk-reveal-delay: {{ $index * 70 }}ms">
+                        <div class="mk-workflow-marker" aria-hidden="true">{{ $step['step'] }}</div>
+                        <article class="mk-workflow-card">
+                            <span class="mk-icon-well h-10 w-10 shrink-0">
+                                <x-marketing.icon :name="$step['icon']" />
+                            </span>
+                            <div>
+                                <p class="mk-workflow-step-label">Step {{ $step['step'] }}</p>
+                                <h3>{{ $step['title'] }}</h3>
+                                <p>{{ $step['description'] }}</p>
+                            </div>
+                        </article>
                     </li>
                 @endforeach
             </ol>

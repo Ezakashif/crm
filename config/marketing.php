@@ -326,23 +326,45 @@ return [
         'how_it_works' => [
             [
                 'step' => '01',
-                'title' => 'Create your workspace',
-                'description' => 'Sign up, invite your team, and set roles in minutes.',
+                'title' => 'Lead created',
+                'description' => 'Capture a new enquiry with the contact details and context your team needs.',
+                'icon' => 'user-plus',
             ],
             [
                 'step' => '02',
-                'title' => 'Import your pipeline',
-                'description' => 'Bring leads and customers in with CSV, or start fresh.',
+                'title' => 'Assigned to a sales representative',
+                'description' => 'Give one owner a clear next action so every opportunity has accountability.',
+                'icon' => 'users',
             ],
             [
                 'step' => '03',
-                'title' => 'Run every follow-up',
-                'description' => 'Track tasks, activities, and next steps from one dashboard.',
+                'title' => 'Follow-up activities',
+                'description' => 'Record calls, notes, and touchpoints while the full conversation stays visible.',
+                'icon' => 'scroll-text',
             ],
             [
                 'step' => '04',
-                'title' => 'Measure what converts',
-                'description' => 'Use reports to double down on the work that wins deals.',
+                'title' => 'Lead converted',
+                'description' => 'Move a qualified opportunity forward without losing its sales history.',
+                'icon' => 'kanban',
+            ],
+            [
+                'step' => '05',
+                'title' => 'Customer management',
+                'description' => 'Keep the account, owner, and relationship context together after the deal closes.',
+                'icon' => 'users',
+            ],
+            [
+                'step' => '06',
+                'title' => 'Tasks & reminders',
+                'description' => 'Turn each next step into an assigned task with a clear due date.',
+                'icon' => 'check-square',
+            ],
+            [
+                'step' => '07',
+                'title' => 'Reports & analytics',
+                'description' => 'See pipeline health and team activity, then decide what needs attention next.',
+                'icon' => 'bar-chart',
             ],
         ],
         'why_us' => [

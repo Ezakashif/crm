@@ -899,6 +899,138 @@
         }
     }
 
+    /* CRM workflow */
+    .mk-workflow-section {
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(620px 340px at 0% 50%, rgba(224, 242, 254, 0.82), transparent 70%),
+            linear-gradient(180deg, #f8fbff, var(--mk-bg-muted));
+    }
+
+    .mk-workflow-layout {
+        display: grid;
+        gap: 2.5rem;
+    }
+
+    .mk-workflow-intro {
+        max-width: 29rem;
+    }
+
+    .mk-workflow {
+        position: relative;
+        display: grid;
+        gap: 0.85rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .mk-workflow::before {
+        content: "";
+        position: absolute;
+        top: 1.3rem;
+        bottom: 1.3rem;
+        left: 1.25rem;
+        width: 1px;
+        background: linear-gradient(180deg, rgba(2, 132, 199, 0.1), rgba(2, 132, 199, 0.55), rgba(2, 132, 199, 0.1));
+    }
+
+    .mk-workflow-step {
+        position: relative;
+        display: grid;
+        grid-template-columns: 2.5rem minmax(0, 1fr);
+        gap: 0.85rem;
+        align-items: center;
+    }
+
+    .mk-workflow-marker {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        width: 2.5rem;
+        height: 2.5rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(2, 132, 199, 0.28);
+        border-radius: 9999px;
+        background: #ffffff;
+        box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06);
+        color: var(--mk-accent-hover);
+        font-family: var(--mk-font-display);
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+    }
+
+    .mk-workflow-card {
+        display: flex;
+        gap: 0.85rem;
+        align-items: flex-start;
+        min-height: 5.75rem;
+        border: 1px solid rgba(203, 213, 225, 0.86);
+        border-radius: var(--mk-radius-lg);
+        padding: 0.9rem;
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: var(--mk-shadow-sm);
+        transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    }
+
+    .mk-workflow-step:hover .mk-workflow-card {
+        transform: translateX(0.2rem);
+        border-color: rgba(2, 132, 199, 0.34);
+        box-shadow: var(--mk-shadow);
+    }
+
+    .mk-workflow-step:hover .mk-workflow-marker {
+        border-color: var(--mk-accent);
+        background: var(--mk-accent);
+        color: #fff;
+    }
+
+    .mk-workflow-step-label {
+        margin-bottom: 0.15rem;
+        color: var(--mk-accent);
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .mk-workflow-card h3 {
+        color: var(--mk-ink);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+        line-height: 1.3;
+    }
+
+    .mk-workflow-card p:last-child {
+        margin-top: 0.25rem;
+        color: var(--mk-muted);
+        font-size: 0.8125rem;
+        line-height: 1.55;
+    }
+
+    @media (min-width: 768px) {
+        .mk-workflow {
+            gap: 1rem;
+        }
+
+        .mk-workflow-card {
+            min-height: 5.25rem;
+            padding: 1rem 1.15rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .mk-workflow-layout {
+            grid-template-columns: minmax(16rem, 0.72fr) minmax(0, 1.28fr);
+            gap: 5rem;
+            align-items: center;
+        }
+    }
+
     .mk-pricing-featured {
         border-color: rgba(2, 132, 199, 0.35);
         background:
