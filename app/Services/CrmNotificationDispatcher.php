@@ -28,13 +28,13 @@ class CrmNotificationDispatcher
     public function customerCreated(Customer $customer): void
     {
         $this->activeCompanyAdmins($customer->company_id)
-            ->each(fn (User $admin) => $admin->notify(new CustomerCreated($customer)));
+            ->each(fn (User $admin) => $this->send($admin, new CustomerCreated($customer)));
     }
 
     public function websiteLeadReceived(Lead $lead): void
     {
         $this->activeCompanyAdmins($lead->company_id)
-            ->each(fn (User $admin) => $admin->notify(new WebsiteLeadReceived($lead)));
+            ->each(fn (User $admin) => $this->send($admin, new WebsiteLeadReceived($lead)));
     }
 
     private function notifyAssignee(?int $assigneeId, ?int $companyId, ?int $actorId, Notification $notification): void
@@ -50,7 +50,14 @@ class CrmNotificationDispatcher
             ->find($assigneeId);
 
         if ($assignee) {
-            $assignee->notify($notification);
+            $this->send($assignee, $notification);
+        }
+    }
+
+    private function send(User $user, Notification $notification): void
+    {
+        if ($notification->via($user) !== []) {
+            $user->notify($notification);
         }
     }
 

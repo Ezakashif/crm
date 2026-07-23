@@ -1,6 +1,7 @@
 @php
     $statusToasts = [
         'profile-updated' => ['type' => 'success', 'message' => 'Profile saved.'],
+        'notification-preferences-updated' => ['type' => 'success', 'message' => 'Notification preferences saved.'],
         'password-updated' => ['type' => 'success', 'message' => 'Password updated. Other devices were signed out.'],
         'session-revoked' => ['type' => 'success', 'message' => 'Session signed out.'],
         'sessions-revoked' => ['type' => 'success', 'message' => 'Other devices were signed out.'],

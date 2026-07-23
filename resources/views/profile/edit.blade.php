@@ -169,6 +169,70 @@
                 @endif
             </div>
 
+            <div class="card card-outline card-info mb-3">
+                <form method="post" action="{{ route('profile.notification-preferences.update') }}">
+                    @csrf
+                    @method('patch')
+                    <div class="card-body">
+                        <x-form-section
+                            title="Notification preferences"
+                            description="Choose how you receive CRM notifications. In-app notifications are available now; email preferences are saved for future delivery."
+                        >
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Notification</th>
+                                            @foreach ($notificationPreferenceChannels as $channel => $label)
+                                                <th scope="col" class="text-center">{{ $label }}</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($notificationPreferenceTypes as $typeKey => $type)
+                                            <tr>
+                                                <th scope="row">
+                                                    <div>{{ $type['label'] }}</div>
+                                                    <small id="notification-{{ $typeKey }}-description" class="text-muted font-weight-normal">
+                                                        {{ $type['description'] }}
+                                                    </small>
+                                                </th>
+                                                @foreach ($notificationPreferenceChannels as $channel => $label)
+                                                    @php($inputId = 'notification-'.$typeKey.'-'.$channel)
+                                                    <td class="text-center align-middle">
+                                                        <input type="hidden" name="preferences[{{ $typeKey }}][{{ $channel }}]" value="0">
+                                                        <div class="custom-control custom-switch d-inline-block">
+                                                            <input
+                                                                id="{{ $inputId }}"
+                                                                name="preferences[{{ $typeKey }}][{{ $channel }}]"
+                                                                type="checkbox"
+                                                                value="1"
+                                                                class="custom-control-input"
+                                                                aria-describedby="notification-{{ $typeKey }}-description"
+                                                                @checked(old('preferences.'.$typeKey.'.'.$channel, data_get($notificationPreferences, $typeKey.'.'.$channel)))
+                                                            >
+                                                            <label class="custom-control-label" for="{{ $inputId }}">
+                                                                <span class="sr-only">{{ $label }} notifications for {{ $type['label'] }}</span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                @endforeach
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            @error('preferences')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </x-form-section>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Save notification preferences</button>
+                    </div>
+                </form>
+            </div>
+
             <div class="card card-outline card-secondary mb-3">
                 <form method="post" action="{{ route('password.update') }}">
                     @csrf

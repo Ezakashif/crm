@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Lead;
+use App\Services\UserNotificationPreferenceService;
 use Illuminate\Notifications\Notification;
 
 class LeadAssigned extends Notification
@@ -11,7 +12,9 @@ class LeadAssigned extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return app(UserNotificationPreferenceService::class)->isEnabled($notifiable, self::class, 'database')
+            ? ['database']
+            : [];
     }
 
     public function toArray(object $notifiable): array
