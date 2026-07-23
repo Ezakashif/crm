@@ -141,6 +141,12 @@
                     title="One connected workflow from first lead to clear decisions"
                     description="Algos keeps the customer journey moving in one shared workspace—without losing context between sales, service, and reporting."
                 />
+                <div class="mt-7">
+                    <x-marketing.button :href="$trialHref">
+                        <x-marketing.trial-cta-label />
+                        <x-marketing.icon name="arrow-right" size="sm" />
+                    </x-marketing.button>
+                </div>
             </div>
             <ol class="mk-workflow">
                 @foreach ($home['how_it_works'] as $index => $step)
