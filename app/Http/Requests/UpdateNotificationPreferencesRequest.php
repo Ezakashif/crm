@@ -23,10 +23,10 @@ class UpdateNotificationPreferencesRequest extends FormRequest
         ];
 
         foreach ($types as $type) {
-            $rules['preferences.'.$type] = ['required', 'array:'.implode(',', $channels)];
+            $rules['preferences.'.$type] = ['sometimes', 'array:'.implode(',', $channels)];
 
             foreach ($channels as $channel) {
-                $rules['preferences.'.$type.'.'.$channel] = ['required', Rule::in(['0', '1', 0, 1, false, true])];
+                $rules['preferences.'.$type.'.'.$channel] = ['sometimes', Rule::in(['0', '1', 0, 1, false, true])];
             }
         }
 
