@@ -70,6 +70,36 @@
                         </div>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>SMTP host</label>
+                            <input type="text" name="smtp_host" value="{{ old('smtp_host', $settings['smtp_host'] ?? '') }}" class="form-control" autocomplete="off" placeholder="smtp.example.com">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>SMTP port</label>
+                            <input type="number" name="smtp_port" value="{{ old('smtp_port', $settings['smtp_port'] ?? 587) }}" class="form-control" min="1" max="65535">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Encryption</label>
+                            <select name="smtp_encryption" class="custom-select">
+                                <option value="">None</option>
+                                <option value="tls" @selected(old('smtp_encryption', $settings['smtp_encryption'] ?? 'tls') === 'tls')>TLS</option>
+                                <option value="ssl" @selected(old('smtp_encryption', $settings['smtp_encryption'] ?? '') === 'ssl')>SSL</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>SMTP username</label>
+                            <input type="text" name="smtp_username" value="{{ old('smtp_username', $settings['smtp_username'] ?? '') }}" class="form-control" autocomplete="username">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>SMTP password</label>
+                            <input type="password" name="smtp_password" class="form-control" autocomplete="new-password" placeholder="Leave blank to keep the current password">
+                            <small class="sa-muted">Stored encrypted and never shown again.</small>
+                        </div>
+                    </div>
+
                     <div class="form-row mb-0">
                         <div class="form-group col-md-6">
                             <label class="sa-required">Trial duration (days)</label>

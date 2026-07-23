@@ -77,6 +77,10 @@ class SettingsController extends Controller
             'default_plan_id' => $validated['default_plan_id'] ?? null,
             'mail_from_name' => $validated['mail_from_name'] ?? null,
             'mail_from_address' => $validated['mail_from_address'] ?? null,
+            'smtp_host' => $validated['smtp_host'] ?? null,
+            'smtp_port' => $validated['smtp_port'] ?? null,
+            'smtp_username' => $validated['smtp_username'] ?? null,
+            'smtp_encryption' => $validated['smtp_encryption'] ?? null,
             'registration_enabled' => $registrationEnabled,
             'email_verification_required' => $emailVerificationRequired,
             'maintenance_mode' => $maintenanceMode,
@@ -90,10 +94,12 @@ class SettingsController extends Controller
                 : $this->settings->get('platform_favicon_path'),
         ]);
 
+        $this->settings->setEncrypted('smtp_password', $validated['smtp_password'] ?? null);
+
         $this->settings->applyBranding();
 
         ActivityLogger::log('platform.settings_updated', null, [
-            'keys' => array_keys($validated),
+            'keys' => array_values(array_diff(array_keys($validated), ['smtp_password'])),
             'registration_enabled' => $registrationEnabled,
             'email_verification_required' => $emailVerificationRequired,
             'maintenance_mode' => $maintenanceMode,
