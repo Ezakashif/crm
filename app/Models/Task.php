@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -49,7 +50,17 @@ class Task extends Model
         return [
             'due_date' => 'datetime',
             'completed_at' => 'datetime',
+            'reminders_sent' => 'array',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::updating(function (Task $task) {
+            if ($task->isDirty('due_date') || $task->isDirty('assigned_to')) {
+                $task->reminders_sent = null;
+            }
+        });
     }
 
     public function creator()
@@ -122,5 +133,25 @@ class Task extends Model
         }
 
         return $query->where('assigned_to', $userId);
+    }
+
+    public function hasReminderBeenSent(string $tier): bool
+    {
+        return filled(($this->reminders_sent ?? [])[$tier] ?? null);
+    }
+
+    public function reminderSentAt(string $tier): ?\Carbon\CarbonInterface
+    {
+        $value = ($this->reminders_sent ?? [])[$tier] ?? null;
+
+        return filled($value) ? Carbon::parse($value) : null;
+    }
+
+    public function markReminderSent(string $tier): void
+    {
+        $sent = $this->reminders_sent ?? [];
+        $sent[$tier] = now()->toIso8601String();
+
+        $this->forceFill(['reminders_sent' => $sent])->save();
     }
 }

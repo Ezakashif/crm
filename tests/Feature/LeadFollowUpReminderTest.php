@@ -114,6 +114,32 @@ class LeadFollowUpReminderTest extends TestCase
         Notification::assertNothingSent();
     }
 
+    public function test_overdue_escalation_repeats_daily_only_after_the_one_shot_due_reminder(): void
+    {
+        Notification::fake();
+        config(['lead_reminders.tiers.overdue.repeat_days' => 1]);
+
+        $user = User::factory()->create(['status' => 'active']);
+        $lead = Lead::factory()->assignedTo($user)->create([
+            'follow_up_date' => today()->subDay(),
+            'status' => 'new',
+            'follow_up_reminders_sent' => ['due' => now()->subDay()->toIso8601String()],
+        ]);
+
+        $this->artisan('leads:send-follow-up-reminders --tier=overdue')->assertSuccessful();
+        $this->artisan('leads:send-follow-up-reminders --tier=overdue')->assertSuccessful();
+
+        Notification::assertSentTo($user, LeadFollowUpDue::class, function (LeadFollowUpDue $notification) use ($lead) {
+            return $notification->lead->is($lead) && $notification->tier === 'overdue';
+        });
+        $this->assertTrue($lead->fresh()->hasFollowUpReminderBeenSent('overdue'));
+
+        $this->travel(1)->days();
+        $this->artisan('leads:send-follow-up-reminders --tier=overdue')->assertSuccessful();
+
+        Notification::assertSentTo($user, LeadFollowUpDue::class, 2);
+    }
+
     public function test_command_skips_won_leads(): void
     {
         Notification::fake();

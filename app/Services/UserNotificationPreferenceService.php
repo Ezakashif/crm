@@ -53,9 +53,8 @@ class UserNotificationPreferenceService
                 foreach ($channels as $channel => $enabled) {
                     $this->assertKnownChannel($channel);
 
-                    UserNotificationPreference::query()->updateOrCreate(
+                    $user->notificationPreferences()->updateOrCreate(
                         [
-                            'user_id' => $user->id,
                             'notification_type' => $type['class'],
                             'channel' => $channel,
                         ],

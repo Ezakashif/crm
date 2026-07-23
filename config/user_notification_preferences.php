@@ -2,7 +2,9 @@
 
 use App\Notifications\CustomerCreated;
 use App\Notifications\LeadAssigned;
+use App\Notifications\LeadFollowUpDue;
 use App\Notifications\TaskAssigned;
+use App\Notifications\TaskDue;
 use App\Notifications\WebsiteLeadReceived;
 
 return [
@@ -21,6 +23,16 @@ return [
             'class' => TaskAssigned::class,
             'label' => 'Task assignments',
             'description' => 'When a task is assigned to you.',
+        ],
+        'task_due' => [
+            'class' => TaskDue::class,
+            'label' => 'Task due and overdue reminders',
+            'description' => 'When an assigned task is due or remains overdue.',
+        ],
+        'lead_follow_up_due' => [
+            'class' => LeadFollowUpDue::class,
+            'label' => 'Lead follow-up reminders',
+            'description' => 'When an assigned lead follow-up is due or overdue.',
         ],
         'customer_created' => [
             'class' => CustomerCreated::class,

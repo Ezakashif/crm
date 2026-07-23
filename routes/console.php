@@ -21,10 +21,28 @@ Schedule::command('leads:send-follow-up-reminders --tier=due')
     ->when($remindersEnabled)
     ->when(fn () => config('lead_reminders.tiers.due.enabled', true));
 
+Schedule::command('leads:send-follow-up-reminders --tier=overdue')
+    ->dailyAt($dailyTime)
+    ->when($remindersEnabled)
+    ->when(fn () => config('lead_reminders.tiers.overdue.enabled', true));
+
 Schedule::command('leads:send-follow-up-reminders --tier=hours_before')
     ->hourly()
     ->when($remindersEnabled)
     ->when(fn () => config('lead_reminders.tiers.hours_before.enabled', true));
+
+$taskRemindersEnabled = fn () => (bool) config('task_reminders.enabled', true);
+$taskReminderTime = config('task_reminders.schedule_time', '08:15');
+
+Schedule::command('tasks:send-reminders --tier=due')
+    ->dailyAt($taskReminderTime)
+    ->when($taskRemindersEnabled)
+    ->when(fn () => config('task_reminders.tiers.due.enabled', true));
+
+Schedule::command('tasks:send-reminders --tier=overdue')
+    ->dailyAt($taskReminderTime)
+    ->when($taskRemindersEnabled)
+    ->when(fn () => config('task_reminders.tiers.overdue.enabled', true));
 
 Schedule::call(function () {
     \App\Models\PlatformSetting::query()->updateOrCreate(
@@ -33,6 +51,11 @@ Schedule::call(function () {
     );
     \Illuminate\Support\Facades\Cache::forget(\App\Services\SuperAdmin\PlatformSettingsService::CACHE_KEY);
 })->everyFiveMinutes()->name('platform-scheduler-heartbeat');
+
+Schedule::command('platform:send-alert-notifications')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->name('platform-alert-notifications');
 
 Schedule::command('activity-logs:prune --days=90')
     ->weekly()

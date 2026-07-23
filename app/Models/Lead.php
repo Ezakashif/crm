@@ -218,16 +218,20 @@ class Lead extends Model
             ->whereNotNull('assigned_to')
             ->whereNotNull('follow_up_date')
             ->whereNotIn('status', ['won', 'lost'])
-            ->whereHas('assignee', fn (Builder $assignee) => $assignee->where('status', 'active'))
-            ->where(function (Builder $builder) use ($tier) {
+            ->whereHas('assignee', fn (Builder $assignee) => $assignee->where('status', 'active'));
+
+        if ($tier !== 'overdue') {
+            $query->where(function (Builder $builder) use ($tier) {
                 $builder->whereNull('follow_up_reminders_sent')
                     ->orWhereNull("follow_up_reminders_sent->{$tier}");
             });
+        }
 
         return match ($tier) {
             'day_before' => $query->whereDate('follow_up_date', today()->addDay()),
             'hours_before' => $query->whereDate('follow_up_date', today()),
             'due' => $query->whereDate('follow_up_date', '<=', today()),
+            'overdue' => $query->whereDate('follow_up_date', '<', today()),
             default => $query->whereRaw('1 = 0'),
         };
     }
@@ -245,5 +249,12 @@ class Lead extends Model
         $sent[$tier] = now()->toIso8601String();
 
         $this->forceFill(['follow_up_reminders_sent' => $sent])->save();
+    }
+
+    public function followUpReminderSentAt(string $tier): ?\Carbon\CarbonInterface
+    {
+        $value = ($this->follow_up_reminders_sent ?? [])[$tier] ?? null;
+
+        return filled($value) ? \Carbon\Carbon::parse($value) : null;
     }
 }

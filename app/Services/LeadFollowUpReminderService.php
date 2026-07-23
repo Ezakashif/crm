@@ -5,14 +5,16 @@ namespace App\Services;
 use App\Jobs\SendLeadFollowUpReminderJob;
 use App\Models\Company;
 use App\Models\Lead;
+use App\Models\User;
 use App\Notifications\LeadFollowUpDue;
 use App\Support\CurrentCompany;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class LeadFollowUpReminderService
 {
-    public const TIERS = ['day_before', 'hours_before', 'due'];
+    public const TIERS = ['day_before', 'hours_before', 'due', 'overdue'];
 
     /**
      * Dispatch reminder jobs for one tier (or all enabled tiers), per company.
@@ -54,7 +56,7 @@ class LeadFollowUpReminderService
 
     /**
      * Deliver a single reminder synchronously (called by the queued job).
-     * Marks the tier sent only after successful notification delivery.
+     * A row lock makes duplicate queued jobs harmless.
      */
     public function deliverReminder(int $leadId, string $tier): bool
     {
@@ -64,25 +66,33 @@ class LeadFollowUpReminderService
             return false;
         }
 
-        $lead = Lead::withoutCompanyScope()
-            ->with('assignee')
-            ->find($leadId);
+        return DB::transaction(function () use ($leadId, $tier): bool {
+            $lead = Lead::withoutCompanyScope()
+                ->lockForUpdate()
+                ->find($leadId);
 
-        if (! $lead || ! $this->isEligible($lead, $tier)) {
-            return false;
-        }
+            if (! $lead || ! $this->isEligible($lead, $tier)) {
+                return false;
+            }
 
-        $assignee = $lead->assignee;
+            $assignee = User::withoutCompanyScope()
+                ->where('company_id', $lead->company_id)
+                ->find($lead->assigned_to);
 
-        if (! $assignee || $assignee->status !== 'active') {
-            return false;
-        }
+            if (! $assignee || $assignee->status !== 'active' || $assignee->is_super_admin) {
+                return false;
+            }
 
-        $assignee->notifyNow(new LeadFollowUpDue($lead, $tier));
+            $notification = new LeadFollowUpDue($lead, $tier);
 
-        $lead->markFollowUpReminderSent($tier);
+            if ($notification->via($assignee) !== []) {
+                $assignee->notifyNow($notification);
+            }
 
-        return true;
+            $lead->markFollowUpReminderSent($tier);
+
+            return true;
+        });
     }
 
     protected function dispatchTier(string $tier): int
@@ -115,7 +125,7 @@ class LeadFollowUpReminderService
             return false;
         }
 
-        if ($lead->hasFollowUpReminderBeenSent($tier)) {
+        if ($tier !== 'overdue' && $lead->hasFollowUpReminderBeenSent($tier)) {
             return false;
         }
 
@@ -124,6 +134,9 @@ class LeadFollowUpReminderService
             'hours_before' => $lead->follow_up_date->isSameDay(today())
                 && $this->isInsideHoursBeforeWindow($lead),
             'due' => $lead->follow_up_date->lessThanOrEqualTo(today()),
+            'overdue' => $lead->follow_up_date->isBefore(today())
+                && $lead->hasFollowUpReminderBeenSent('due')
+                && $this->overdueReminderIsDue($lead),
             default => false,
         };
     }
@@ -143,6 +156,19 @@ class LeadFollowUpReminderService
         $windowEnd = $windowStart->copy()->addHour();
 
         return now()->betweenIncluded($windowStart, $windowEnd);
+    }
+
+    private function overdueReminderIsDue(Lead $lead): bool
+    {
+        $lastSent = $lead->followUpReminderSentAt('overdue');
+
+        if (! $lastSent) {
+            return true;
+        }
+
+        $repeatDays = max(1, (int) config('lead_reminders.tiers.overdue.repeat_days', 1));
+
+        return $lastSent->copy()->addDays($repeatDays)->lessThanOrEqualTo(now());
     }
 
     protected function assertValidTier(string $tier): void
