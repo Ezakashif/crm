@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CompanySettingsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
@@ -36,6 +37,9 @@ Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->grou
     Route::delete('/profile/sessions/others', [\App\Http\Controllers\ProfileSessionController::class, 'destroyOthers'])->name('profile.sessions.destroy-others');
     Route::delete('/profile/sessions/{session}', [\App\Http\Controllers\ProfileSessionController::class, 'destroy'])->name('profile.sessions.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/company/settings', [CompanySettingsController::class, 'edit'])->name('company.settings.edit');
+    Route::patch('/company/settings', [CompanySettingsController::class, 'update'])->name('company.settings.update');
 
     Route::get('/search', [GlobalSearchController::class, 'index'])
         ->middleware('throttle:60,1')

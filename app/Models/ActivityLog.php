@@ -66,6 +66,7 @@ class ActivityLog extends Model
         'company.created' => 'Company created',
         'company.updated' => 'Company updated',
         'company.status_changed' => 'Company status changed',
+        'company.settings_updated' => 'Company settings updated',
         'company.deleted' => 'Company deleted',
         'company.restored' => 'Company restored',
         'plan.created' => 'Subscription plan created',

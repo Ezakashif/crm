@@ -3,6 +3,7 @@
 namespace App\Services\SuperAdmin;
 
 use App\Models\PlatformSetting;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Cache;
 
 class PlatformSettingsService
@@ -64,6 +65,21 @@ class PlatformSettingsService
         return is_numeric($value) ? (int) $value : $default;
     }
 
+    public function getDecrypted(string $key, mixed $default = null): mixed
+    {
+        $value = $this->get($key);
+
+        if (blank($value)) {
+            return $default;
+        }
+
+        try {
+            return Crypt::decryptString((string) $value);
+        } catch (\Throwable) {
+            return $default;
+        }
+    }
+
     /**
      * @param  array<string, mixed>  $values
      */
@@ -81,6 +97,15 @@ class PlatformSettingsService
         }
 
         Cache::forget(self::CACHE_KEY);
+    }
+
+    public function setEncrypted(string $key, ?string $value): void
+    {
+        if (blank($value)) {
+            return;
+        }
+
+        $this->setMany([$key => Crypt::encryptString($value)]);
     }
 
     public function platformName(): string
@@ -179,6 +204,19 @@ class PlatformSettingsService
             config([
                 'mail.from.name' => filled($mailFromName) ? (string) $mailFromName : config('mail.from.name'),
                 'mail.from.address' => filled($mailFromAddress) ? (string) $mailFromAddress : config('mail.from.address'),
+            ]);
+        }
+
+        $smtpHost = $this->get('smtp_host');
+        if (filled($smtpHost)) {
+            $smtpEncryption = $this->get('smtp_encryption');
+            config([
+                'mail.default' => 'smtp',
+                'mail.mailers.smtp.host' => $smtpHost,
+                'mail.mailers.smtp.port' => $this->getInt('smtp_port', 587),
+                'mail.mailers.smtp.username' => $this->get('smtp_username'),
+                'mail.mailers.smtp.password' => $this->getDecrypted('smtp_password'),
+                'mail.mailers.smtp.scheme' => $smtpEncryption === 'ssl' ? 'smtps' : null,
             ]);
         }
 
