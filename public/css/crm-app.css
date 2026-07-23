@@ -2056,3 +2056,37 @@ body.crm-app .crm-image-crop.is-invalid .crm-image-crop__dropzone {
 .crm-notification-item.is-read {
     background: #fff;
 }
+
+.crm-notification-dropdown {
+    position: fixed;
+    top: .5rem;
+    right: 5.25rem;
+    z-index: 1050;
+}
+
+.crm-notification-dropdown summary {
+    position: relative;
+    display: flex;
+    width: 2.2rem;
+    height: 2.2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .35rem;
+    color: #4b5563;
+    cursor: pointer;
+    list-style: none;
+}
+
+.crm-notification-dropdown summary::-webkit-details-marker { display: none; }
+.crm-notification-dropdown summary:hover { background: #f3f4f6; color: var(--crm-primary); }
+.crm-notification-badge { position: absolute; top: -.2rem; right: -.25rem; min-width: 1rem; padding: .05rem .25rem; border-radius: 999px; background: var(--crm-danger); color: #fff; font-size: .65rem; font-weight: 700; text-align: center; }
+.crm-notification-popover { position: absolute; top: 2.7rem; right: 0; width: min(22rem, calc(100vw - 2rem)); overflow: hidden; border: 1px solid var(--crm-border); border-radius: var(--crm-radius); background: #fff; box-shadow: var(--crm-shadow-lg); }
+.crm-notification-popover__header { display: flex; justify-content: space-between; padding: .85rem 1rem; border-bottom: 1px solid var(--crm-border); }
+.crm-notification-popover__header button { border: 0; background: none; color: var(--crm-primary); font-size: .75rem; font-weight: 700; cursor: pointer; }
+.crm-notification-preview { display: block; padding: .75rem 1rem; border-bottom: 1px solid var(--crm-border); color: inherit; text-decoration: none; }
+.crm-notification-preview.is-unread { background: #eff6ff; }
+.crm-notification-preview strong, .crm-notification-preview span, .crm-notification-preview small { display: block; }
+.crm-notification-preview span { margin-top: .15rem; color: #64748b; font-size: .8rem; }
+.crm-notification-preview small { margin-top: .25rem; color: #94a3b8; font-size: .7rem; }
+.crm-notification-empty { margin: 0; padding: 1rem; color: #64748b; font-size: .875rem; }
+.crm-notification-popover__footer { display: block; padding: .75rem 1rem; color: var(--crm-primary); font-size: .8rem; font-weight: 700; text-align: center; text-decoration: none; }

@@ -10,6 +10,7 @@
 
 @section('content')
     @include('partials.impersonation-banner')
+    @include('partials.notification-dropdown')
     {{ $slot }}
     @include('partials.crm-shell')
 @stop
