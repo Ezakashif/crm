@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Lead;
+use App\Services\UserNotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -19,7 +20,18 @@ class LeadFollowUpDue extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $preferences = app(UserNotificationPreferenceService::class);
+        $channels = [];
+
+        foreach (['mail', 'database'] as $channel) {
+            $preferenceChannel = $channel === 'mail' ? 'email' : $channel;
+
+            if ($preferences->isEnabled($notifiable, self::class, $preferenceChannel)) {
+                $channels[] = $channel;
+            }
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -60,7 +72,7 @@ class LeadFollowUpDue extends Notification implements ShouldQueue
             'tier' => $this->tier,
             'is_overdue' => $this->isOverdue(),
             'message' => $line,
-            'url' => route('leads.show', $this->lead),
+            'url' => route('leads.show', $this->lead, false),
             'subject' => $subject,
         ];
     }
@@ -80,6 +92,10 @@ class LeadFollowUpDue extends Notification implements ShouldQueue
             'hours_before' => [
                 'Follow-up in 2 hours',
                 'Reminder: follow-up for '.$this->lead->name.' is coming up in about 2 hours ('.$dateLabel.').',
+            ],
+            'overdue' => [
+                'Follow-up still overdue',
+                'Follow-up for '.$this->lead->name.' remains overdue since '.$dateLabel.'.',
             ],
             default => $this->isOverdue()
                 ? [

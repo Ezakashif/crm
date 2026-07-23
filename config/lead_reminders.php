@@ -28,5 +28,11 @@ return [
             'enabled' => env('LEAD_FOLLOW_UP_REMINDER_DUE_ENABLED', true),
             'label' => 'Due / overdue',
         ],
+        'overdue' => [
+            'enabled' => env('LEAD_FOLLOW_UP_REMINDER_OVERDUE_ENABLED', true),
+            'label' => 'Overdue daily escalation',
+            // Minimum number of whole days between escalation reminders.
+            'repeat_days' => (int) env('LEAD_FOLLOW_UP_REMINDER_OVERDUE_REPEAT_DAYS', 1),
+        ],
     ],
 ];
