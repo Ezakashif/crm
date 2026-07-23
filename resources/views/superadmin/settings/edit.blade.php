@@ -45,6 +45,35 @@
                 </div>
 
                 <div class="sa-form-section">
+                    <h2 class="sa-form-section__title">Company contact & social links</h2>
+                    <p class="sa-form-section__hint">Public contact details shown on marketing pages.</p>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Company email</label>
+                            <input type="email" name="company_email" value="{{ old('company_email', $settings['company_email'] ?? config('marketing.contact.email')) }}" class="form-control">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Company phone</label>
+                            <input type="text" name="company_phone" value="{{ old('company_phone', $settings['company_phone'] ?? config('marketing.contact.phone')) }}" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row mb-0">
+                        <div class="form-group col-md-4">
+                            <label>LinkedIn URL</label>
+                            <input type="url" name="company_linkedin_url" value="{{ old('company_linkedin_url', $settings['company_linkedin_url'] ?? config('marketing.social.linkedin')) }}" class="form-control">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Facebook URL</label>
+                            <input type="url" name="company_facebook_url" value="{{ old('company_facebook_url', $settings['company_facebook_url'] ?? '') }}" class="form-control">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>GitHub URL</label>
+                            <input type="url" name="company_github_url" value="{{ old('company_github_url', $settings['company_github_url'] ?? config('marketing.social.github')) }}" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sa-form-section">
                     <h2 class="sa-form-section__title">Defaults</h2>
                     <p class="sa-form-section__hint">Timezone, currency, mail, and trial defaults for new tenants.</p>
 
