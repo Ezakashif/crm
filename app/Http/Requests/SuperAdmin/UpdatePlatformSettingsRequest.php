@@ -33,6 +33,7 @@ class UpdatePlatformSettingsRequest extends FormRequest
             'company_phone' => ['nullable', 'string', 'max:50'],
             'company_linkedin_url' => ['nullable', 'url', 'max:255'],
             'company_facebook_url' => ['nullable', 'url', 'max:255'],
+            'company_twitter_url' => ['nullable', 'url', 'max:255'],
             'company_github_url' => ['nullable', 'url', 'max:255'],
             'smtp_host' => ['nullable', 'string', 'max:255', 'required_with:smtp_port,smtp_username,smtp_password'],
             'smtp_port' => ['nullable', 'integer', 'min:1', 'max:65535'],

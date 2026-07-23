@@ -6,6 +6,7 @@
     $contact['phone'] = $platformSettings->get('company_phone', $contact['phone']);
     $social['linkedin'] = $platformSettings->get('company_linkedin_url', $social['linkedin']);
     $social['facebook'] = $platformSettings->get('company_facebook_url', null);
+    $social['twitter'] = $platformSettings->get('company_twitter_url', $social['twitter']);
     $social['github'] = $platformSettings->get('company_github_url', $social['github']);
     $brand = config('marketing.name');
     $trialRoute = config('marketing.cta.trial_route', 'register');

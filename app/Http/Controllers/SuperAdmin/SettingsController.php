@@ -81,6 +81,7 @@ class SettingsController extends Controller
             'company_phone' => $validated['company_phone'] ?? null,
             'company_linkedin_url' => $validated['company_linkedin_url'] ?? null,
             'company_facebook_url' => $validated['company_facebook_url'] ?? null,
+            'company_twitter_url' => $validated['company_twitter_url'] ?? null,
             'company_github_url' => $validated['company_github_url'] ?? null,
             'smtp_host' => $validated['smtp_host'] ?? null,
             'smtp_port' => $validated['smtp_port'] ?? null,
