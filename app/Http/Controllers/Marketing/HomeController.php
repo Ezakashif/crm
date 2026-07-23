@@ -23,7 +23,7 @@ class HomeController extends Controller
         $plans = PricingController::publicPlans();
 
         return view('marketing.home', [
-            'trialDays' => max(1, (int) ($plans->where('trial_days', '>', 0)->min('trial_days') ?? $settings->getInt('trial_duration_days', 14))),
+            'trialDays' => max(1, $settings->getInt('trial_duration_days', 14)),
             'plans' => $plans,
         ]);
     }
