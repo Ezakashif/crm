@@ -16,7 +16,7 @@ class MarketingHomeTest extends TestCase
         $this->get(route('marketing.home'))
             ->assertOk()
             ->assertSee(config('marketing.home.headline'), false)
-            ->assertSee('Start free trial', false)
+            ->assertSee('Start 14 days free trial', false)
             ->assertSee('Book demo', false)
             ->assertSee('No credit card required', false)
             ->assertSee('The CRM foundation your team can rely on', false)
