@@ -2,6 +2,8 @@
     $contact = config('marketing.contact');
     $social = config('marketing.social');
     $brand = config('marketing.name');
+    $trialRoute = config('marketing.cta.trial_route', 'register');
+    $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
     $isDemo = ($intent ?? null) === 'demo';
     $defaultMessage = $isDemo
         ? 'Hi—I’d like to book a demo of Algos for our team.'
@@ -214,6 +216,12 @@
             </div>
             <div class="mx-auto mt-10 max-w-3xl" data-mk-reveal style="--mk-reveal-delay: 160ms">
                 <x-marketing.faq-accordion :items="$faqs" open="trial" class="mk-faq-surface" />
+            </div>
+            <div class="mt-10 text-center" data-mk-reveal>
+                <x-marketing.button :href="$trialHref">
+                    <x-marketing.trial-cta-label />
+                    <x-marketing.icon name="arrow-right" size="sm" />
+                </x-marketing.button>
             </div>
         </div>
     </section>
