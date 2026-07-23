@@ -45,6 +45,13 @@
                             $title = $data['subject'] ?? 'Notification';
                             $message = $data['message'] ?? 'You have a new notification.';
                             $url = $data['url'] ?? null;
+                            $actionLabel = match (true) {
+                                ! empty($data['task_id']) => 'View task',
+                                ! empty($data['customer_id']) => 'View customer',
+                                ! empty($data['lead_id']) => 'View lead',
+                                str_starts_with((string) $url, '/superadmin') => 'View alert',
+                                default => 'View details',
+                            };
                         @endphp
                         <li class="list-group-item crm-notification-item {{ $isUnread ? 'is-unread' : 'is-read' }}">
                             <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap: 0.75rem;">
@@ -74,7 +81,7 @@
                                         <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
                                             @csrf
                                             <button type="submit" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-eye" aria-hidden="true"></i> View lead
+                                                <i class="fas fa-eye" aria-hidden="true"></i> {{ $actionLabel }}
                                             </button>
                                         </form>
                                     @elseif ($isUnread)
