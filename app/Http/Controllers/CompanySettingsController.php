@@ -13,6 +13,8 @@ class CompanySettingsController extends Controller
 {
     public function edit(CurrentCompany $currentCompany): View
     {
+        abort_unless(auth()->user()?->isAdmin() || auth()->user()?->hasPermission('update.company_settings'), 403);
+
         $company = $currentCompany->get();
         abort_unless($company, 404);
 

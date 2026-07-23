@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Marketing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class PricingController extends Controller
@@ -21,6 +22,10 @@ class PricingController extends Controller
     /** @return \Illuminate\Support\Collection<int, Plan> */
     public static function publicPlans(): \Illuminate\Support\Collection
     {
+        if (! Schema::hasTable('plans')) {
+            return collect();
+        }
+
         return Plan::query()
             ->active()
             ->where('is_public', true)
