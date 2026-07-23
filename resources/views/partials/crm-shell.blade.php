@@ -32,6 +32,7 @@
 @endphp
 
 <div id="crm-toast-stack" class="crm-toast-stack" aria-live="polite" aria-relevant="additions"></div>
+@include('partials.notification-sidebar-badge')
 
 <div
     id="crm-confirm-backdrop"
