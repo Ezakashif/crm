@@ -1,6 +1,12 @@
 @php
     $contact = config('marketing.contact');
     $social = config('marketing.social');
+    $platformSettings = app(\App\Services\SuperAdmin\PlatformSettingsService::class);
+    $contact['email'] = $platformSettings->get('company_email', $contact['email']);
+    $contact['phone'] = $platformSettings->get('company_phone', $contact['phone']);
+    $social['linkedin'] = $platformSettings->get('company_linkedin_url', $social['linkedin']);
+    $social['facebook'] = $platformSettings->get('company_facebook_url', null);
+    $social['github'] = $platformSettings->get('company_github_url', $social['github']);
     $brand = config('marketing.name');
     $trialRoute = config('marketing.cta.trial_route', 'register');
     $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
@@ -188,6 +194,11 @@
                                 <a href="{{ $social['linkedin'] }}" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-sky-50 hover:text-sky-700" aria-label="LinkedIn">
                                     <x-marketing.icon name="linkedin" />
                                 </a>
+                                @if ($social['facebook'])
+                                    <a href="{{ $social['facebook'] }}" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-sky-50 hover:text-sky-700" aria-label="Facebook">
+                                        <x-marketing.icon name="facebook" />
+                                    </a>
+                                @endif
                                 <a href="{{ $social['twitter'] }}" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-sky-50 hover:text-sky-700" aria-label="X / Twitter">
                                     <x-marketing.icon name="twitter" />
                                 </a>
