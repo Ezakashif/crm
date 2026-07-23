@@ -2060,7 +2060,7 @@ body.crm-app .crm-image-crop.is-invalid .crm-image-crop__dropzone {
 .crm-notification-dropdown {
     position: fixed;
     top: .5rem;
-    right: 12rem;
+    right: 14rem;
     z-index: 1050;
 }
 
@@ -2093,6 +2093,6 @@ body.crm-app .crm-image-crop.is-invalid .crm-image-crop__dropzone {
 
 @media (max-width: 767.98px) {
     .crm-notification-dropdown {
-        right: 4.25rem;
+        right: 6.25rem;
     }
 }
