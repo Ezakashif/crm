@@ -43,6 +43,9 @@ class MarketingPricingTest extends TestCase
             ->assertSee('Lead management')
             ->assertSee('Pricing questions')
             ->assertSee('Do I need a credit card to start?')
+            ->assertSee('Documentation')
+            ->assertSee('Contact support')
+            ->assertSee('Book a demo')
             ->assertSee(config('marketing.pricing.future_note'))
             ->assertSee('No credit card required', false)
             ->assertSee('Recommended', false);

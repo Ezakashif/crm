@@ -129,15 +129,34 @@
     </section>
 
     {{-- FAQ --}}
-    <section class="mk-section bg-white" aria-labelledby="pricing-faq-heading">
+    <section class="mk-section mk-faq-section" aria-labelledby="pricing-faq-heading">
         <div class="mk-container grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-start">
-            <x-marketing.section-heading
-                heading-id="pricing-faq-heading"
-                eyebrow="FAQ"
-                title="Pricing questions"
-                description="Billing, trials, and what to expect as you get started."
-            />
-            <x-marketing.faq-accordion :items="$pricing['faqs']" open="billing" />
+            <div class="mk-faq-intro" data-mk-reveal="left">
+                <x-marketing.section-heading
+                    heading-id="pricing-faq-heading"
+                    eyebrow="FAQ"
+                    title="Pricing questions"
+                    description="Straightforward answers about billing, trials, and choosing the right plan."
+                />
+                <div class="mk-faq-support">
+                    <p class="font-semibold text-slate-900">Need a little more help?</p>
+                    <p>Explore the product, talk to support, or book a walkthrough with our team.</p>
+                    <div class="mk-faq-actions">
+                        <x-marketing.button :href="route('marketing.features')" variant="secondary" size="sm">
+                            Documentation
+                        </x-marketing.button>
+                        <x-marketing.button :href="route('marketing.contact', ['intent' => 'support'])" variant="secondary" size="sm">
+                            Contact support
+                        </x-marketing.button>
+                        <x-marketing.button :href="$demoHref" size="sm">
+                            Book a demo
+                        </x-marketing.button>
+                    </div>
+                </div>
+            </div>
+            <div data-mk-reveal="right" style="--mk-reveal-delay: 200ms">
+                <x-marketing.faq-accordion :items="$pricing['faqs']" open="billing" class="mk-faq-surface" />
+            </div>
         </div>
     </section>
 
