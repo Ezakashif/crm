@@ -67,6 +67,12 @@
                             <input type="url" name="company_facebook_url" value="{{ old('company_facebook_url', $settings['company_facebook_url'] ?? '') }}" class="form-control">
                         </div>
                         <div class="form-group col-md-4">
+                            <label>Twitter / X URL</label>
+                            <input type="url" name="company_twitter_url" value="{{ old('company_twitter_url', $settings['company_twitter_url'] ?? config('marketing.social.twitter')) }}" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row mb-0">
+                        <div class="form-group col-md-4">
                             <label>GitHub URL</label>
                             <input type="url" name="company_github_url" value="{{ old('company_github_url', $settings['company_github_url'] ?? config('marketing.social.github')) }}" class="form-control">
                         </div>
