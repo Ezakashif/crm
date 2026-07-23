@@ -18,7 +18,6 @@ class MarketingContactTest extends TestCase
             ->assertSee('Company')
             ->assertSee('Phone')
             ->assertSee('Message')
-            ->assertSee('Google Maps placeholder')
             ->assertSee(config('marketing.contact.email'))
             ->assertSee(config('marketing.contact.phone'))
             ->assertSee(config('marketing.contact.address'))

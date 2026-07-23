@@ -196,7 +196,6 @@
                         </div>
                     </div>
 
-                    <x-marketing.map-placeholder />
                 </aside>
             </div>
         </div>
