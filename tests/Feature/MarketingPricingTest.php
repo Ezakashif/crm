@@ -13,6 +13,8 @@ class MarketingPricingTest extends TestCase
 
     public function test_pricing_page_shows_plans_and_toggle_copy(): void
     {
+        Plan::withTrashed()->forceDelete();
+
         $starter = Plan::factory()->public()->create(['name' => 'Starter', 'slug' => 'starter', 'is_free' => true]);
         $professional = Plan::factory()->public()->create(['name' => 'Professional', 'slug' => 'professional', 'is_featured' => true]);
         Plan::factory()->public()->create(['name' => 'Enterprise', 'slug' => 'enterprise']);
@@ -33,6 +35,8 @@ class MarketingPricingTest extends TestCase
 
     public function test_pricing_page_includes_comparison_and_faq(): void
     {
+        Plan::withTrashed()->forceDelete();
+
         $plan = Plan::factory()->public()->create(['name' => 'Professional', 'slug' => 'professional']);
         $plan->features()->create(PlanFeature::factory()->make(['feature_key' => 'lead-management', 'feature_name' => 'Lead management'])->toArray());
 
