@@ -38,10 +38,8 @@ Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->grou
     Route::delete('/profile/sessions/{session}', [\App\Http\Controllers\ProfileSessionController::class, 'destroy'])->name('profile.sessions.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::middleware('can:access-company-settings')->group(function () {
-        Route::get('/company/settings', [CompanySettingsController::class, 'edit'])->name('company.settings.edit');
-        Route::patch('/company/settings', [CompanySettingsController::class, 'update'])->name('company.settings.update');
-    });
+    Route::get('/company/settings', [CompanySettingsController::class, 'edit'])->name('company.settings.edit');
+    Route::patch('/company/settings', [CompanySettingsController::class, 'update'])->name('company.settings.update');
 
     Route::get('/search', [GlobalSearchController::class, 'index'])
         ->middleware('throttle:60,1')

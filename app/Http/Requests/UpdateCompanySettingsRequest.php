@@ -10,7 +10,7 @@ class UpdateCompanySettingsRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user !== null && ($user->hasPermission('update.company_settings') || $user->role === 'admin');
+        return $user !== null && ($user->hasPermission('update.company_settings') || $user->isAdmin());
     }
 
     public function rules(): array
