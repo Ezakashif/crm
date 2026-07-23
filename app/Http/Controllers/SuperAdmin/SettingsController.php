@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SuperAdmin\UpdatePlatformSettingsRequest;
+use App\Models\Plan;
 use App\Services\ActivityLogger;
 use App\Services\SuperAdmin\PlatformLogoProcessor;
 use App\Services\SuperAdmin\PlatformSettingsService;
@@ -24,6 +25,8 @@ class SettingsController extends Controller
         return view('superadmin.settings.edit', [
             'settings' => $this->settings->all(),
             'logoUrl' => $this->settings->logoUrl('light') ?: $this->settings->logoUrl(),
+            'faviconUrl' => $this->settings->faviconUrl(),
+            'plans' => Plan::query()->active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -44,7 +47,18 @@ class SettingsController extends Controller
             );
         }
 
-        unset($validated['platform_logo'], $validated['remove_logo']);
+        if ($request->boolean('remove_favicon')) {
+            $this->deleteFavicon();
+            $validated['platform_favicon_path'] = null;
+        }
+
+        if ($request->hasFile('platform_favicon')) {
+            $this->ensurePublicStorageLink();
+            $this->deleteFavicon();
+            $validated['platform_favicon_path'] = $request->file('platform_favicon')->store('platform-favicons', 'public');
+        }
+
+        unset($validated['platform_logo'], $validated['remove_logo'], $validated['platform_favicon'], $validated['remove_favicon']);
 
         $registrationEnabled = $request->has('registration_enabled')
             ? $request->boolean('registration_enabled')
@@ -60,6 +74,7 @@ class SettingsController extends Controller
             'platform_name' => $validated['platform_name'],
             'default_timezone' => $validated['default_timezone'],
             'default_currency' => $validated['default_currency'],
+            'default_plan_id' => $validated['default_plan_id'] ?? null,
             'mail_from_name' => $validated['mail_from_name'] ?? null,
             'mail_from_address' => $validated['mail_from_address'] ?? null,
             'registration_enabled' => $registrationEnabled,
@@ -70,6 +85,9 @@ class SettingsController extends Controller
             'platform_logo_path' => array_key_exists('platform_logo_path', $validated)
                 ? $validated['platform_logo_path']
                 : $this->settings->get('platform_logo_path'),
+            'platform_favicon_path' => array_key_exists('platform_favicon_path', $validated)
+                ? $validated['platform_favicon_path']
+                : $this->settings->get('platform_favicon_path'),
         ]);
 
         $this->settings->applyBranding();
@@ -104,6 +122,15 @@ class SettingsController extends Controller
     private function deleteLogo(): void
     {
         $path = $this->settings->get('platform_logo_path');
+
+        if (filled($path) && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    private function deleteFavicon(): void
+    {
+        $path = $this->settings->get('platform_favicon_path');
 
         if (filled($path) && Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);

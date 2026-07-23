@@ -41,7 +41,10 @@ class CompanyProvisioner
             $slug = $data['slug'] ?? null;
             $slug = filled($slug) ? Str::slug((string) $slug) : Str::slug($data['name']);
 
-            $planId = $data['plan_id'] ?? Plan::default()?->id;
+            $configuredPlanId = $this->settings->getInt('default_plan_id', 0);
+            $planId = $data['plan_id']
+                ?? Plan::query()->active()->whereKey($configuredPlanId)->value('id')
+                ?? Plan::default()?->id;
             $subscriptionStatus = $data['subscription_status']
                 ?? Company::SUBSCRIPTION_TRIAL;
             $trialEndsAt = $data['trial_ends_at'] ?? null;

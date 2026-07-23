@@ -137,6 +137,17 @@ class PlatformSettingsService
         return asset($assetPath).'?v='.$version;
     }
 
+    public function faviconUrl(): ?string
+    {
+        $path = $this->get('platform_favicon_path');
+
+        if (filled($path) && is_file(public_path('storage/'.ltrim((string) $path, '/')))) {
+            return asset('storage/'.ltrim((string) $path, '/')).'?v='.filemtime(public_path('storage/'.ltrim((string) $path, '/')));
+        }
+
+        return null;
+    }
+
     /**
      * Apply platform branding and runtime settings (timezone, mail, currency).
      */
