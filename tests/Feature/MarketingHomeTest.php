@@ -13,6 +13,10 @@ class MarketingHomeTest extends TestCase
 
     public function test_guest_can_view_marketing_home(): void
     {
+        app(PlatformSettingsService::class)->setMany([
+            'trial_duration_days' => 14,
+        ]);
+
         $this->get(route('marketing.home'))
             ->assertOk()
             ->assertSee(config('marketing.home.headline'), false)
@@ -89,7 +93,7 @@ class MarketingHomeTest extends TestCase
 
         $response
             ->assertSee('Explore every part of the CRM', false)
-            ->assertSee('Workspace overview', false)
+            ->assertSee('marketing/screenshots/', false)
             ->assertDontSee('Screenshot placeholder', false)
             ->assertDontSee('Drop a real', false)
             ->assertSee('Business benefit', false)

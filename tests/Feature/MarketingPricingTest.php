@@ -37,7 +37,7 @@ class MarketingPricingTest extends TestCase
     {
         Plan::withTrashed()->forceDelete();
 
-        $plan = Plan::factory()->public()->create(['name' => 'Professional', 'slug' => 'professional']);
+        $plan = Plan::factory()->public()->create(['name' => 'Professional', 'slug' => 'professional', 'is_featured' => true]);
         $plan->features()->create(PlanFeature::factory()->make(['feature_key' => 'lead-management', 'feature_name' => 'Lead management'])->toArray());
 
         $this->get(route('marketing.pricing'))
