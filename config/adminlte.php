@@ -347,6 +347,7 @@ return [
             'text' => 'Notifications',
             'route' => 'notifications.index',
             'icon' => 'fas fa-fw fa-bell',
+            'can' => 'view.notifications',
         ],
         ['header' => 'Administration'],
         [

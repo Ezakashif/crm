@@ -37,3 +37,7 @@ Schedule::call(function () {
 Schedule::command('activity-logs:prune --days=90')
     ->weekly()
     ->name('activity-logs-prune');
+
+Schedule::command('notifications:prune')
+    ->weekly()
+    ->name('notifications-prune');
