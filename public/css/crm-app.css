@@ -2091,6 +2091,21 @@ body.crm-app .crm-image-crop.is-invalid .crm-image-crop__dropzone {
 .crm-notification-empty { margin: 0; padding: 1rem; color: #64748b; font-size: .875rem; }
 .crm-notification-popover__footer { display: block; padding: .75rem 1rem; color: var(--crm-primary); font-size: .8rem; font-weight: 700; text-align: center; text-decoration: none; }
 
+.crm-sidebar-notification-badge {
+    display: inline-flex;
+    min-width: 1.2rem;
+    height: 1.2rem;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    border-radius: 999px;
+    background: var(--crm-danger);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
 @media (max-width: 767.98px) {
     .crm-notification-dropdown {
         right: 6.25rem;
