@@ -4,7 +4,7 @@
 
 @php
     $destination = $href ?? route('marketing.home');
-    $brand = config('marketing.name');
+    $brand = app(\App\Services\SuperAdmin\PlatformSettingsService::class)->platformName();
 @endphp
 
 <a href="{{ $destination }}" {{ $attributes->merge(['class' => 'inline-flex items-center gap-2.5 no-underline']) }} aria-label="{{ $brand }} home">
