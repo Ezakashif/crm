@@ -15,7 +15,8 @@
     <x-marketing.json-ld type="organization" />
     <x-marketing.json-ld type="website" />
 
-    <link rel="icon" href="{{ asset('branding/algos-logo.svg') }}" type="image/svg+xml">
+    @php($platformFavicon = app(\App\Services\SuperAdmin\PlatformSettingsService::class)->faviconUrl())
+    <link rel="icon" href="{{ $platformFavicon ?: asset('branding/algos-logo.svg') }}" @if (! $platformFavicon) type="image/svg+xml" @endif>
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
     <link rel="preload" as="style" href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">

@@ -32,7 +32,15 @@
                             </label>
                         @endif
                         <input type="file" name="platform_logo" class="form-control-file text-white">
-                        <small class="sa-muted d-block mt-1">PNG/JPG/SVG accepted. Backgrounds are removed automatically. Tip: run <code>php artisan platform:optimize-logo --force-packaged</code> to install the official Algos logo.</small>
+                        <small class="sa-muted d-block mt-1">PNG, JPG, GIF, or WebP accepted. Backgrounds are removed automatically.</small>
+                    </div>
+                    <div class="form-group mt-4 mb-0">
+                        <label>Favicon</label>
+                        @if ($faviconUrl)
+                            <label class="sa-muted small d-block mb-2"><input type="checkbox" name="remove_favicon" value="1"> Remove favicon</label>
+                        @endif
+                        <input type="file" name="platform_favicon" class="form-control-file text-white" accept=".ico,.png,.svg">
+                        <small class="sa-muted d-block mt-1">ICO, PNG, or SVG up to 512 KB.</small>
                     </div>
                 </div>
 
@@ -75,6 +83,15 @@
                                 @endforeach
                             </select>
                         </div>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>Default subscription plan</label>
+                        <select name="default_plan_id" class="custom-select">
+                            <option value="">Use the plan marked default</option>
+                            @foreach ($plans as $plan)
+                                <option value="{{ $plan->id }}" @selected((string) old('default_plan_id', $settings['default_plan_id'] ?? '') === (string) $plan->id)>{{ $plan->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
