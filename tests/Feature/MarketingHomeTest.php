@@ -28,7 +28,7 @@ class MarketingHomeTest extends TestCase
             ->assertSee('Outcomes for every stage of the pipeline', false)
             ->assertSee('One connected workflow from first lead to clear decisions', false)
             ->assertSee('Lead created', false)
-            ->assertSee('Reports & analytics', false)
+            ->assertSeeText('Reports & analytics')
             ->assertSee('Why Algos', false)
             ->assertSee('The structure to grow without the CRM complexity', false)
             ->assertSee('Leave spreadsheets behind', false)
