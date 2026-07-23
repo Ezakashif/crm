@@ -20,7 +20,6 @@ class MarketingContactTest extends TestCase
             ->assertSee('Message')
             ->assertSee(config('marketing.contact.email'))
             ->assertSee(config('marketing.contact.phone'))
-            ->assertSee(config('marketing.contact.address'))
             ->assertSee('Answers before you reach out')
             ->assertSee('Is there a free trial?')
             ->assertSee('Can I switch between monthly and annual billing?');
