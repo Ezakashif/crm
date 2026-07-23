@@ -21,7 +21,10 @@ class MarketingContactTest extends TestCase
             ->assertSee('Google Maps placeholder')
             ->assertSee(config('marketing.contact.email'))
             ->assertSee(config('marketing.contact.phone'))
-            ->assertSee(config('marketing.contact.address'));
+            ->assertSee(config('marketing.contact.address'))
+            ->assertSee('Answers before you reach out')
+            ->assertSee('Is there a free trial?')
+            ->assertSee('Can I switch between monthly and annual billing?');
     }
 
     public function test_demo_intent_prefills_contact_page(): void
