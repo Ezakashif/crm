@@ -72,6 +72,12 @@ return [
                 'view_own' => 'View Own',
             ],
         ],
+        'company_settings' => [
+            'label' => 'Company Settings',
+            'actions' => [
+                'update' => 'Update',
+            ],
+        ],
         'reports' => [
             'label' => 'Reports',
             'actions' => [

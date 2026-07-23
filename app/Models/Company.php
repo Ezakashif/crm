@@ -44,6 +44,15 @@ class Company extends Model
         'email',
         'phone',
         'logo_path',
+        'address_line_1',
+        'address_line_2',
+        'city',
+        'state',
+        'postal_code',
+        'country',
+        'timezone',
+        'currency',
+        'business_hours',
         'owner_id',
         'plan_id',
         'status',
@@ -57,6 +66,7 @@ class Company extends Model
         return [
             'trial_ends_at' => 'datetime',
             'last_active_at' => 'datetime',
+            'business_hours' => 'array',
         ];
     }
 
