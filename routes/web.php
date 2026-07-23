@@ -48,9 +48,11 @@ Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->grou
         ->middleware('throttle:60,1')
         ->name('search.suggest');
 
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
-    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::middleware('permission:view.notifications')->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    });
 
     Route::get('/imports/{type}', [CsvImportController::class, 'create'])
         ->whereIn('type', ['leads', 'customers', 'users'])

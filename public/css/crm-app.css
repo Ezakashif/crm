@@ -2034,3 +2034,25 @@ body.crm-app .crm-image-crop.is-invalid .crm-image-crop__dropzone {
         height: 300px;
     }
 }
+
+/* Notification center */
+.crm-notification-list {
+    border: 1px solid var(--crm-border);
+    border-radius: var(--crm-radius-lg);
+    overflow: hidden;
+    background: #fff;
+}
+
+.crm-notification-item {
+    border-left: 3px solid transparent;
+    transition: background-color var(--crm-duration) var(--crm-ease);
+}
+
+.crm-notification-item.is-unread {
+    border-left-color: var(--crm-primary);
+    background: #eff6ff;
+}
+
+.crm-notification-item.is-read {
+    background: #fff;
+}
