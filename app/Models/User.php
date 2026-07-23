@@ -88,6 +88,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->hasMany(ActivityLog::class);
     }
 
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(UserNotificationPreference::class);
+    }
+
     public function isSuperAdmin(): bool
     {
         return (bool) $this->is_super_admin;

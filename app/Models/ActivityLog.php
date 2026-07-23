@@ -62,6 +62,7 @@ class ActivityLog extends Model
         'task.created' => 'Task created',
         'task.updated' => 'Task updated',
         'task.deleted' => 'Task deleted',
+        'task.assigned' => 'Task assigned',
         'task.status_changed' => 'Task status changed',
         'company.created' => 'Company created',
         'company.updated' => 'Company updated',
@@ -232,6 +233,7 @@ class ActivityLog extends Model
             'task.created' => sprintf('Created task %s', $properties['title'] ?? 'unknown'),
             'task.updated' => sprintf('Updated task %s', $properties['title'] ?? ($this->subject?->title ?? 'unknown')),
             'task.deleted' => sprintf('Deleted task %s', $properties['title'] ?? 'unknown'),
+            'task.assigned' => sprintf('Assigned task %s', $properties['title'] ?? ($this->subject?->title ?? 'unknown')),
             'task.status_changed' => sprintf(
                 'Task status changed from %s to %s',
                 $properties['from'] ?? 'unknown',

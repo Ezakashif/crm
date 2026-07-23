@@ -10,6 +10,7 @@ use App\Models\LeadActivity;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\CrmNotificationDispatcher;
 use App\Services\LeadListQueryService;
 use App\Services\PlanLimitService;
 use App\Support\CrmValidation;
@@ -21,6 +22,7 @@ class LeadController extends Controller
     public function __construct(
         protected LeadListQueryService $leadListQuery,
         protected PlanLimitService $planLimits,
+        protected CrmNotificationDispatcher $notifications,
     ) {}
 
     public function index(Request $request)
@@ -104,6 +106,8 @@ class LeadController extends Controller
                 'from' => null,
                 'to' => $lead->assignee?->name ?? 'Unassigned',
             ]);
+
+            $this->notifications->leadAssigned($lead, $user->id);
         }
 
         return redirect()->route('leads.show', $lead)->with('success', 'Lead created');
@@ -176,6 +180,8 @@ class LeadController extends Controller
                 'from' => $fromUser?->name,
                 'to' => $lead->assignee?->name ?? 'Unassigned',
             ]);
+
+            $this->notifications->leadAssigned($lead, $user->id);
         }
 
         return redirect()->route('leads.show', $lead)->with('success', 'Lead updated');
@@ -260,6 +266,10 @@ class LeadController extends Controller
                 'already_converted' => false,
             ];
         });
+
+        if (! $result['already_converted']) {
+            $this->notifications->customerCreated($result['customer']);
+        }
 
         return redirect()
             ->route('customers.show', $result['customer'])

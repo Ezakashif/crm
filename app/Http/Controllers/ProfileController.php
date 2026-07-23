@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\UpdateNotificationPreferencesRequest;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\Auth\SessionManager;
 use App\Services\SuperAdmin\PlatformSettingsService;
+use App\Services\UserNotificationPreferenceService;
 use App\Support\EmailVerification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,13 +23,16 @@ class ProfileController extends Controller
         private SessionManager $sessions,
     ) {}
 
-    public function edit(Request $request): View
+    public function edit(Request $request, UserNotificationPreferenceService $preferences): View
     {
         $user = $request->user();
 
         return view('profile.edit', [
             'user' => $user,
             'languages' => User::LANGUAGES,
+            'notificationPreferenceTypes' => $preferences->types(),
+            'notificationPreferenceChannels' => $preferences->channels(),
+            'notificationPreferences' => $preferences->forUser($user),
             'sessions' => $this->sessions->listForUser($user),
             'timezones' => timezone_identifiers_list(),
         ]);
@@ -76,6 +81,15 @@ class ProfileController extends Controller
         }
 
         return $redirect;
+    }
+
+    public function updateNotificationPreferences(
+        UpdateNotificationPreferencesRequest $request,
+        UserNotificationPreferenceService $preferences,
+    ): RedirectResponse {
+        $preferences->update($request->user(), $request->validated('preferences'));
+
+        return Redirect::route('profile.edit')->with('status', 'notification-preferences-updated');
     }
 
     public function updatePhoto(Request $request): RedirectResponse
