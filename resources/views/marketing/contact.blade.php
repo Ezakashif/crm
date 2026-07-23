@@ -177,15 +177,6 @@
                                     <a href="tel:{{ preg_replace('/[^\d+]/', '', $contact['phone']) }}" class="hover:text-sky-700">{{ $contact['phone'] }}</a>
                                 </div>
                             </li>
-                            <li class="flex items-start gap-3">
-                                <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
-                                    <x-marketing.icon name="map-pin" />
-                                </span>
-                                <div>
-                                    <div class="font-semibold text-slate-900">Office</div>
-                                    <p>{{ $contact['address'] }}</p>
-                                </div>
-                            </li>
                         </ul>
 
                         <div class="mt-6 border-t border-slate-100 pt-5">
