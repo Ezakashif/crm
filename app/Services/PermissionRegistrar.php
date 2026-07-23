@@ -31,6 +31,8 @@ class PermissionRegistrar
             'view.activity_logs',
             'view_own.activity_logs',
         ]));
+        Gate::define('access-company-settings', fn (User $user) => $user->role === 'admin'
+            || $user->hasPermission('update.company_settings'));
     }
 
     public function refreshGates(): void

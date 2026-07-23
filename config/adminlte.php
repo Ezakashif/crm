@@ -373,6 +373,12 @@ return [
             'icon' => 'fas fa-fw fa-history',
             'can' => 'access-activity-logs',
         ],
+        [
+            'text' => 'Company Settings',
+            'route' => 'company.settings.edit',
+            'icon' => 'fas fa-fw fa-building',
+            'can' => 'access-company-settings',
+        ],
         ['header' => 'Account'],
         [
             'text' => 'Profile',
