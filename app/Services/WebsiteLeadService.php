@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Validator;
 
 class WebsiteLeadService
 {
+    public function __construct(
+        protected CrmNotificationDispatcher $notifications,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -56,6 +60,8 @@ class WebsiteLeadService
             ActivityLogger::log('lead.created_via_website', $lead, [
                 'name' => $lead->name,
             ], $createdById);
+
+            $this->notifications->websiteLeadReceived($lead);
 
             $initialMessage = $validated['notes'] ?? $validated['message'] ?? null;
 

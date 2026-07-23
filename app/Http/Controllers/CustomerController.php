@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\Task;
 use App\Services\ActivityLogger;
+use App\Services\CrmNotificationDispatcher;
 use App\Services\CustomerListQueryService;
 use App\Services\CustomerTimelineService;
 use App\Services\PlanLimitService;
@@ -18,6 +19,7 @@ class CustomerController extends Controller
         protected CustomerListQueryService $customerListQuery,
         protected CustomerTimelineService $customerTimeline,
         protected PlanLimitService $planLimits,
+        protected CrmNotificationDispatcher $notifications,
     ) {}
 
     public function index(Request $request)
@@ -61,6 +63,8 @@ class CustomerController extends Controller
         ActivityLogger::log('customer.created', $customer, [
             'name' => $customer->name,
         ]);
+
+        $this->notifications->customerCreated($customer);
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer created successfully');

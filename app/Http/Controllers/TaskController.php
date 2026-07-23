@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\CrmNotificationDispatcher;
 use App\Services\TaskListQueryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -14,6 +15,7 @@ class TaskController extends Controller
 {
     public function __construct(
         protected TaskListQueryService $taskListQuery,
+        protected CrmNotificationDispatcher $notifications,
     ) {}
 
     public function index(Request $request)
@@ -97,6 +99,14 @@ class TaskController extends Controller
             'title' => $task->title,
         ]);
 
+        ActivityLogger::log('task.assigned', $task, [
+            'title' => $task->title,
+            'from_user_id' => null,
+            'to_user_id' => $task->assigned_to,
+        ]);
+
+        $this->notifications->taskAssigned($task, $user->id);
+
         return redirect()->route('tasks.index')
             ->with('success', 'Task created successfully');
     }
@@ -151,6 +161,7 @@ class TaskController extends Controller
         }
 
         $previousStatus = $task->status;
+        $previousAssigneeId = $task->assigned_to;
 
         $task->fill($validated);
 
@@ -171,6 +182,17 @@ class TaskController extends Controller
                 'from' => $previousStatus,
                 'to' => $task->status,
             ]);
+        }
+
+        if (array_key_exists('assigned_to', $validated)
+            && (int) $previousAssigneeId !== (int) $task->assigned_to) {
+            ActivityLogger::log('task.assigned', $task, [
+                'title' => $task->title,
+                'from_user_id' => $previousAssigneeId,
+                'to_user_id' => $task->assigned_to,
+            ]);
+
+            $this->notifications->taskAssigned($task, $request->user()->id);
         }
 
         return redirect()->route('tasks.index')
