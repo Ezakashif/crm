@@ -20,6 +20,15 @@
                     <div><label class="mk-label">Timezone</label><input class="mk-input" name="timezone" value="{{ old('timezone', $company->timezone) }}" placeholder="UTC"></div>
                     <div><label class="mk-label">Currency</label><input class="mk-input" name="currency" maxlength="3" value="{{ old('currency', $company->currency) }}" placeholder="USD"></div>
                 </div>
+                <div>
+                    <label class="mk-label">Business hours</label>
+                    <p class="mb-3 text-sm text-slate-500">Enter hours such as 09:00–17:00, or leave a day blank when closed.</p>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        @foreach (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day)
+                            <div><label class="mk-label text-sm">{{ ucfirst($day) }}</label><input class="mk-input" name="business_hours[{{ $day }}]" value="{{ old('business_hours.'.$day, $company->business_hours[$day] ?? '') }}" placeholder="09:00–17:00"></div>
+                        @endforeach
+                    </div>
+                </div>
                 <button class="btn btn-primary">Save company settings</button>
             </form>
         </div>
