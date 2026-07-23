@@ -202,6 +202,23 @@
         </div>
     </section>
 
+    <section class="mk-section mk-faq-section" aria-labelledby="contact-faq-heading">
+        <div class="mk-container">
+            <div class="mx-auto max-w-2xl text-center" data-mk-reveal>
+                <x-marketing.section-heading
+                    heading-id="contact-faq-heading"
+                    eyebrow="FAQ"
+                    title="Answers before you reach out"
+                    description="Everything from trials and billing to data, permissions, and ongoing support."
+                    align="center"
+                />
+            </div>
+            <div class="mx-auto mt-10 max-w-3xl" data-mk-reveal style="--mk-reveal-delay: 160ms">
+                <x-marketing.faq-accordion :items="$faqs" open="trial" class="mk-faq-surface" />
+            </div>
+        </div>
+    </section>
+
     <x-marketing.cta
         title="Prefer to explore on your own?"
         description="Start a free trial and invite your team when you’re ready."

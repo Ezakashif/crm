@@ -16,6 +16,10 @@ class ContactController extends Controller
     {
         return view('marketing.contact', [
             'intent' => request()->query('intent'),
+            'faqs' => array_merge(
+                config('marketing.home.faqs', []),
+                config('marketing.pricing.faqs', []),
+            ),
         ]);
     }
 
