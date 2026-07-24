@@ -2,17 +2,17 @@
 
 namespace App\Notifications;
 
+use App\Mail\TemplatedMail;
 use App\Notifications\Concerns\RendersTemplatedMail;
 use App\Support\EmailVerification;
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use App\Mail\TemplatedMail;
 
-class AccountActivationNotification extends BaseVerifyEmail implements ShouldQueue
+/**
+ * Sent synchronously — auth activation must not depend on a queue worker.
+ */
+class AccountActivationNotification extends BaseVerifyEmail
 {
-    use Queueable;
     use RendersTemplatedMail;
 
     /**

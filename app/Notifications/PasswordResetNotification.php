@@ -5,13 +5,13 @@ namespace App\Notifications;
 use App\Mail\TemplatedMail;
 use App\Notifications\Concerns\RendersTemplatedMail;
 use Illuminate\Auth\Notifications\ResetPassword as BaseResetPassword;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class PasswordResetNotification extends BaseResetPassword implements ShouldQueue
+/**
+ * Sent synchronously — password reset must not depend on a queue worker.
+ */
+class PasswordResetNotification extends BaseResetPassword
 {
-    use Queueable;
     use RendersTemplatedMail;
 
     /**

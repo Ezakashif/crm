@@ -109,6 +109,20 @@ class EmailTemplateManagementTest extends TestCase
         Notification::assertSentTo($user, PasswordResetNotification::class);
     }
 
+    public function test_account_activation_mailable_includes_recipient(): void
+    {
+        $user = User::factory()->unverified()->create([
+            'email' => 'activate-me@example.com',
+            'name' => 'Activate Me',
+        ]);
+
+        $mail = (new \App\Notifications\AccountActivationNotification)->toMail($user);
+
+        $this->assertInstanceOf(TemplatedMail::class, $mail);
+        $this->assertTrue($mail->hasTo('activate-me@example.com'));
+        $this->assertStringContainsString('Activate', $mail->envelope()->subject);
+    }
+
     public function test_lead_assignment_can_send_mail_channel(): void
     {
         Notification::fake();
