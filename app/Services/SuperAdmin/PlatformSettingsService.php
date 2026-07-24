@@ -209,6 +209,7 @@ class PlatformSettingsService
 
         $smtpHost = $this->get('smtp_host');
         if (filled($smtpHost)) {
+            $smtpHost = $this->normalizeSmtpHost((string) $smtpHost);
             $smtpEncryption = $this->get('smtp_encryption');
             config([
                 'mail.default' => 'smtp',
@@ -237,6 +238,12 @@ class PlatformSettingsService
         config([
             'adminlte.register_url' => $this->getBool('registration_enabled') ? 'register' : false,
         ]);
+
+        // Normalize .env MAIL_HOST as well (common typo: smpt.gmail.com).
+        $envHost = config('mail.mailers.smtp.host');
+        if (filled($envHost)) {
+            config(['mail.mailers.smtp.host' => $this->normalizeSmtpHost((string) $envHost)]);
+        }
     }
 
     public function announcement(): ?string
@@ -244,5 +251,14 @@ class PlatformSettingsService
         $value = $this->get('broadcast_announcement');
 
         return filled($value) ? (string) $value : null;
+    }
+
+    private function normalizeSmtpHost(string $host): string
+    {
+        $host = strtolower(trim($host));
+        $host = preg_replace('#^(smtp|smtps)://#', '', $host) ?? $host;
+        $host = rtrim($host, '/');
+
+        return preg_replace('/^smpt\./', 'smtp.', $host) ?? $host;
     }
 }
