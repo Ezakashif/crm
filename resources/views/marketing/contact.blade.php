@@ -56,6 +56,12 @@
                         </div>
                     @endif
 
+                    @if (session('warning'))
+                        <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+                            {{ session('warning') }}
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('marketing.contact.store') }}" class="mt-6 space-y-5" novalidate>
                         @csrf
                         <input type="hidden" name="intent" value="{{ old('intent', $intent) }}">

@@ -41,6 +41,12 @@
                     <p class="mk-lead mb-6 text-sm">{{ $subheading }}</p>
                 @endisset
 
+                @if (session('warning'))
+                    <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+                        {{ session('warning') }}
+                    </div>
+                @endif
+
                 {{ $slot }}
             </div>
         </main>

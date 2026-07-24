@@ -3,9 +3,12 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Support\RateLimitResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -45,6 +48,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (ThrottleRequestsException|TooManyRequestsHttpException $e, Request $request) {
+            return RateLimitResponse::fromException($e, $request);
+        });
+
         // TokenMismatchException is prepared into an HttpException(419) before render.
         $exceptions->render(function (HttpException $e, Request $request) {
             if ($e->getStatusCode() !== 419) {
