@@ -147,11 +147,13 @@ class PlatformAlertNotificationService
      */
     private function fingerprint(array $alert): string
     {
-        return hash('sha256', json_encode($this->sortRecursively([
+        $payload = $this->sortRecursively([
             'type' => $alert['type'],
             'severity' => $alert['severity'],
             'meta' => $alert['meta'] ?? [],
-        ], JSON_THROW_ON_ERROR));
+        ]);
+
+        return hash('sha256', json_encode($payload, JSON_THROW_ON_ERROR));
     }
 
     /**
