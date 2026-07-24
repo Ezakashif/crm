@@ -9,6 +9,7 @@ use App\Http\Controllers\SuperAdmin\DashboardController;
 use App\Http\Controllers\SuperAdmin\ImpersonationController;
 use App\Http\Controllers\SuperAdmin\PlanController;
 use App\Http\Controllers\SuperAdmin\SearchController;
+use App\Http\Controllers\SuperAdmin\EmailTemplateController;
 use App\Http\Controllers\SuperAdmin\SettingsController;
 use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
 use Illuminate\Support\Facades\Route;
@@ -82,4 +83,11 @@ Route::middleware(['auth', 'active', 'superadmin'])
         Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::put('settings/announcement', [SettingsController::class, 'announcement'])->name('settings.announcement');
+
+        Route::get('email-templates/{email_template}/preview', [EmailTemplateController::class, 'preview'])
+            ->name('email-templates.preview');
+        Route::post('email-templates/{email_template}/test', [EmailTemplateController::class, 'sendTest'])
+            ->middleware('throttle:10,1')
+            ->name('email-templates.test');
+        Route::resource('email-templates', EmailTemplateController::class)->except(['show']);
     });

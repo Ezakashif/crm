@@ -18,6 +18,9 @@
                     <a href="{{ route('imports.create', 'users') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-file-upload" aria-hidden="true"></i> Import CSV
                     </a>
+                    <a href="{{ route('users.invite.create') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-envelope" aria-hidden="true"></i> Invite
+                    </a>
                     <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus" aria-hidden="true"></i> Add User
                     </a>

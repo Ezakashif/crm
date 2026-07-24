@@ -3,22 +3,21 @@
 namespace App\Notifications;
 
 use App\Mail\TemplatedMail;
-use App\Models\User;
+use App\Models\Company;
 use App\Notifications\Concerns\RendersTemplatedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class UserStatusChanged extends Notification implements ShouldQueue
+class TrialEndingNotification extends Notification implements ShouldQueue
 {
     use Queueable;
     use RendersTemplatedMail;
 
     public function __construct(
-        public string $oldStatus,
-        public string $newStatus,
-        public User $changedBy,
+        public Company $company,
+        public int $daysRemaining,
     ) {}
 
     public function via(object $notifiable): array
@@ -31,11 +30,12 @@ class UserStatusChanged extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage|TemplatedMail
     {
-        return $this->templatedMail($notifiable, 'user_status_changed', [
+        return $this->templatedMail($notifiable, 'trial_ending', [
             'user_name' => $notifiable->name,
-            'old_status' => ucfirst($this->oldStatus),
-            'new_status' => ucfirst($this->newStatus),
-            'changed_by' => $this->changedBy->name,
+            'company_name' => $this->company->name,
+            'trial_ends_at' => $this->company->trial_ends_at?->format('M j, Y') ?? '',
+            'days_remaining' => (string) $this->daysRemaining,
+            'billing_url' => route('dashboard'),
         ]);
     }
 }

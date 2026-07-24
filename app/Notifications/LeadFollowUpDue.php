@@ -2,8 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Mail\TemplatedMail;
 use App\Models\Lead;
-use App\Services\UserNotificationPreferenceService;
+use App\Notifications\Concerns\RendersTemplatedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,6 +13,7 @@ use Illuminate\Notifications\Notification;
 class LeadFollowUpDue extends Notification implements ShouldQueue
 {
     use Queueable;
+    use RendersTemplatedMail;
 
     public function __construct(
         public Lead $lead,
@@ -20,45 +22,27 @@ class LeadFollowUpDue extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        $preferences = app(UserNotificationPreferenceService::class);
-        $channels = [];
-
-        foreach (['mail', 'database'] as $channel) {
-            $preferenceChannel = $channel === 'mail' ? 'email' : $channel;
-
-            if ($preferences->isEnabled($notifiable, self::class, $preferenceChannel)) {
-                $channels[] = $channel;
-            }
-        }
-
-        return $channels;
+        return $this->channelsFromPreferences($notifiable, self::class);
     }
 
-    public function toMail(object $notifiable): MailMessage
+    /**
+     * @return MailMessage|TemplatedMail
+     */
+    public function toMail(object $notifiable): MailMessage|TemplatedMail
     {
         [$subject, $line] = $this->copy();
 
-        $message = (new MailMessage)
-            ->subject($subject.': '.$this->lead->name)
-            ->greeting('Hello '.$notifiable->name.'!')
-            ->line($line)
-            ->line('Lead: '.$this->lead->name);
-
-        if (filled($this->lead->company)) {
-            $message->line('Company: '.$this->lead->company);
-        }
-
-        if (filled($this->lead->phone)) {
-            $message->line('Phone: '.$this->lead->phone);
-        }
-
-        if (filled($this->lead->email)) {
-            $message->line('Email: '.$this->lead->email);
-        }
-
-        return $message
-            ->action('View Lead', route('leads.show', $this->lead))
-            ->line('Log your contact in the CRM after reaching out.');
+        return $this->templatedMail($notifiable, 'lead_follow_up', [
+            'user_name' => $notifiable->name,
+            'lead_name' => $this->lead->name,
+            'lead_company' => $this->lead->company ?? '—',
+            'lead_email' => $this->lead->email ?? '—',
+            'lead_phone' => $this->lead->phone ?? '—',
+            'follow_up_date' => $this->lead->follow_up_date?->format('M j, Y') ?? 'unknown date',
+            'subject_line' => $subject,
+            'body_line' => $line,
+            'lead_url' => route('leads.show', $this->lead),
+        ]);
     }
 
     public function toArray(object $notifiable): array

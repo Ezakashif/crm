@@ -11,6 +11,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserInvitationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\NotificationController;
@@ -96,6 +97,10 @@ Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->grou
         ->name('tasks.board.update');
 
     Route::resource('users', UserController::class);
+    Route::get('/users-invite/create', [UserInvitationController::class, 'create'])
+        ->name('users.invite.create');
+    Route::post('/users-invite', [UserInvitationController::class, 'store'])
+        ->name('users.invite.store');
     Route::post('/users/{user}/status', [UserController::class, 'changeStatus'])
         ->name('users.status');
 

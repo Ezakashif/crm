@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RbacSeeder::class);
+        $this->call(EmailTemplateSeeder::class);
 
         User::factory()->superAdmin()->create([
             'name' => 'Super Admin',

@@ -59,7 +59,7 @@ class MarketingContactTest extends TestCase
             ->assertRedirect(route('marketing.contact', ['intent' => 'demo']))
             ->assertSessionHas('status');
 
-        Mail::assertSent(ContactInquiryMail::class, function (ContactInquiryMail $mail) use ($payload) {
+        Mail::assertQueued(ContactInquiryMail::class, function (ContactInquiryMail $mail) use ($payload) {
             return $mail->inquiry['email'] === $payload['email']
                 && $mail->inquiry['intent'] === 'demo'
                 && $mail->hasTo(config('marketing.contact.email'));

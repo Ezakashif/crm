@@ -6,7 +6,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Models\ActivityLog;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\PasswordResetNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -40,7 +40,7 @@ class PasswordResetTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertSessionHas('status', PasswordResetLinkController::REQUEST_STATUS_MESSAGE);
 
-        Notification::assertSentTo($user, ResetPassword::class);
+        Notification::assertSentTo($user, PasswordResetNotification::class);
 
         $this->assertDatabaseHas('activity_logs', [
             'user_id' => $user->id,
@@ -75,7 +75,7 @@ class PasswordResetTest extends TestCase
             'email' => $user->email,
         ]);
 
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
+        Notification::assertSentTo($user, PasswordResetNotification::class, function ($notification) {
             $response = $this->get('/reset-password/'.$notification->token);
 
             $response->assertStatus(200);
@@ -106,7 +106,7 @@ class PasswordResetTest extends TestCase
             'email' => $user->email,
         ]);
 
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+        Notification::assertSentTo($user, PasswordResetNotification::class, function ($notification) use ($user) {
             $oldRememberToken = $user->fresh()->remember_token;
 
             $response = $this->post('/reset-password', [
@@ -170,7 +170,7 @@ class PasswordResetTest extends TestCase
             'email' => $user->email,
         ]);
 
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+        Notification::assertSentTo($user, PasswordResetNotification::class, function ($notification) use ($user) {
             $response = $this->from('/reset-password/'.$notification->token)->post('/reset-password', [
                 'token' => $notification->token,
                 'email' => $user->email,

@@ -6,7 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\User;
 use App\Services\SuperAdmin\PlatformSettingsService;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\AccountActivationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
@@ -88,7 +88,7 @@ class EmailVerificationTest extends TestCase
             ->assertSessionHas('status', 'verification-link-sent')
             ->assertSessionHas('verification_preview_url');
 
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, AccountActivationNotification::class);
 
         $this->assertTrue(
             ActivityLog::withoutCompanyScope()
@@ -143,7 +143,8 @@ class EmailVerificationTest extends TestCase
 
         $this->assertNotNull($user);
         $this->assertTrue($user->hasVerifiedEmail());
-        Notification::assertNothingSent();
+        Notification::assertSentTo($user, \App\Notifications\WelcomeNotification::class);
+        Notification::assertNotSentTo($user, AccountActivationNotification::class);
     }
 
     public function test_public_registration_requires_verification_when_enabled(): void
@@ -167,7 +168,7 @@ class EmailVerificationTest extends TestCase
 
         $this->assertNotNull($user);
         $this->assertFalse($user->hasVerifiedEmail());
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, AccountActivationNotification::class);
 
         $this->actingAs($user)
             ->get(route('dashboard'))

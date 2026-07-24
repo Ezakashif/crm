@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Notifications\WelcomeNotification;
 use App\Services\ActivityLogger;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -28,6 +29,9 @@ class VerifyEmailController extends Controller
                 'email' => $user->email,
                 'user_agent' => $request->userAgent(),
             ], $user->id);
+
+            $companyName = $user->company?->name ?? config('app.name');
+            $user->notify(new WelcomeNotification($companyName));
         }
 
         return redirect()

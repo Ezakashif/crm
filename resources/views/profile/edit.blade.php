@@ -176,7 +176,7 @@
                     <div class="card-body">
                         <x-form-section
                             title="Notification preferences"
-                            description="Choose how you receive CRM notifications. In-app notifications are available now; email preferences are saved for future delivery."
+                            description="Choose how you receive CRM notifications for in-app and email delivery."
                         >
                             <div class="table-responsive">
                                 <table class="table table-sm mb-0">

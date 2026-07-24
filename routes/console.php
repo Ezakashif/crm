@@ -57,6 +57,10 @@ Schedule::command('platform:send-alert-notifications')
     ->withoutOverlapping()
     ->name('platform-alert-notifications');
 
+Schedule::command('trials:send-ending-notifications --days=3')
+    ->dailyAt('09:00')
+    ->name('trial-ending-notifications');
+
 Schedule::command('activity-logs:prune --days=90')
     ->weekly()
     ->name('activity-logs-prune');

@@ -3,22 +3,19 @@
 namespace App\Notifications;
 
 use App\Mail\TemplatedMail;
-use App\Models\User;
 use App\Notifications\Concerns\RendersTemplatedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class UserStatusChanged extends Notification implements ShouldQueue
+class WelcomeNotification extends Notification implements ShouldQueue
 {
     use Queueable;
     use RendersTemplatedMail;
 
     public function __construct(
-        public string $oldStatus,
-        public string $newStatus,
-        public User $changedBy,
+        public string $companyName,
     ) {}
 
     public function via(object $notifiable): array
@@ -31,11 +28,11 @@ class UserStatusChanged extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage|TemplatedMail
     {
-        return $this->templatedMail($notifiable, 'user_status_changed', [
+        return $this->templatedMail($notifiable, 'welcome', [
             'user_name' => $notifiable->name,
-            'old_status' => ucfirst($this->oldStatus),
-            'new_status' => ucfirst($this->newStatus),
-            'changed_by' => $this->changedBy->name,
+            'user_email' => $notifiable->email,
+            'company_name' => $this->companyName,
+            'login_url' => route('login'),
         ]);
     }
 }

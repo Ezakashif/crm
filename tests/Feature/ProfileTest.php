@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Services\SuperAdmin\PlatformSettingsService;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\AccountActivationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -63,7 +63,7 @@ class ProfileTest extends TestCase
         $this->assertSame('America/New_York', $user->timezone);
         $this->assertSame('en', $user->language);
         $this->assertNull($user->email_verified_at);
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, AccountActivationNotification::class);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void

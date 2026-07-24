@@ -2,12 +2,19 @@
 
 namespace App\Notifications;
 
+use App\Mail\TemplatedMail;
 use App\Models\Task;
-use App\Services\UserNotificationPreferenceService;
+use App\Notifications\Concerns\RendersTemplatedMail;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TaskDue extends Notification
+class TaskDue extends Notification implements ShouldQueue
 {
+    use Queueable;
+    use RendersTemplatedMail;
+
     public function __construct(
         public Task $task,
         public string $tier,
@@ -15,9 +22,24 @@ class TaskDue extends Notification
 
     public function via(object $notifiable): array
     {
-        return app(UserNotificationPreferenceService::class)->isEnabled($notifiable, self::class, 'database')
-            ? ['database']
-            : [];
+        return $this->channelsFromPreferences($notifiable, self::class);
+    }
+
+    /**
+     * @return MailMessage|TemplatedMail
+     */
+    public function toMail(object $notifiable): MailMessage|TemplatedMail
+    {
+        $isOverdue = $this->tier === 'overdue';
+        $dueDate = $this->task->due_date?->format('M j, Y') ?? 'unknown date';
+
+        return $this->templatedMail($notifiable, 'task_reminder', [
+            'user_name' => $notifiable->name,
+            'task_title' => $this->task->title,
+            'due_date' => $dueDate,
+            'tier_label' => $isOverdue ? 'Task overdue' : 'Task due today',
+            'task_url' => route('tasks.show', $this->task),
+        ]);
     }
 
     public function toArray(object $notifiable): array

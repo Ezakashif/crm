@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Notifications\WelcomeNotification;
 use App\Services\CompanyProvisioner;
 use App\Services\SuperAdmin\PlatformSettingsService;
 use App\Support\EmailVerification;
@@ -83,6 +84,8 @@ class RegisteredUserController extends Controller
 
             return $redirect;
         }
+
+        $admin->notify(new WelcomeNotification($result['company']->name));
 
         return redirect()
             ->route('dashboard')

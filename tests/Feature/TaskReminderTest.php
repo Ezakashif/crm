@@ -85,7 +85,7 @@ class TaskReminderTest extends TestCase
 
         $user = User::factory()->create(['status' => 'active']);
         app(UserNotificationPreferenceService::class)->update($user, [
-            'task_due' => ['database' => false],
+            'task_due' => ['database' => false, 'email' => false],
         ]);
         Task::factory()->create([
             'company_id' => $user->company_id,

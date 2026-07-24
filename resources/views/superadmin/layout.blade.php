@@ -43,6 +43,9 @@
         <a href="{{ route('superadmin.super-admins.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.super-admins.*') ? 'active' : '' }}">
             <i class="fas fa-user-shield" aria-hidden="true"></i> Super Admins
         </a>
+        <a href="{{ route('superadmin.email-templates.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.email-templates.*') ? 'active' : '' }}">
+            <i class="fas fa-envelope-open-text" aria-hidden="true"></i> Email Templates
+        </a>
         <a href="{{ route('superadmin.settings.edit') }}" class="sa-nav-link {{ request()->routeIs('superadmin.settings.*') ? 'active' : '' }}">
             <i class="fas fa-cog" aria-hidden="true"></i> Settings
         </a>

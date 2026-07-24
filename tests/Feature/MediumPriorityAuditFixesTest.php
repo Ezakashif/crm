@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Models\Company;
 use App\Models\User;
 use Database\Seeders\RbacSeeder;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\PasswordResetNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -36,7 +36,7 @@ class MediumPriorityAuditFixesTest extends TestCase
             'email' => 'reset-me@example.com',
         ])->assertSessionHas('status');
 
-        Notification::assertSentTo($user, ResetPassword::class);
+        Notification::assertSentTo($user, PasswordResetNotification::class);
 
         $token = Password::broker()->createToken($user);
 
