@@ -51,8 +51,8 @@ class SearchController extends Controller
                 'email' => $user->email,
                 'company' => $user->company?->name,
                 'is_super_admin' => $user->is_super_admin,
-                'url' => $user->company_id
-                    ? route('superadmin.companies.show', $user->company_id)
+                'url' => $user->company
+                    ? route('superadmin.companies.show', $user->company)
                     : route('superadmin.super-admins.index'),
             ]),
         ]);

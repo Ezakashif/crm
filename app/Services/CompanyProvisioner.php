@@ -108,7 +108,7 @@ class CompanyProvisioner
         $candidate = $slug;
         $i = 1;
 
-        while (Company::query()->where('slug', $candidate)->exists()) {
+        while (Company::withTrashed()->where('slug', $candidate)->exists()) {
             $candidate = $slug.'-'.$i;
             $i++;
         }

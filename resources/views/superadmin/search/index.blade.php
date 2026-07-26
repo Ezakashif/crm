@@ -44,8 +44,8 @@
                             {{ $user->email }}
                             · {{ $user->is_super_admin ? 'Super Admin' : ($user->company?->name ?? 'No company') }}
                         </div>
-                        @if ($user->company_id)
-                            <a href="{{ route('superadmin.companies.show', $user->company_id) }}" class="small">View company</a>
+                        @if ($user->company)
+                            <a href="{{ route('superadmin.companies.show', $user->company) }}" class="small">View company</a>
                         @endif
                     </div>
                 @empty
