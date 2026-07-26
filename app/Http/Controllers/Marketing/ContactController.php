@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Marketing;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Marketing\ContactRequest;
 use App\Mail\Marketing\ContactInquiryMail;
+use App\Services\SuperAdmin\PlatformSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -23,7 +24,7 @@ class ContactController extends Controller
         ]);
     }
 
-    public function store(ContactRequest $request): RedirectResponse
+    public function store(ContactRequest $request, PlatformSettingsService $settings): RedirectResponse
     {
         $inquiry = $request->safe()->only([
             'name',
@@ -36,8 +37,11 @@ class ContactController extends Controller
 
         Log::info('marketing.contact.inquiry', $inquiry);
 
-        Mail::to(config('marketing.contact.email'))
-            ->send(new ContactInquiryMail($inquiry));
+        $to = filled($settings->get('company_email'))
+            ? (string) $settings->get('company_email')
+            : (string) config('marketing.contact.email');
+
+        Mail::to($to)->send(new ContactInquiryMail($inquiry));
 
         return redirect()
             ->route('marketing.contact', array_filter([

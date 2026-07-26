@@ -30,6 +30,7 @@ return [
     'social' => [
         'twitter' => env('MARKETING_SOCIAL_TWITTER', '#'),
         'linkedin' => env('MARKETING_SOCIAL_LINKEDIN', '#'),
+        'facebook' => env('MARKETING_SOCIAL_FACEBOOK'),
         'github' => env('MARKETING_SOCIAL_GITHUB', '#'),
     ],
 

@@ -31,6 +31,7 @@ class UpdatePlatformSettingsRequest extends FormRequest
             'mail_from_address' => ['nullable', 'email', 'max:255'],
             'company_email' => ['nullable', 'email', 'max:255'],
             'company_phone' => ['nullable', 'string', 'max:50'],
+            'company_address' => ['nullable', 'string', 'max:500'],
             'company_linkedin_url' => ['nullable', 'url', 'max:255'],
             'company_facebook_url' => ['nullable', 'url', 'max:255'],
             'company_twitter_url' => ['nullable', 'url', 'max:255'],

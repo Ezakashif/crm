@@ -5,14 +5,19 @@
 @php
     $brand = config('marketing.name');
     $contact = config('marketing.contact');
-    $social = array_values(array_filter(config('marketing.social', [])));
+    $social = array_values(array_filter(
+        config('marketing.social', []),
+        fn ($url) => filled($url) && $url !== '#'
+    ));
+    $logoUrl = app(\App\Services\SuperAdmin\PlatformSettingsService::class)->logoUrl()
+        ?: url('/branding/algos-logo.png');
 
     $organization = [
         '@context' => 'https://schema.org',
         '@type' => 'Organization',
         'name' => $brand,
         'url' => url('/'),
-        'logo' => url('/branding/algos-logo.png'),
+        'logo' => $logoUrl,
         'email' => $contact['email'] ?? null,
         'telephone' => $contact['phone'] ?? null,
         'address' => [

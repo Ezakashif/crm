@@ -79,6 +79,7 @@ class SettingsController extends Controller
             'mail_from_address' => $validated['mail_from_address'] ?? null,
             'company_email' => $validated['company_email'] ?? null,
             'company_phone' => $validated['company_phone'] ?? null,
+            'company_address' => $validated['company_address'] ?? null,
             'company_linkedin_url' => $validated['company_linkedin_url'] ?? null,
             'company_facebook_url' => $validated['company_facebook_url'] ?? null,
             'company_twitter_url' => $validated['company_twitter_url'] ?? null,

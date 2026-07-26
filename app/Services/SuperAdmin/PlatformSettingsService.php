@@ -239,6 +239,8 @@ class PlatformSettingsService
             'adminlte.register_url' => $this->getBool('registration_enabled') ? 'register' : false,
         ]);
 
+        $this->applyMarketingContactDetails();
+
         // Normalize .env MAIL_HOST as well (common typo: smpt.gmail.com).
         $envHost = config('mail.mailers.smtp.host');
         if (filled($envHost)) {
@@ -251,6 +253,36 @@ class PlatformSettingsService
         $value = $this->get('broadcast_announcement');
 
         return filled($value) ? (string) $value : null;
+    }
+
+    /**
+     * Overlay Super Admin company contact / social settings onto marketing config
+     * so footer, contact page, SEO, and mail all share the same public details.
+     */
+    private function applyMarketingContactDetails(): void
+    {
+        $brand = $this->platformName();
+        $contact = config('marketing.contact', []);
+        $social = config('marketing.social', []);
+
+        $email = $this->get('company_email');
+        $phone = $this->get('company_phone');
+        $address = $this->get('company_address');
+        $linkedin = $this->get('company_linkedin_url');
+        $facebook = $this->get('company_facebook_url');
+        $twitter = $this->get('company_twitter_url');
+        $github = $this->get('company_github_url');
+
+        config([
+            'marketing.name' => $brand,
+            'marketing.contact.email' => filled($email) ? (string) $email : ($contact['email'] ?? null),
+            'marketing.contact.phone' => filled($phone) ? (string) $phone : ($contact['phone'] ?? null),
+            'marketing.contact.address' => filled($address) ? (string) $address : ($contact['address'] ?? null),
+            'marketing.social.linkedin' => filled($linkedin) ? (string) $linkedin : ($social['linkedin'] ?? null),
+            'marketing.social.facebook' => filled($facebook) ? (string) $facebook : ($social['facebook'] ?? null),
+            'marketing.social.twitter' => filled($twitter) ? (string) $twitter : ($social['twitter'] ?? null),
+            'marketing.social.github' => filled($github) ? (string) $github : ($social['github'] ?? null),
+        ]);
     }
 
     private function normalizeSmtpHost(string $host): string

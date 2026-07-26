@@ -57,6 +57,10 @@
                             <input type="text" name="company_phone" value="{{ old('company_phone', $settings['company_phone'] ?? config('marketing.contact.phone')) }}" class="form-control">
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label>Company address</label>
+                        <input type="text" name="company_address" value="{{ old('company_address', $settings['company_address'] ?? config('marketing.contact.address')) }}" class="form-control" maxlength="500">
+                    </div>
                     <div class="form-row mb-0">
                         <div class="form-group col-md-4">
                             <label>LinkedIn URL</label>

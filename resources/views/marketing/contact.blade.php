@@ -1,19 +1,12 @@
 @php
     $contact = config('marketing.contact');
     $social = config('marketing.social');
-    $platformSettings = app(\App\Services\SuperAdmin\PlatformSettingsService::class);
-    $contact['email'] = $platformSettings->get('company_email', $contact['email']);
-    $contact['phone'] = $platformSettings->get('company_phone', $contact['phone']);
-    $social['linkedin'] = $platformSettings->get('company_linkedin_url', $social['linkedin']);
-    $social['facebook'] = $platformSettings->get('company_facebook_url', null);
-    $social['twitter'] = $platformSettings->get('company_twitter_url', $social['twitter']);
-    $social['github'] = $platformSettings->get('company_github_url', $social['github']);
     $brand = config('marketing.name');
     $trialRoute = config('marketing.cta.trial_route', 'register');
     $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
     $isDemo = ($intent ?? null) === 'demo';
     $defaultMessage = $isDemo
-        ? 'Hi—I’d like to book a demo of Algos for our team.'
+        ? 'Hi—I’d like to book a demo of '.$brand.' for our team.'
         : old('message');
 @endphp
 
@@ -184,25 +177,35 @@
                                     <a href="tel:{{ preg_replace('/[^\d+]/', '', $contact['phone']) }}" class="hover:text-sky-700">{{ $contact['phone'] }}</a>
                                 </div>
                             </li>
+                            @if (filled($contact['address'] ?? null))
+                                <li class="flex items-start gap-3">
+                                    <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+                                        <x-marketing.icon name="map-pin" />
+                                    </span>
+                                    <div>
+                                        <div class="font-semibold text-slate-900">Address</div>
+                                        <div>{{ $contact['address'] }}</div>
+                                    </div>
+                                </li>
+                            @endif
                         </ul>
 
                         <div class="mt-6 border-t border-slate-100 pt-5">
-                            <div class="text-sm font-semibold text-slate-900">Follow Algos</div>
+                            <div class="text-sm font-semibold text-slate-900">Follow {{ $brand }}</div>
                             <div class="mt-3 flex items-center gap-2">
-                                <a href="{{ $social['linkedin'] }}" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-sky-50 hover:text-sky-700" aria-label="LinkedIn">
-                                    <x-marketing.icon name="linkedin" />
-                                </a>
-                                @if ($social['facebook'])
-                                    <a href="{{ $social['facebook'] }}" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-sky-50 hover:text-sky-700" aria-label="Facebook">
-                                        <x-marketing.icon name="facebook" />
-                                    </a>
-                                @endif
-                                <a href="{{ $social['twitter'] }}" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-sky-50 hover:text-sky-700" aria-label="X / Twitter">
-                                    <x-marketing.icon name="twitter" />
-                                </a>
-                                <a href="{{ $social['github'] }}" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-sky-50 hover:text-sky-700" aria-label="GitHub">
-                                    <x-marketing.icon name="github" />
-                                </a>
+                                @foreach ([
+                                    'linkedin' => 'LinkedIn',
+                                    'facebook' => 'Facebook',
+                                    'twitter' => 'X / Twitter',
+                                    'github' => 'GitHub',
+                                ] as $network => $label)
+                                    @php($url = trim((string) ($social[$network] ?? '')))
+                                    @if ($url !== '' && $url !== '#')
+                                        <a href="{{ $url }}" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-sky-50 hover:text-sky-700" aria-label="{{ $label }}" rel="noopener noreferrer" target="_blank">
+                                            <x-marketing.icon :name="$network" />
+                                        </a>
+                                    @endif
+                                @endforeach
                             </div>
                         </div>
                     </div>
