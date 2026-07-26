@@ -64,6 +64,11 @@ class AppServiceProvider extends ServiceProvider
                 ->by($request->ip());
         });
 
+        RateLimiter::for('channel-webhooks', function (Request $request) {
+            return Limit::perMinute((int) config('channels.webhooks.rate_limit', 60))
+                ->by($request->ip().'|'.(string) $request->route('uuid'));
+        });
+
         $this->applyPlatformBranding();
     }
 

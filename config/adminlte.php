@@ -351,6 +351,12 @@ return [
         ],
         ['header' => 'Administration'],
         [
+            'text' => 'Channels',
+            'route' => 'channels.index',
+            'icon' => 'fas fa-fw fa-plug',
+            'can' => 'view.channels',
+        ],
+        [
             'text' => 'Website Lead Demo',
             'route' => 'demo.website-lead',
             'icon' => 'fas fa-fw fa-globe',

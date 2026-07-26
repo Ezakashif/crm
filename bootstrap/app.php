@@ -43,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'webhooks/leads/website',
+            'webhooks/channels/*',
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));

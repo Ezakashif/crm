@@ -19,10 +19,16 @@ use App\Http\Controllers\WebsiteLeadDemoController;
 use App\Http\Controllers\CsvImportController;
 use App\Http\Controllers\CsvExportController;
 use App\Http\Controllers\WebsiteLeadWebhookController;
+use App\Http\Controllers\ChannelConnectionController;
+use App\Http\Controllers\ChannelWebhookController;
 
 Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'store'])
     ->middleware(['website-lead-webhook', 'throttle:website-leads'])
     ->name('webhooks.leads.website');
+
+Route::post('/webhooks/channels/{uuid}', [ChannelWebhookController::class, 'inbound'])
+    ->middleware(['throttle:channel-webhooks'])
+    ->name('webhooks.channels.inbound');
 
 require __DIR__.'/marketing.php';
 
@@ -106,6 +112,19 @@ Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->grou
         ->name('users.status');
 
     Route::resource('roles', RoleController::class)->except(['show']);
+
+    Route::resource('channels', ChannelConnectionController::class)
+        ->only(['index', 'create', 'store', 'show', 'destroy']);
+    Route::post('/channels/{channel}/test', [ChannelConnectionController::class, 'test'])
+        ->name('channels.test');
+    Route::post('/channels/{channel}/sync', [ChannelConnectionController::class, 'sync'])
+        ->name('channels.sync');
+    Route::post('/channels/{channel}/retry', [ChannelConnectionController::class, 'retry'])
+        ->name('channels.retry');
+    Route::post('/channels/{channel}/disconnect', [ChannelConnectionController::class, 'disconnect'])
+        ->name('channels.disconnect');
+    Route::post('/channels/{channel}/regenerate-secret', [ChannelConnectionController::class, 'regenerateSecret'])
+        ->name('channels.regenerate-secret');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export/{type}', [ReportController::class, 'export'])

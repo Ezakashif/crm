@@ -62,6 +62,7 @@ return [
     'webhooks' => [
         'max_attempts' => 5,
         'queue' => env('CHANNELS_WEBHOOK_QUEUE', 'channels'),
+        'rate_limit' => (int) env('CHANNELS_WEBHOOK_RATE_LIMIT', 60),
     ],
 
     /*
