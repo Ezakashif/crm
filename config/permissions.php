@@ -97,5 +97,20 @@ return [
                 'website_lead' => 'Website Lead',
             ],
         ],
+        'channels' => [
+            'label' => 'Channels',
+            'actions' => [
+                'view' => 'View',
+                'manage' => 'Manage',
+            ],
+        ],
+        'inbox' => [
+            'label' => 'Inbox',
+            'actions' => [
+                'view' => 'View',
+                'reply' => 'Reply',
+                'assign' => 'Assign',
+            ],
+        ],
     ],
 ];

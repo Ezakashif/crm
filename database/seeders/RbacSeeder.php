@@ -32,6 +32,8 @@ class RbacSeeder extends Seeder
             'view_own.activity_logs',
             'view.notifications',
             'view.reports', 'export.reports',
+            'view.channels',
+            'view.inbox', 'reply.inbox',
         ],
     ];
 
