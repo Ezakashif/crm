@@ -19,6 +19,28 @@ class CompanySettingsTest extends TestCase
         $this->seed(RbacSeeder::class);
     }
 
+    public function test_company_settings_page_uses_crm_layout_sections(): void
+    {
+        $company = Company::factory()->create(['name' => 'Default Company']);
+        $admin = User::factory()->admin()->create(['company_id' => $company->id]);
+
+        $this->actingAs($admin)
+            ->get(route('company.settings.edit'))
+            ->assertOk()
+            ->assertSee('Company settings', false)
+            ->assertSee('Company profile', false)
+            ->assertSee('Address', false)
+            ->assertSee('Regional defaults', false)
+            ->assertSee('Business hours', false)
+            ->assertSee('Company logo', false)
+            ->assertSee('form-control', false)
+            ->assertSee('name="name"', false)
+            ->assertSee('name="timezone"', false)
+            ->assertSee('Default Company', false)
+            ->assertDontSee('mk-input', false)
+            ->assertDontSee('mk-label', false);
+    }
+
     public function test_company_admin_can_update_its_own_settings_and_activity_is_logged(): void
     {
         $company = Company::factory()->create();

@@ -18,7 +18,10 @@ class CompanySettingsController extends Controller
         $company = $currentCompany->get();
         abort_unless($company, 404);
 
-        return view('company.settings.edit', compact('company'));
+        return view('company.settings.edit', [
+            'company' => $company,
+            'timezones' => timezone_identifiers_list(),
+        ]);
     }
 
     public function update(UpdateCompanySettingsRequest $request, CurrentCompany $currentCompany, CompanySettingsService $settings): RedirectResponse
