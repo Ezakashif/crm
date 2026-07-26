@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\ActivityLog;
 use App\Models\Company;
 use App\Models\User;
 use Database\Seeders\RbacSeeder;
@@ -57,7 +56,7 @@ class CompanySettingsTest extends TestCase
                 'currency' => 'USD',
                 'business_hours' => ['monday' => '09:00–17:00'],
             ])
-            ->assertRedirect()
+            ->assertRedirect(route('company.profile'))
             ->assertSessionHas('success');
 
         $this->assertDatabaseHas('companies', [
@@ -73,14 +72,35 @@ class CompanySettingsTest extends TestCase
         ]);
     }
 
-    public function test_sales_user_cannot_access_company_settings(): void
+    public function test_sales_user_cannot_access_company_profile_or_settings(): void
     {
         $company = Company::factory()->create();
         $sales = User::factory()->create(['company_id' => $company->id, 'role' => 'sales']);
         $sales->syncRolesFromLegacyColumn();
 
         $this->actingAs($sales)
+            ->get(route('company.profile'))
+            ->assertForbidden();
+
+        $this->actingAs($sales)
             ->get(route('company.settings.edit'))
             ->assertForbidden();
+    }
+
+    public function test_super_admin_can_view_soft_deleted_company_profile(): void
+    {
+        $superAdmin = User::factory()->superAdmin()->create();
+        $company = Company::factory()->create(['name' => 'Deleted Tenant']);
+
+        $this->actingAs($superAdmin)
+            ->delete(route('superadmin.companies.destroy', $company))
+            ->assertRedirect();
+
+        $this->actingAs($superAdmin)
+            ->get(route('superadmin.companies.show', $company->id))
+            ->assertOk()
+            ->assertSee('Deleted Tenant', false)
+            ->assertSee('soft-deleted', false)
+            ->assertSee('Restore company', false);
     }
 }

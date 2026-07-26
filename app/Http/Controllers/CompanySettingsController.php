@@ -11,9 +11,9 @@ use Illuminate\View\View;
 
 class CompanySettingsController extends Controller
 {
-    public function edit(CurrentCompany $currentCompany): View
+    public function show(CurrentCompany $currentCompany): View
     {
-        abort_unless(auth()->user()?->isAdmin() || auth()->user()?->hasPermission('update.company_settings'), 403);
+        $this->authorizeCompanySettingsAccess();
 
         $company = $currentCompany->get();
         abort_unless($company, 404);
@@ -32,6 +32,18 @@ class CompanySettingsController extends Controller
 
         ActivityLogger::log('company.settings_updated', $company, ['name' => $company->name]);
 
-        return back()->with('success', 'Company settings saved.');
+        return redirect()
+            ->route('company.profile')
+            ->with('success', 'Company settings saved.');
+    }
+
+    private function authorizeCompanySettingsAccess(): void
+    {
+        $user = auth()->user();
+
+        abort_unless(
+            $user !== null && ($user->isAdmin() || $user->hasPermission('update.company_settings')),
+            403
+        );
     }
 }

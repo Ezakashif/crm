@@ -28,6 +28,9 @@ class CompanyCsvImporter
 
     public function import(UploadedFile $file): CsvImportResult
     {
+        app(\App\Services\SuperAdmin\CompanySoftDeleteService::class)
+            ->releaseIdentifiersForTrashedCompanies();
+
         $parsed = $this->reader->read($file);
         $result = new CsvImportResult;
         $seenSlugs = [];

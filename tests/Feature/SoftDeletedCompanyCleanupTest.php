@@ -97,6 +97,58 @@ class SoftDeletedCompanyCleanupTest extends TestCase
         ]);
     }
 
+    public function test_legacy_soft_deleted_admin_email_is_freed_on_create_attempt(): void
+    {
+        $superAdmin = User::factory()->superAdmin()->create();
+        $company = Company::factory()->create([
+            'name' => 'Kashif & Co',
+            'slug' => 'kashif-co',
+            'email' => 'kashif.aijazh@gmail.com',
+        ]);
+        $admin = User::factory()->admin()->create([
+            'company_id' => $company->id,
+            'email' => 'kashif.aijazh@gmail.com',
+            'password' => Hash::make('Password1!'),
+        ]);
+
+        // Simulate a soft-delete from before identifier archiving existed.
+        $company->delete();
+        $this->assertSame('kashif.aijazh@gmail.com', $admin->fresh()->email);
+        $this->assertSame('kashif-co', $company->fresh()->slug);
+
+        // Search hides orphaned users, which previously looked like the email was free.
+        $this->actingAs($superAdmin)
+            ->get(route('superadmin.search.index', ['q' => 'kashif.aijazh@gmail.com']))
+            ->assertOk()
+            ->assertSee('No users matched', false)
+            ->assertSee('No companies matched', false);
+
+        $this->actingAs($superAdmin)
+            ->post(route('superadmin.companies.store'), [
+                'name' => 'Kashif & Co',
+                'slug' => 'kashif-co',
+                'email' => 'kashif.aijazh@gmail.com',
+                'status' => 'active',
+                'subscription_status' => 'trial',
+                'admin_name' => 'Kashif',
+                'admin_email' => 'kashif.aijazh@gmail.com',
+                'admin_password' => 'Password1!x',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertNotSame('kashif.aijazh@gmail.com', $admin->fresh()->email);
+        $this->assertDatabaseHas('users', [
+            'email' => 'kashif.aijazh@gmail.com',
+            'status' => 'active',
+        ]);
+        $this->assertDatabaseHas('companies', [
+            'name' => 'Kashif & Co',
+            'slug' => 'kashif-co',
+            'deleted_at' => null,
+        ]);
+    }
+
     public function test_restoring_company_restores_slug_and_user_email(): void
     {
         $superAdmin = User::factory()->superAdmin()->create();

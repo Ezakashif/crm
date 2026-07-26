@@ -159,6 +159,7 @@
                             </button>
                             <div class="dropdown-menu dropdown-menu-right">
                                 @if ($company->trashed())
+                                    <a class="dropdown-item" href="{{ route('superadmin.companies.show', $company->id) }}">View</a>
                                     <form method="POST" action="{{ route('superadmin.companies.restore', $company->id) }}">
                                         @csrf
                                         <button class="dropdown-item" type="submit">Restore</button>

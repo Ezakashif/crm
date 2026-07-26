@@ -375,9 +375,15 @@ return [
             'can' => 'access-activity-logs',
         ],
         [
+            'text' => 'Company Profile',
+            'route' => 'company.profile',
+            'icon' => 'fas fa-fw fa-building',
+            'can' => 'access-company-settings',
+        ],
+        [
             'text' => 'Company Settings',
             'route' => 'company.settings.edit',
-            'icon' => 'fas fa-fw fa-building',
+            'icon' => 'fas fa-fw fa-cog',
             'can' => 'access-company-settings',
         ],
         ['header' => 'Account'],

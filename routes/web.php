@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->grou
     Route::delete('/profile/sessions/{session}', [\App\Http\Controllers\ProfileSessionController::class, 'destroy'])->name('profile.sessions.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/company', [CompanySettingsController::class, 'show'])->name('company.profile');
     Route::get('/company/settings', [CompanySettingsController::class, 'edit'])->name('company.settings.edit');
     Route::patch('/company/settings', [CompanySettingsController::class, 'update'])->name('company.settings.update');
 
