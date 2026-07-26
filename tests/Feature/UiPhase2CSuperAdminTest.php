@@ -48,6 +48,13 @@ class UiPhase2CSuperAdminTest extends TestCase
             ->get(route('superadmin.companies.index'))
             ->assertOk()
             ->assertSee('data-sa-confirm', false)
+            ->assertSee('sa-toolbar', false)
+            ->assertSee('sa-filter-bar', false)
+            ->assertSee('Apply filters', false)
+            ->assertSee('New company', false)
+            ->assertSee('Import', false)
+            ->assertSee('Export CSV', false)
+            ->assertSee('Export PDF', false)
             ->assertDontSee("onclick=\"return confirm(", false);
     }
 

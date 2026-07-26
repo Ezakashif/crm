@@ -203,6 +203,122 @@ body.sa-app a:hover {
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
 }
 
+.sa-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+}
+
+.sa-toolbar__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.sa-toolbar__count {
+    color: #fff;
+    font-weight: 650;
+    font-size: 0.95rem;
+}
+
+.sa-toolbar__hint {
+    color: var(--sa-muted);
+    font-size: 0.8rem;
+}
+
+.sa-toolbar__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sa-btn-group .btn {
+    white-space: nowrap;
+}
+
+.sa-filter-bar {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.sa-filter-bar__grid {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1.6fr) repeat(3, minmax(8rem, 1fr));
+    gap: 0.75rem 0.85rem;
+    align-items: end;
+}
+
+.sa-filter-bar__field {
+    min-width: 0;
+}
+
+.sa-filter-bar__label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--sa-muted);
+}
+
+.sa-filter-bar__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.95rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--sa-border);
+}
+
+.sa-filter-bar__submit {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+@media (max-width: 991.98px) {
+    .sa-filter-bar__grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .sa-filter-bar__field--search {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .sa-filter-bar__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sa-toolbar__actions {
+        width: 100%;
+    }
+
+    .sa-toolbar__actions .btn-group,
+    .sa-toolbar__actions > .btn {
+        flex: 1 1 auto;
+    }
+
+    .sa-toolbar__actions .btn-group {
+        display: flex;
+    }
+
+    .sa-toolbar__actions .btn-group .btn {
+        flex: 1 1 0;
+    }
+}
+
 .sa-card--flush {
     padding: 0;
     overflow: hidden;
