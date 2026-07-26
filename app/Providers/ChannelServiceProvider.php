@@ -28,8 +28,9 @@ class ChannelServiceProvider extends ServiceProvider
         // Resource route param {channel} resolves to ChannelConnection.
         Route::bind('channel', function (string $value) {
             return ChannelConnection::query()
-                ->where('id', $value)
-                ->orWhere('uuid', $value)
+                ->where(function ($query) use ($value) {
+                    $query->where('id', $value)->orWhere('uuid', $value);
+                })
                 ->firstOrFail();
         });
     }
