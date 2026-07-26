@@ -21,6 +21,13 @@
         'warning' => session('warning'),
         'info' => session('info'),
     ])->filter(fn ($message) => filled($message) && is_string($message));
+    $newContactInquiryCount = \Illuminate\Support\Facades\Schema::hasTable('contact_inquiries')
+        ? \App\Models\ContactInquiry::query()->new()->count()
+        : 0;
+    $unreadNotificationCount = auth()->user()?->unreadNotifications()->count() ?? 0;
+    $recentUnreadNotifications = auth()->user()
+        ? auth()->user()->unreadNotifications()->latest()->limit(5)->get()
+        : collect();
 @endphp
 <div class="sa-shell">
     <aside class="sa-nav" aria-label="Super Admin navigation">
@@ -45,6 +52,20 @@
         </a>
         <a href="{{ route('superadmin.email-templates.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.email-templates.*') ? 'active' : '' }}">
             <i class="fas fa-envelope-open-text" aria-hidden="true"></i> Email Templates
+        </a>
+        <a href="{{ route('superadmin.contact-inquiries.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.contact-inquiries.*') ? 'active' : '' }}">
+            <i class="fas fa-inbox" aria-hidden="true"></i>
+            <span>Contact inquiries</span>
+            @if ($newContactInquiryCount > 0)
+                <span class="sa-nav-badge">{{ $newContactInquiryCount > 99 ? '99+' : $newContactInquiryCount }}</span>
+            @endif
+        </a>
+        <a href="{{ route('superadmin.notifications.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.notifications.*') ? 'active' : '' }}">
+            <i class="fas fa-bell" aria-hidden="true"></i>
+            <span>Notifications</span>
+            @if ($unreadNotificationCount > 0)
+                <span class="sa-nav-badge">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}</span>
+            @endif
         </a>
         <a href="{{ route('superadmin.settings.edit') }}" class="sa-nav-link {{ request()->routeIs('superadmin.settings.*') ? 'active' : '' }}">
             <i class="fas fa-cog" aria-hidden="true"></i> Settings
@@ -74,6 +95,55 @@
                     <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="Search companies, users..." autocomplete="off" id="sa-search-input" aria-label="Search companies and users">
                     <div class="sa-search-results" id="sa-search-results" role="listbox"></div>
                 </form>
+
+                <div class="dropdown sa-notification-dropdown">
+                    <button
+                        class="sa-notification-bell btn btn-sm btn-outline-light dropdown-toggle"
+                        type="button"
+                        id="sa-notification-toggle"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-label="Notifications"
+                    >
+                        <i class="fas fa-bell" aria-hidden="true"></i>
+                        @if ($unreadNotificationCount > 0)
+                            <span class="sa-notification-bell__count">{{ $unreadNotificationCount > 9 ? '9+' : $unreadNotificationCount }}</span>
+                        @endif
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right sa-notification-menu" aria-labelledby="sa-notification-toggle">
+                        <div class="sa-notification-menu__header">
+                            <strong>Notifications</strong>
+                            @if ($unreadNotificationCount > 0)
+                                <form method="POST" action="{{ route('superadmin.notifications.read-all') }}" class="mb-0">
+                                    @csrf
+                                    <button type="submit" class="btn btn-link btn-sm p-0">Mark all read</button>
+                                </form>
+                            @endif
+                        </div>
+                        @forelse ($recentUnreadNotifications as $notification)
+                            @php
+                                $data = $notification->data;
+                                $title = $data['subject'] ?? 'Notification';
+                                $message = $data['message'] ?? '';
+                            @endphp
+                            <form method="POST" action="{{ route('superadmin.notifications.read', $notification->id) }}" class="mb-0">
+                                @csrf
+                                <button type="submit" class="dropdown-item sa-notification-menu__item">
+                                    <span class="sa-notification-menu__title">{{ $title }}</span>
+                                    <span class="sa-notification-menu__message">{{ \Illuminate\Support\Str::limit($message, 72) }}</span>
+                                    <span class="sa-notification-menu__time">{{ $notification->created_at->diffForHumans() }}</span>
+                                </button>
+                            </form>
+                        @empty
+                            <div class="sa-notification-menu__empty">No unread notifications</div>
+                        @endforelse
+                        <div class="sa-notification-menu__footer">
+                            <a href="{{ route('superadmin.notifications.index') }}">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="sa-muted small">{{ auth()->user()->name }}</div>
             </div>
         </div>

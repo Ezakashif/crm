@@ -5,11 +5,13 @@ use App\Http\Controllers\SuperAdmin\AnalyticsController;
 use App\Http\Controllers\SuperAdmin\CompanyController;
 use App\Http\Controllers\SuperAdmin\CompanyExportController;
 use App\Http\Controllers\SuperAdmin\CompanyImportController;
+use App\Http\Controllers\SuperAdmin\ContactInquiryController;
 use App\Http\Controllers\SuperAdmin\DashboardController;
+use App\Http\Controllers\SuperAdmin\EmailTemplateController;
 use App\Http\Controllers\SuperAdmin\ImpersonationController;
+use App\Http\Controllers\SuperAdmin\NotificationController;
 use App\Http\Controllers\SuperAdmin\PlanController;
 use App\Http\Controllers\SuperAdmin\SearchController;
-use App\Http\Controllers\SuperAdmin\EmailTemplateController;
 use App\Http\Controllers\SuperAdmin\SettingsController;
 use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
 use Illuminate\Support\Facades\Route;
@@ -90,4 +92,18 @@ Route::middleware(['auth', 'active', 'superadmin'])
             ->middleware('throttle:10,1')
             ->name('email-templates.test');
         Route::resource('email-templates', EmailTemplateController::class)->except(['show']);
+
+        Route::get('contact-inquiries', [ContactInquiryController::class, 'index'])
+            ->name('contact-inquiries.index');
+        Route::get('contact-inquiries/{contact_inquiry}', [ContactInquiryController::class, 'show'])
+            ->name('contact-inquiries.show');
+        Route::patch('contact-inquiries/{contact_inquiry}/status', [ContactInquiryController::class, 'updateStatus'])
+            ->name('contact-inquiries.status');
+
+        Route::get('notifications', [NotificationController::class, 'index'])
+            ->name('notifications.index');
+        Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+            ->name('notifications.read-all');
+        Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])
+            ->name('notifications.read');
     });

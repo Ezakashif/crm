@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Company;
+use App\Models\ContactInquiry;
 use App\Services\SuperAdmin\PlatformAlertService;
 use App\Services\SuperAdmin\PlatformDashboardService;
 use App\Services\SuperAdmin\SystemHealthService;
@@ -30,6 +31,11 @@ class DashboardController extends Controller
                 ->latest()
                 ->limit(5)
                 ->get(),
+            'recentContactInquiries' => ContactInquiry::query()
+                ->latest()
+                ->limit(5)
+                ->get(),
+            'newContactInquiryCount' => ContactInquiry::query()->new()->count(),
             'recentActivity' => ActivityLog::withoutCompanyScope()
                 ->forPlatform()
                 ->with([

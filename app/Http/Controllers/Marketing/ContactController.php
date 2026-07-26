@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Marketing;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Marketing\ContactRequest;
 use App\Mail\Marketing\ContactInquiryMail;
+use App\Services\Marketing\ContactInquiryService;
 use App\Services\SuperAdmin\PlatformSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -24,9 +25,12 @@ class ContactController extends Controller
         ]);
     }
 
-    public function store(ContactRequest $request, PlatformSettingsService $settings): RedirectResponse
-    {
-        $inquiry = $request->safe()->only([
+    public function store(
+        ContactRequest $request,
+        PlatformSettingsService $settings,
+        ContactInquiryService $inquiries,
+    ): RedirectResponse {
+        $payload = $request->safe()->only([
             'name',
             'email',
             'company',
@@ -35,17 +39,23 @@ class ContactController extends Controller
             'intent',
         ]);
 
-        Log::info('marketing.contact.inquiry', $inquiry);
+        $inquiry = $inquiries->createFromRequest($payload, $request);
+
+        Log::info('marketing.contact.inquiry', [
+            'id' => $inquiry->id,
+            'email' => $inquiry->email,
+            'intent' => $inquiry->intent,
+        ]);
 
         $to = filled($settings->get('company_email'))
             ? (string) $settings->get('company_email')
             : (string) config('marketing.contact.email');
 
-        Mail::to($to)->send(new ContactInquiryMail($inquiry));
+        Mail::to($to)->send(new ContactInquiryMail($payload));
 
         return redirect()
             ->route('marketing.contact', array_filter([
-                'intent' => $inquiry['intent'] ?? null,
+                'intent' => $payload['intent'] ?? null,
             ]))
             ->with('status', 'Thanks—your message is on its way. We’ll get back to you shortly.');
     }

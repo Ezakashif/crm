@@ -13,6 +13,12 @@
         <a href="{{ route('superadmin.settings.edit') }}#announcement" class="btn btn-sm btn-outline-light">Broadcast Announcement</a>
         <a href="{{ route('superadmin.companies.export') }}" class="btn btn-sm btn-outline-light">Export Companies</a>
         <a href="{{ route('superadmin.settings.edit') }}" class="btn btn-sm btn-outline-light">System Settings</a>
+        <a href="{{ route('superadmin.contact-inquiries.index') }}" class="btn btn-sm btn-outline-light">
+            Contact inquiries
+            @if (($newContactInquiryCount ?? 0) > 0)
+                <span class="badge badge-warning ml-1">{{ $newContactInquiryCount }}</span>
+            @endif
+        </a>
     </div>
 </div>
 
@@ -131,6 +137,34 @@
             @empty
                 <div class="sa-empty py-3">
                     <p class="sa-empty__text mb-0">No alerts right now.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <div class="sa-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0 text-white">Contact inquiries</h2>
+                <a href="{{ route('superadmin.contact-inquiries.index') }}" class="btn btn-sm btn-outline-light">View all</a>
+            </div>
+            @forelse ($recentContactInquiries as $inquiry)
+                <a href="{{ route('superadmin.contact-inquiries.show', $inquiry) }}" class="sa-activity-item d-block text-decoration-none">
+                    <div class="d-flex justify-content-between align-items-start" style="gap: 0.5rem;">
+                        <div>
+                            <div class="text-white">
+                                {{ $inquiry->name }}
+                                <span class="badge badge-{{ $inquiry->isDemo() ? 'info' : 'secondary' }} ml-1">{{ $inquiry->intentLabel() }}</span>
+                                @if ($inquiry->isNew())
+                                    <span class="badge badge-warning ml-1">New</span>
+                                @endif
+                            </div>
+                            <div class="sa-muted small">{{ $inquiry->email }}{{ $inquiry->company ? ' · '.$inquiry->company : '' }}</div>
+                        </div>
+                        <div class="sa-muted small text-nowrap">{{ $inquiry->created_at?->diffForHumans() }}</div>
+                    </div>
+                </a>
+            @empty
+                <div class="sa-empty py-3">
+                    <p class="sa-empty__text mb-0">No website inquiries yet.</p>
                 </div>
             @endforelse
         </div>

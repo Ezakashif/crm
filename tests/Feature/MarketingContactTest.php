@@ -3,11 +3,15 @@
 namespace Tests\Feature;
 
 use App\Mail\Marketing\ContactInquiryMail;
+use App\Models\ContactInquiry;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class MarketingContactTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_contact_page_renders_form_and_business_info(): void
     {
         $this->get(route('marketing.contact'))
@@ -64,5 +68,11 @@ class MarketingContactTest extends TestCase
                 && $mail->inquiry['intent'] === 'demo'
                 && $mail->hasTo(config('marketing.contact.email'));
         });
+
+        $this->assertDatabaseHas('contact_inquiries', [
+            'email' => 'alex@example.com',
+            'intent' => 'demo',
+            'status' => ContactInquiry::STATUS_NEW,
+        ]);
     }
 }
