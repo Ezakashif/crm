@@ -16,50 +16,92 @@
     </div>
 @endif
 
-<div class="sa-card">
-    <form method="GET" class="form-row align-items-end">
-        <div class="form-group col-md-3 mb-md-0">
-            <label class="sa-muted">Search</label>
-            <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" class="form-control" placeholder="Name, slug, email, owner">
+@php
+    $hasActiveFilters = collect($filters ?? [])
+        ->filter(fn ($value) => filled($value))
+        ->isNotEmpty();
+@endphp
+
+<div class="sa-toolbar">
+    <div class="sa-toolbar__meta">
+        <span class="sa-toolbar__count">{{ $companies->total() }} {{ \Illuminate\Support\Str::plural('company', $companies->total()) }}</span>
+        @if ($hasActiveFilters)
+            <span class="sa-toolbar__hint">Filtered results</span>
+        @endif
+    </div>
+    <div class="sa-toolbar__actions">
+        <div class="btn-group sa-btn-group" role="group" aria-label="Import and export">
+            <a href="{{ route('superadmin.companies.import.create') }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-file-import" aria-hidden="true"></i> Import
+            </a>
+            <a href="{{ route('superadmin.companies.export', request()->query()) }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-file-csv" aria-hidden="true"></i> Export CSV
+            </a>
+            <a href="{{ route('superadmin.companies.export.pdf', request()->query()) }}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-file-pdf" aria-hidden="true"></i> Export PDF
+            </a>
         </div>
-        <div class="form-group col-md-2 mb-md-0">
-            <label class="sa-muted">Status</label>
-            <select name="status" class="custom-select">
-                <option value="">All</option>
-                @foreach ($statuses as $value => $label)
-                    <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
-                @endforeach
-            </select>
+        <a href="{{ route('superadmin.companies.create') }}" class="btn btn-sm btn-info">
+            <i class="fas fa-plus" aria-hidden="true"></i> New company
+        </a>
+    </div>
+</div>
+
+<div class="sa-card sa-filter-bar">
+    <form method="GET" action="{{ route('superadmin.companies.index') }}">
+        <div class="sa-filter-bar__grid">
+            <div class="sa-filter-bar__field sa-filter-bar__field--search">
+                <label class="sa-filter-bar__label" for="companies-search">Search</label>
+                <input
+                    id="companies-search"
+                    type="search"
+                    name="search"
+                    value="{{ $filters['search'] ?? '' }}"
+                    class="form-control form-control-sm"
+                    placeholder="Name, slug, email, owner"
+                >
+            </div>
+            <div class="sa-filter-bar__field">
+                <label class="sa-filter-bar__label" for="companies-status">Status</label>
+                <select id="companies-status" name="status" class="custom-select custom-select-sm">
+                    <option value="">All</option>
+                    @foreach ($statuses as $value => $label)
+                        <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="sa-filter-bar__field">
+                <label class="sa-filter-bar__label" for="companies-subscription">Subscription</label>
+                <select id="companies-subscription" name="subscription_status" class="custom-select custom-select-sm">
+                    <option value="">All</option>
+                    @foreach ($subscriptionStatuses as $value => $label)
+                        <option value="{{ $value }}" @selected(($filters['subscription_status'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="sa-filter-bar__field">
+                <label class="sa-filter-bar__label" for="companies-plan">Plan</label>
+                <select id="companies-plan" name="plan_id" class="custom-select custom-select-sm">
+                    <option value="">All</option>
+                    @foreach ($plans as $plan)
+                        <option value="{{ $plan->id }}" @selected((string) ($filters['plan_id'] ?? '') === (string) $plan->id)>{{ $plan->name }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
-        <div class="form-group col-md-2 mb-md-0">
-            <label class="sa-muted">Subscription</label>
-            <select name="subscription_status" class="custom-select">
-                <option value="">All</option>
-                @foreach ($subscriptionStatuses as $value => $label)
-                    <option value="{{ $value }}" @selected(($filters['subscription_status'] ?? '') === $value)>{{ $label }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="form-group col-md-2 mb-md-0">
-            <label class="sa-muted">Plan</label>
-            <select name="plan_id" class="custom-select">
-                <option value="">All</option>
-                @foreach ($plans as $plan)
-                    <option value="{{ $plan->id }}" @selected((string) ($filters['plan_id'] ?? '') === (string) $plan->id)>{{ $plan->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="form-group col-md-3 mb-0">
-            <div class="custom-control custom-checkbox mb-2">
+
+        <div class="sa-filter-bar__footer">
+            <div class="custom-control custom-checkbox mb-0">
                 <input type="checkbox" class="custom-control-input" id="trashed" name="trashed" value="1" @checked(! empty($filters['trashed']))>
                 <label class="custom-control-label sa-muted" for="trashed">Show deleted only</label>
             </div>
-            <div class="d-flex flex-wrap">
-                <button class="btn btn-outline-light mr-2 mb-2">Filter</button>
-                <a href="{{ route('superadmin.companies.create') }}" class="btn btn-info mr-2 mb-2">New company</a>
-                <a href="{{ route('superadmin.companies.import.create') }}" class="btn btn-outline-light mr-2 mb-2">Import CSV</a>
-                <a href="{{ route('superadmin.companies.export', request()->query()) }}" class="btn btn-outline-light mr-2 mb-2">Export CSV</a>
-                <a href="{{ route('superadmin.companies.export.pdf', request()->query()) }}" class="btn btn-outline-light mb-2">Export PDF</a>
+            <div class="sa-filter-bar__submit">
+                @if ($hasActiveFilters)
+                    <a href="{{ route('superadmin.companies.index') }}" class="btn btn-sm btn-outline-light">Clear</a>
+                @endif
+                <button type="submit" class="btn btn-sm btn-outline-light">
+                    <i class="fas fa-filter" aria-hidden="true"></i> Apply filters
+                </button>
             </div>
         </div>
     </form>
