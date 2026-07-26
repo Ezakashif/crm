@@ -29,7 +29,13 @@ class StoreCompanyRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:100', 'alpha_dash', 'unique:companies,slug'],
+            'slug' => [
+                'nullable',
+                'string',
+                'max:100',
+                'alpha_dash',
+                Rule::unique('companies', 'slug')->whereNull('deleted_at'),
+            ],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048', 'dimensions:max_width=2000,max_height=2000'],
@@ -38,7 +44,25 @@ class StoreCompanyRequest extends FormRequest
             'plan_id' => ['nullable', 'integer', 'exists:plans,id'],
             'trial_ends_at' => ['nullable', 'date'],
             'admin_name' => ['nullable', 'string', 'max:255'],
-            'admin_email' => ['nullable', 'required_with:admin_password', 'email', 'max:255', 'unique:users,email'],
+            'admin_email' => [
+                'nullable',
+                'required_with:admin_password',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->where(function ($query) {
+                    // Ignore users still attached to soft-deleted companies
+                    // (those emails are also archived on delete, but keep this
+                    // defensive for older soft-deletes before the fix).
+                    $query->where(function ($inner) {
+                        $inner->whereNull('company_id')
+                            ->orWhereIn('company_id', function ($companies) {
+                                $companies->select('id')
+                                    ->from('companies')
+                                    ->whereNull('deleted_at');
+                            });
+                    });
+                }),
+            ],
             'admin_password' => ['nullable', 'required_with:admin_email', Password::defaults()],
         ];
     }

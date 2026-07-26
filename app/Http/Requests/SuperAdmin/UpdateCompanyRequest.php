@@ -28,7 +28,7 @@ class UpdateCompanyRequest extends FormRequest
                 'string',
                 'max:100',
                 'alpha_dash',
-                Rule::unique('companies', 'slug')->ignore($company->id),
+                Rule::unique('companies', 'slug')->whereNull('deleted_at')->ignore($company->id),
             ],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],

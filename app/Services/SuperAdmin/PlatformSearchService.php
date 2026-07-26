@@ -41,6 +41,12 @@ class PlatformSearchService
 
         $users = User::withoutCompanyScope()
             ->with(['company:id,name,slug'])
+            // Soft-deleted tenants must not surface orphaned users that still
+            // point at a company_id (those company pages 404).
+            ->where(function ($query) {
+                $query->whereNull('company_id')
+                    ->orWhereHas('company');
+            })
             ->where(function ($query) use ($like) {
                 $query->where('name', 'like', $like)
                     ->orWhere('email', 'like', $like);

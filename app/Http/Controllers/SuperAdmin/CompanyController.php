@@ -12,6 +12,7 @@ use App\Services\CompanyListQueryService;
 use App\Services\CompanyProvisioner;
 use App\Services\SuperAdmin\CompanyExportService;
 use App\Services\SuperAdmin\CompanyProfileService;
+use App\Services\SuperAdmin\CompanySoftDeleteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -154,31 +155,32 @@ class CompanyController extends Controller
         return back()->with('success', "Company marked as {$label}.");
     }
 
-    public function destroy(Company $company): RedirectResponse
+    public function destroy(Company $company, CompanySoftDeleteService $softDeletes): RedirectResponse
     {
         if ($company->isDefault()) {
             return back()->withErrors(['company' => 'The default company cannot be deleted.']);
         }
 
         $name = $company->name;
+        $slug = $company->slug;
 
         ActivityLogger::log('company.deleted', $company, [
             'name' => $name,
-            'slug' => $company->slug,
+            'slug' => $slug,
         ]);
 
-        $company->delete();
+        $softDeletes->softDelete($company);
 
         return redirect()
             ->route('superadmin.companies.index')
             ->with('success', "Company \"{$name}\" deleted.");
     }
 
-    public function restore(int $company): RedirectResponse
+    public function restore(int $company, CompanySoftDeleteService $softDeletes): RedirectResponse
     {
         $model = Company::onlyTrashed()->findOrFail($company);
 
-        $model->restore();
+        $softDeletes->restore($model);
 
         ActivityLogger::log('company.restored', $model, [
             'name' => $model->name,
