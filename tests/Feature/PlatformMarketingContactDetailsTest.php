@@ -53,4 +53,42 @@ class PlatformMarketingContactDetailsTest extends TestCase
             ->assertDontSee('hello@algos.test', false)
             ->assertDontSee('1200 Market Street', false);
     }
+
+    public function test_empty_company_address_is_hidden_from_public_ui(): void
+    {
+        $superAdmin = User::factory()->superAdmin()->create();
+
+        $this->actingAs($superAdmin)
+            ->put(route('superadmin.settings.update'), [
+                'platform_name' => 'Northline CRM',
+                'default_timezone' => 'UTC',
+                'default_currency' => 'USD',
+                'trial_duration_days' => 14,
+                'default_company_status' => 'active',
+                'company_email' => 'hello@northline.example',
+                'company_phone' => '+1 555 999 1212',
+                'company_address' => '',
+            ])
+            ->assertRedirect();
+
+        app(PlatformSettingsService::class)->applyBranding();
+
+        $this->assertNull(config('marketing.contact.address'));
+
+        auth()->logout();
+
+        $html = $this->get(route('marketing.contact'))
+            ->assertOk()
+            ->assertSee('hello@northline.example', false)
+            ->assertSee('+1 555 999 1212', false)
+            ->assertDontSee('1200 Market Street', false)
+            ->assertDontSee('San Francisco', false)
+            ->assertDontSee('PostalAddress', false)
+            ->assertDontSee('streetAddress', false)
+            ->assertDontSee('Google Maps', false)
+            ->getContent();
+
+        $this->assertStringNotContainsString('font-semibold text-slate-900">Address</', $html);
+        $this->assertStringNotContainsString('>Address</', $html);
+    }
 }

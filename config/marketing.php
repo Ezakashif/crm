@@ -24,7 +24,8 @@ return [
     'contact' => [
         'email' => env('MARKETING_CONTACT_EMAIL', 'hello@algos.test'),
         'phone' => env('MARKETING_CONTACT_PHONE', '+1 (555) 010-2000'),
-        'address' => env('MARKETING_CONTACT_ADDRESS', '1200 Market Street, Suite 400, San Francisco, CA 94103'),
+        // Optional — leave empty/null to hide address everywhere in the public UI.
+        'address' => env('MARKETING_CONTACT_ADDRESS') ?: null,
     ],
 
     'social' => [

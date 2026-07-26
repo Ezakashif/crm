@@ -58,8 +58,8 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Company address</label>
-                        <input type="text" name="company_address" value="{{ old('company_address', $settings['company_address'] ?? config('marketing.contact.address')) }}" class="form-control" maxlength="500">
+                        <label>Company address <span class="text-muted font-weight-normal">(optional)</span></label>
+                        <input type="text" name="company_address" value="{{ old('company_address', $settings['company_address'] ?? '') }}" class="form-control" maxlength="500" placeholder="Leave blank to hide address on the public site">
                     </div>
                     <div class="form-row mb-0">
                         <div class="form-group col-md-4">

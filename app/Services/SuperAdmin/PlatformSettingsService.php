@@ -277,7 +277,13 @@ class PlatformSettingsService
             'marketing.name' => $brand,
             'marketing.contact.email' => filled($email) ? (string) $email : ($contact['email'] ?? null),
             'marketing.contact.phone' => filled($phone) ? (string) $phone : ($contact['phone'] ?? null),
-            'marketing.contact.address' => filled($address) ? (string) $address : ($contact['address'] ?? null),
+            // Address is optional. An explicit empty Super Admin value hides it everywhere
+            // (no config placeholder fallback). Env/config is used only when unset.
+            'marketing.contact.address' => filled($address)
+                ? (string) $address
+                : (array_key_exists('company_address', $this->all())
+                    ? null
+                    : (filled($contact['address'] ?? null) ? (string) $contact['address'] : null)),
             'marketing.social.linkedin' => filled($linkedin) ? (string) $linkedin : ($social['linkedin'] ?? null),
             'marketing.social.facebook' => filled($facebook) ? (string) $facebook : ($social['facebook'] ?? null),
             'marketing.social.twitter' => filled($twitter) ? (string) $twitter : ($social['twitter'] ?? null),

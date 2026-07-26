@@ -20,12 +20,15 @@
         'logo' => $logoUrl,
         'email' => $contact['email'] ?? null,
         'telephone' => $contact['phone'] ?? null,
-        'address' => [
-            '@type' => 'PostalAddress',
-            'streetAddress' => $contact['address'] ?? null,
-        ],
         'sameAs' => $social,
     ];
+
+    if (filled($contact['address'] ?? null)) {
+        $organization['address'] = [
+            '@type' => 'PostalAddress',
+            'streetAddress' => $contact['address'],
+        ];
+    }
 
     $website = [
         '@context' => 'https://schema.org',
