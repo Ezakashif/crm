@@ -78,9 +78,10 @@ class CompanyController extends Controller
             ->with('success', $message);
     }
 
-    public function show(Company $company): View
+    public function show(int $company): View
     {
-        $profile = $this->profiles->profile($company);
+        $model = Company::withTrashed()->findOrFail($company);
+        $profile = $this->profiles->profile($model);
 
         return view('superadmin.companies.show', array_merge($profile, [
             'statuses' => Company::STATUSES,
