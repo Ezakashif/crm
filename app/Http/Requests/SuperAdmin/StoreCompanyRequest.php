@@ -3,6 +3,7 @@
 namespace App\Http\Requests\SuperAdmin;
 
 use App\Models\Company;
+use App\Services\SuperAdmin\CompanySoftDeleteService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -16,9 +17,19 @@ class StoreCompanyRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        // Free emails/slugs still held by previously soft-deleted tenants so
+        // create validation does not falsely report "email already taken".
+        app(CompanySoftDeleteService::class)->releaseIdentifiersForTrashedCompanies();
+
         $this->merge([
             'subscription_status' => $this->input('subscription_status', Company::SUBSCRIPTION_TRIAL),
             'status' => $this->input('status', Company::STATUS_ACTIVE),
+            'admin_email' => filled($this->input('admin_email'))
+                ? strtolower(trim((string) $this->input('admin_email')))
+                : $this->input('admin_email'),
+            'email' => filled($this->input('email'))
+                ? strtolower(trim((string) $this->input('email')))
+                : $this->input('email'),
         ]);
     }
 
@@ -49,19 +60,7 @@ class StoreCompanyRequest extends FormRequest
                 'required_with:admin_password',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')->where(function ($query) {
-                    // Ignore users still attached to soft-deleted companies
-                    // (those emails are also archived on delete, but keep this
-                    // defensive for older soft-deletes before the fix).
-                    $query->where(function ($inner) {
-                        $inner->whereNull('company_id')
-                            ->orWhereIn('company_id', function ($companies) {
-                                $companies->select('id')
-                                    ->from('companies')
-                                    ->whereNull('deleted_at');
-                            });
-                    });
-                }),
+                Rule::unique('users', 'email'),
             ],
             'admin_password' => ['nullable', 'required_with:admin_email', Password::defaults()],
         ];
@@ -74,6 +73,7 @@ class StoreCompanyRequest extends FormRequest
     {
         return [
             'admin_password.required_with' => 'An admin password is required when creating a company admin account.',
+            'admin_email.unique' => 'This admin email is already used by an active account.',
         ];
     }
 }
