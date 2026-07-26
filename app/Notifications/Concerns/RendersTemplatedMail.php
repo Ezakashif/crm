@@ -42,6 +42,15 @@ trait RendersTemplatedMail
                     ->line('If you did not request a password reset, no further action is required.');
             }
 
+            if (isset($placeholders['temporary_password'])) {
+                return $message
+                    ->line('An account was created for you'.(isset($placeholders['company_name']) ? ' on '.$placeholders['company_name'] : '').'.')
+                    ->line('Email: '.(string) ($placeholders['user_email'] ?? data_get($notifiable, 'email')))
+                    ->line('Temporary password: '.(string) $placeholders['temporary_password'])
+                    ->action('Sign in', (string) ($placeholders['login_url'] ?? route('login')))
+                    ->line('Please change your password after signing in.');
+            }
+
             return $message->line((string) ($placeholders['body'] ?? 'Notification from '.config('app.name')));
         }
 

@@ -85,6 +85,18 @@ class RoleController extends Controller
 
         $role->permissions()->sync($permissionIds);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Role created successfully.',
+                'role' => [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'slug' => $role->slug,
+                    'description' => $role->description,
+                ],
+            ], 201);
+        }
+
         return redirect()->route('roles.index')
             ->with('success', 'Role created successfully.');
     }

@@ -37,6 +37,12 @@ class EmailTemplateSeeder extends Seeder
                 'html_body' => '<p>Hi {{invitee_name}},</p><p>{{inviter_name}} invited you to join <strong>{{company_name}}</strong> as {{role_names}}.</p><p><a href="{{invitation_url}}">Accept invitation</a></p><p>This invitation expires on {{expires_at}}.</p>',
                 'text_body' => "Hi {{invitee_name}},\n\n{{inviter_name}} invited you to join {{company_name}} as {{role_names}}.\n\nAccept: {{invitation_url}}\n\nExpires: {{expires_at}}",
             ],
+            'user_credentials' => [
+                'name' => 'User Credentials',
+                'subject' => 'Your {{company_name}} account on {{platform_name}}',
+                'html_body' => '<p>Hi {{user_name}},</p><p>An account was created for you on <strong>{{company_name}}</strong> with the role(s): {{role_names}}.</p><p>Email: <strong>{{user_email}}</strong><br>Temporary password: <strong>{{temporary_password}}</strong></p><p><a href="{{login_url}}">Sign in</a></p><p>Please change your password after signing in. Need help? Contact {{support_email}}.</p>',
+                'text_body' => "Hi {{user_name}},\n\nAn account was created for you on {{company_name}} with the role(s): {{role_names}}.\n\nEmail: {{user_email}}\nTemporary password: {{temporary_password}}\n\nSign in: {{login_url}}\n\nPlease change your password after signing in.",
+            ],
             'lead_assigned' => [
                 'name' => 'Lead Assigned',
                 'subject' => 'Lead assigned: {{lead_name}}',

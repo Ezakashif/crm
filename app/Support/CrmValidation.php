@@ -146,6 +146,7 @@ class CrmValidation
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'email_credentials' => ['sometimes', 'boolean'],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => [
                 'integer',

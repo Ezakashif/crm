@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\UserCredentialsNotification;
 use App\Notifications\UserStatusChanged;
 use App\Services\ActivityLogger;
+use App\Services\PermissionRegistry;
 use App\Services\PlanLimitService;
 use App\Services\RoleAssignmentGuard;
 use App\Services\UserListQueryService;
@@ -54,6 +56,7 @@ class UserController extends Controller
         return view('users.create', [
             'roles' => Role::query()->orderBy('name')->get(),
             'statuses' => self::STATUSES,
+            'modulePermissions' => app(PermissionRegistry::class)->groupedForUi(),
         ]);
     }
 
@@ -77,11 +80,15 @@ class UserController extends Controller
         $this->roleAssignmentGuard->assertCanAssignRoles($actor, $validated['roles']);
         $this->planLimits->assertCanAddUser($actor->company);
 
+        $plainPassword = $validated['password'];
+        $emailCredentials = $request->boolean('email_credentials');
+
         $user = new User;
         $user->forceFill([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            // Model casts password as hashed — pass the plain value once.
+            'password' => $plainPassword,
             'role' => 'user',
             'status' => $validated['status'],
             // Admin-provisioned users are trusted and marked verified.
@@ -102,10 +109,24 @@ class UserController extends Controller
             'email' => $user->email,
             'roles' => $user->roleNames(),
             'status' => $user->status,
+            'credentials_emailed' => $emailCredentials,
         ]);
 
+        if ($emailCredentials) {
+            $companyName = $actor->company?->name ?? config('app.name');
+            $user->notify(new UserCredentialsNotification(
+                temporaryPassword: $plainPassword,
+                companyName: $companyName,
+                roleNames: $user->roleNames(),
+            ));
+        }
+
+        $message = $emailCredentials
+            ? 'User created successfully. Login credentials were emailed to them.'
+            : 'User created successfully.';
+
         return redirect()->route('users.index')
-            ->with('success', 'User created successfully.');
+            ->with('success', $message);
     }
 
     public function edit(User $user)

@@ -119,6 +119,31 @@ return [
             ],
         ],
 
+        'user_credentials' => [
+            'label' => 'User Credentials',
+            'description' => 'Sent when an admin creates a user with a preset password.',
+            'placeholders' => [
+                'user_name' => 'Recipient display name',
+                'user_email' => 'Recipient email / login',
+                'temporary_password' => 'Preset temporary password',
+                'company_name' => 'Company / workspace name',
+                'role_names' => 'Assigned role labels',
+                'login_url' => 'Login URL',
+                'platform_name' => 'Platform name',
+                'support_email' => 'Support email address',
+            ],
+            'sample' => [
+                'user_name' => 'Jordan Lee',
+                'user_email' => 'jordan@example.com',
+                'temporary_password' => 'TempPass1!',
+                'company_name' => 'Acme Corp',
+                'role_names' => 'Sales',
+                'login_url' => '/login',
+                'platform_name' => 'Algos',
+                'support_email' => 'hello@example.com',
+            ],
+        ],
+
         'lead_assigned' => [
             'label' => 'Lead Assigned',
             'description' => 'Sent when a lead is assigned to a user.',
