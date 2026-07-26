@@ -160,58 +160,62 @@
     </div>
 
     @can('create', App\Models\Role::class)
+        {{-- Form is the modal-content so Bootstrap scrollable flex layout can constrain .modal-body. --}}
         <div class="modal fade" id="createRoleModal" tabindex="-1" role="dialog" aria-labelledby="createRoleModalTitle" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-                <div class="modal-content">
-                    <form id="create-role-modal-form" method="POST" action="{{ route('roles.store') }}">
-                        @csrf
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="createRoleModalTitle">Create role &amp; assign permissions</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                <form
+                    id="create-role-modal-form"
+                    class="modal-content"
+                    method="POST"
+                    action="{{ route('roles.store') }}"
+                >
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createRoleModalTitle">Create role &amp; assign permissions</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="create-role-modal-errors" class="alert alert-danger d-none" role="alert"></div>
+
+                        <p class="text-muted mb-3">
+                            Create a new company role when none of the existing ones fit this user. It will be selected automatically below.
+                        </p>
+
+                        <div class="form-group">
+                            <x-form-label for="modal_role_name" :required="true">Name</x-form-label>
+                            <input id="modal_role_name" name="name" type="text" class="form-control" required maxlength="100">
                         </div>
-                        <div class="modal-body">
-                            <div id="create-role-modal-errors" class="alert alert-danger d-none" role="alert"></div>
 
-                            <p class="text-muted mb-3">
-                                Create a new company role when none of the existing ones fit this user. It will be selected automatically below.
-                            </p>
-
-                            <div class="form-group">
-                                <x-form-label for="modal_role_name" :required="true">Name</x-form-label>
-                                <input id="modal_role_name" name="name" type="text" class="form-control" required maxlength="100">
-                            </div>
-
-                            <div class="form-group">
-                                <x-form-label for="modal_role_slug" :required="true">Slug</x-form-label>
-                                <input id="modal_role_slug" name="slug" type="text" class="form-control" required maxlength="50"
-                                       pattern="[A-Za-z0-9_-]+" placeholder="e.g. support_agent">
-                                <small class="form-text text-muted">Lowercase letters, numbers, dashes and underscores only.</small>
-                            </div>
-
-                            <div class="form-group">
-                                <x-form-label for="modal_role_description">Description</x-form-label>
-                                <textarea id="modal_role_description" name="description" rows="2" class="form-control" maxlength="1000"></textarea>
-                            </div>
-
-                            <div class="form-group mb-0">
-                                <x-form-label>Permissions</x-form-label>
-                                <x-permission-checklist
-                                    :module-permissions="$modulePermissions"
-                                    :selected="[]"
-                                    name="permissions"
-                                />
-                            </div>
+                        <div class="form-group">
+                            <x-form-label for="modal_role_slug" :required="true">Slug</x-form-label>
+                            <input id="modal_role_slug" name="slug" type="text" class="form-control" required maxlength="50"
+                                   pattern="[A-Za-z0-9_-]+" placeholder="e.g. support_agent">
+                            <small class="form-text text-muted">Lowercase letters, numbers, dashes and underscores only.</small>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary" id="create-role-modal-submit">
-                                <i class="fas fa-save" aria-hidden="true"></i> Save role
-                            </button>
+
+                        <div class="form-group">
+                            <x-form-label for="modal_role_description">Description</x-form-label>
+                            <textarea id="modal_role_description" name="description" rows="2" class="form-control" maxlength="1000"></textarea>
                         </div>
-                    </form>
-                </div>
+
+                        <div class="form-group mb-0">
+                            <x-form-label>Permissions</x-form-label>
+                            <x-permission-checklist
+                                :module-permissions="$modulePermissions"
+                                :selected="[]"
+                                name="permissions"
+                            />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="create-role-modal-submit">
+                            <i class="fas fa-save" aria-hidden="true"></i> Save role
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     @endcan

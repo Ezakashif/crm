@@ -658,6 +658,27 @@ body.crm-app .modal-footer {
     border-color: var(--crm-border);
 }
 
+/*
+ * Scrollable modals whose <form> is the .modal-content (needed for nested forms
+ * on create-user). Keep body scrollable and footer pinned.
+ */
+body.crm-app .modal-dialog-scrollable > form.modal-content {
+    max-height: calc(100vh - 1rem);
+    overflow: hidden;
+}
+
+body.crm-app .modal-dialog-scrollable > form.modal-content > .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+}
+
+@media (min-width: 576px) {
+    body.crm-app .modal-dialog-scrollable > form.modal-content {
+        max-height: calc(100vh - 3.5rem);
+    }
+}
+
 /* ----- Info boxes / small boxes (reports) ----- */
 body.crm-app .info-box {
     border: 1px solid var(--crm-border);

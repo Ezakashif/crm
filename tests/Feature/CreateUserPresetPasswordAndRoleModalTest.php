@@ -33,6 +33,8 @@ class CreateUserPresetPasswordAndRoleModalTest extends TestCase
             ->assertSee('Generate password', false)
             ->assertSee('Create role &amp; assign permissions', false)
             ->assertSee('id="createRoleModal"', false)
+            ->assertSee('modal-dialog-scrollable', false)
+            ->assertSee('id="create-role-modal-form"', false)
             ->assertSee(route('roles.store'), false);
     }
 
