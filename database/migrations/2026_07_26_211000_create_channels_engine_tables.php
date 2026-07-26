@@ -6,8 +6,37 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * @return list<string>
+     */
+    private function tables(): array
+    {
+        return [
+            'channel_connections',
+            'channel_webhook_events',
+            'channel_contacts',
+            'conversations',
+            'conversation_messages',
+            'lead_channel_meta',
+        ];
+    }
+
     public function up(): void
     {
+        // Recover from a previous MySQL failure that created only some tables
+        // (e.g. index name too long) before the migration row was recorded.
+        $existing = collect($this->tables())->filter(fn (string $table) => Schema::hasTable($table));
+
+        if ($existing->count() === count($this->tables())) {
+            return;
+        }
+
+        if ($existing->isNotEmpty()) {
+            foreach (array_reverse($this->tables()) as $table) {
+                Schema::dropIfExists($table);
+            }
+        }
+
         Schema::create('channel_connections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->cascadeOnDelete();
@@ -144,11 +173,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('lead_channel_meta');
-        Schema::dropIfExists('conversation_messages');
-        Schema::dropIfExists('conversations');
-        Schema::dropIfExists('channel_contacts');
-        Schema::dropIfExists('channel_webhook_events');
-        Schema::dropIfExists('channel_connections');
+        foreach (array_reverse($this->tables()) as $table) {
+            Schema::dropIfExists($table);
+        }
     }
 };
