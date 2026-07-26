@@ -30,8 +30,9 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
 
-            $table->unique(['company_id', 'provider', 'external_account_id']);
-            $table->index(['company_id', 'provider', 'status']);
+            // MySQL identifier limit is 64 chars — keep custom short names.
+            $table->unique(['company_id', 'provider', 'external_account_id'], 'ch_conn_company_provider_acct_uq');
+            $table->index(['company_id', 'provider', 'status'], 'ch_conn_company_provider_status_idx');
         });
 
         Schema::create('channel_webhook_events', function (Blueprint $table) {
@@ -52,8 +53,8 @@ return new class extends Migration
             $table->timestamp('processed_at')->nullable();
             $table->timestamps();
 
-            $table->unique(['company_id', 'provider', 'idempotency_key']);
-            $table->index(['channel_connection_id', 'status']);
+            $table->unique(['company_id', 'provider', 'idempotency_key'], 'ch_wh_company_provider_idem_uq');
+            $table->index(['channel_connection_id', 'status'], 'ch_wh_connection_status_idx');
         });
 
         Schema::create('channel_contacts', function (Blueprint $table) {
@@ -70,9 +71,9 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
 
-            $table->unique(['company_id', 'provider', 'external_user_id']);
-            $table->index(['company_id', 'email']);
-            $table->index(['company_id', 'phone']);
+            $table->unique(['company_id', 'provider', 'external_user_id'], 'ch_contact_company_provider_ext_uq');
+            $table->index(['company_id', 'email'], 'ch_contact_company_email_idx');
+            $table->index(['company_id', 'phone'], 'ch_contact_company_phone_idx');
             $table->index(['lead_id']);
         });
 
@@ -94,8 +95,8 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
 
-            $table->unique(['company_id', 'provider', 'external_thread_id']);
-            $table->index(['company_id', 'status', 'last_message_at']);
+            $table->unique(['company_id', 'provider', 'external_thread_id'], 'ch_conv_company_provider_thread_uq');
+            $table->index(['company_id', 'status', 'last_message_at'], 'ch_conv_company_status_last_idx');
             $table->index(['assigned_to']);
         });
 
@@ -114,8 +115,8 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
 
-            $table->unique(['company_id', 'provider_message_id']);
-            $table->index(['conversation_id', 'sent_at']);
+            $table->unique(['company_id', 'provider_message_id'], 'ch_msg_company_provider_msg_uq');
+            $table->index(['conversation_id', 'sent_at'], 'ch_msg_conversation_sent_idx');
         });
 
         Schema::create('lead_channel_meta', function (Blueprint $table) {
@@ -136,8 +137,8 @@ return new class extends Migration
             $table->json('raw')->nullable();
             $table->timestamps();
 
-            $table->unique(['lead_id', 'provider']);
-            $table->index(['company_id', 'provider', 'campaign_id']);
+            $table->unique(['lead_id', 'provider'], 'lead_ch_meta_lead_provider_uq');
+            $table->index(['company_id', 'provider', 'campaign_id'], 'lead_ch_meta_company_camp_idx');
         });
     }
 
