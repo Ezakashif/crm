@@ -18,16 +18,23 @@ class CompanySettingsTest extends TestCase
         $this->seed(RbacSeeder::class);
     }
 
-    public function test_company_settings_page_uses_crm_layout_sections(): void
+    public function test_company_profile_and_settings_are_separate_pages(): void
     {
         $company = Company::factory()->create(['name' => 'Default Company']);
         $admin = User::factory()->admin()->create(['company_id' => $company->id]);
 
         $this->actingAs($admin)
+            ->get(route('company.profile'))
+            ->assertOk()
+            ->assertSee('Company profile', false)
+            ->assertSee('Edit settings', false)
+            ->assertSee('Default Company', false)
+            ->assertDontSee('name="name"', false);
+
+        $this->actingAs($admin)
             ->get(route('company.settings.edit'))
             ->assertOk()
             ->assertSee('Company settings', false)
-            ->assertSee('Company profile', false)
             ->assertSee('Address', false)
             ->assertSee('Regional defaults', false)
             ->assertSee('Business hours', false)

@@ -18,6 +18,21 @@ class CompanySettingsController extends Controller
         $company = $currentCompany->get();
         abort_unless($company, 404);
 
+        $company->load(['owner:id,name,email', 'plan:id,name']);
+
+        return view('company.profile', [
+            'company' => $company,
+            'canEdit' => true,
+        ]);
+    }
+
+    public function edit(CurrentCompany $currentCompany): View
+    {
+        $this->authorizeCompanySettingsAccess();
+
+        $company = $currentCompany->get();
+        abort_unless($company, 404);
+
         return view('company.settings.edit', [
             'company' => $company,
             'timezones' => timezone_identifiers_list(),
