@@ -75,4 +75,14 @@ return [
         'match_by_email' => true,
         'match_by_phone' => true,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Meta / Facebook
+    |--------------------------------------------------------------------------
+    */
+    'meta' => [
+        'app_secret' => env('META_APP_SECRET'),
+        'graph_version' => env('META_GRAPH_VERSION', 'v21.0'),
+    ],
 ];

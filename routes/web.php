@@ -26,7 +26,7 @@ Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'st
     ->middleware(['website-lead-webhook', 'throttle:website-leads'])
     ->name('webhooks.leads.website');
 
-Route::post('/webhooks/channels/{uuid}', [ChannelWebhookController::class, 'inbound'])
+Route::match(['get', 'post'], '/webhooks/channels/{uuid}', [ChannelWebhookController::class, 'inbound'])
     ->middleware(['throttle:channel-webhooks'])
     ->name('webhooks.channels.inbound');
 

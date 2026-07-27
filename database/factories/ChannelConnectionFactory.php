@@ -26,6 +26,7 @@ class ChannelConnectionFactory extends Factory
             'status' => ChannelConnectionStatus::Connected,
             'external_account_id' => 'acct_'.Str::lower(Str::random(8)),
             'webhook_secret' => 'test-webhook-secret',
+            'verify_token' => Str::random(32),
             'meta' => [],
         ];
     }

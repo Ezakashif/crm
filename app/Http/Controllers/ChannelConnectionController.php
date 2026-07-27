@@ -69,8 +69,18 @@ class ChannelConnectionController extends Controller
             'provider' => ['required', 'string', Rule::in(array_keys($this->connections->enabledProviderOptions()))],
             'name' => ['required', 'string', 'max:255'],
             'external_account_id' => ['nullable', 'string', 'max:255'],
-            'external_page_id' => ['nullable', 'string', 'max:255'],
-            'access_token' => ['nullable', 'string', 'max:5000'],
+            'external_page_id' => [
+                Rule::requiredIf($request->input('provider') === ChannelProvider::FacebookLeadAds->value),
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'access_token' => [
+                Rule::requiredIf($request->input('provider') === ChannelProvider::FacebookLeadAds->value),
+                'nullable',
+                'string',
+                'max:5000',
+            ],
             'webhook_secret' => ['nullable', 'string', 'max:255'],
             'token_expires_at' => ['nullable', 'date'],
         ]);

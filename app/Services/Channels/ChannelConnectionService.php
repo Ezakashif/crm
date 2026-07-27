@@ -7,6 +7,7 @@ use App\Enums\Channels\ChannelProvider;
 use App\Models\ChannelConnection;
 use App\Models\Company;
 use App\Services\ActivityLogger;
+use App\Services\Channels\Meta\MetaGraphClient;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -14,6 +15,7 @@ class ChannelConnectionService
 {
     public function __construct(
         protected ChannelManager $channels,
+        protected MetaGraphClient $graph,
     ) {}
 
     /**
@@ -106,6 +108,10 @@ class ChannelConnectionService
             return ['ok' => false, 'message' => 'Add credentials before testing this channel.'];
         }
 
+        if ($provider === ChannelProvider::FacebookLeadAds) {
+            return $this->testFacebookLeadAdsConnection($connection);
+        }
+
         if (! filled($connection->webhook_secret)) {
             $connection->markError('Webhook secret is missing.');
 
@@ -141,6 +147,55 @@ class ChannelConnectionService
         ]);
 
         return ['ok' => true, 'message' => 'Connection test passed. Webhook signature validation is healthy.'];
+    }
+
+    /**
+     * @return array{ok: bool, message: string}
+     */
+    protected function testFacebookLeadAdsConnection(ChannelConnection $connection): array
+    {
+        if (! filled($connection->external_page_id)) {
+            $connection->markError('Facebook Page ID is missing.');
+
+            return ['ok' => false, 'message' => 'Add the Facebook Page ID before testing this channel.'];
+        }
+
+        if (! filled($connection->access_token)) {
+            $connection->markError('Facebook page access token is missing.');
+
+            return ['ok' => false, 'message' => 'Add the Facebook page access token before testing this channel.'];
+        }
+
+        if (! filled(config('channels.meta.app_secret')) && ! filled($connection->webhook_secret)) {
+            $connection->markError('Meta app secret is not configured.');
+
+            return ['ok' => false, 'message' => 'Set META_APP_SECRET in the environment or store a webhook secret on this connection.'];
+        }
+
+        try {
+            $page = $this->graph->fetchPage((string) $connection->external_page_id, (string) $connection->access_token);
+        } catch (\Throwable $e) {
+            $connection->markError($e->getMessage());
+
+            ActivityLogger::log('channel.connection_tested', $connection, [
+                'provider' => $connection->provider->value,
+                'result' => 'failed',
+            ]);
+
+            return ['ok' => false, 'message' => 'Facebook connection test failed: '.$e->getMessage()];
+        }
+
+        $connection->markHealthy();
+
+        ActivityLogger::log('channel.connection_tested', $connection, [
+            'provider' => $connection->provider->value,
+            'result' => 'passed',
+            'page_name' => $page['name'] ?? null,
+        ]);
+
+        $pageName = filled($page['name'] ?? null) ? ' ('.$page['name'].')' : '';
+
+        return ['ok' => true, 'message' => 'Facebook page token is valid'.$pageName.'. Webhook verification uses the verify token shown on this page.'];
     }
 
     /**

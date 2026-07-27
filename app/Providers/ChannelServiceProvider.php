@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\ChannelConnection;
+use App\Services\Channels\Adapters\FacebookLeadAdsAdapter;
 use App\Services\Channels\Adapters\GenericWebhookAdapter;
 use App\Services\Channels\ChannelManager;
 use Illuminate\Support\Facades\Route;
@@ -16,8 +17,9 @@ class ChannelServiceProvider extends ServiceProvider
             $manager = new ChannelManager;
 
             // M1: generic webhook adapter powers the engine end-to-end.
-            // Provider-specific Meta/WhatsApp adapters register in later milestones.
             $manager->register($app->make(GenericWebhookAdapter::class));
+            // M3: Facebook Lead Ads adapter.
+            $manager->register($app->make(FacebookLeadAdsAdapter::class));
 
             return $manager;
         });

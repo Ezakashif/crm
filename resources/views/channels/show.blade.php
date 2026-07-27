@@ -72,6 +72,12 @@
                         <dd>{{ $channel->provider->label() }}</dd>
                         <dt class="text-muted">External account</dt>
                         <dd>{{ $channel->external_account_id ?: '—' }}</dd>
+                        @if ($channel->provider === \App\Enums\Channels\ChannelProvider::FacebookLeadAds)
+                            <dt class="text-muted">Facebook Page ID</dt>
+                            <dd>{{ $channel->external_page_id ?: '—' }}</dd>
+                            <dt class="text-muted">Verify token</dt>
+                            <dd><code class="user-select-all">{{ $channel->verify_token ?: '—' }}</code></dd>
+                        @endif
                         <dt class="text-muted">Token expiry</dt>
                         <dd>{{ $channel->token_expires_at?->toDayDateTimeString() ?? '—' }}</dd>
                         <dt class="text-muted">Last sync</dt>
@@ -128,10 +134,18 @@
                     <strong>Webhook endpoint</strong>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-2">
-                        Send signed JSON POSTs here. Header: <code>X-Channel-Signature: sha256=&lt;hmac&gt;</code>
-                        using the webhook secret.
-                    </p>
+                    @if ($channel->provider === \App\Enums\Channels\ChannelProvider::FacebookLeadAds)
+                        <p class="text-muted small mb-2">
+                            In Meta App Dashboard → Webhooks, subscribe this callback URL to <strong>leadgen</strong> for your Page.
+                            Use the verify token shown in the connection details. Meta signs POSTs with
+                            <code>X-Hub-Signature-256</code> using your app secret (<code>META_APP_SECRET</code>).
+                        </p>
+                    @else
+                        <p class="text-muted small mb-2">
+                            Send signed JSON POSTs here. Header: <code>X-Channel-Signature: sha256=&lt;hmac&gt;</code>
+                            using the webhook secret.
+                        </p>
+                    @endif
                     <label class="small text-muted mb-1">Webhook URL</label>
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" readonly value="{{ $webhookUrl }}" id="channel-webhook-url">
@@ -140,10 +154,16 @@
                         </div>
                     </div>
 
-                    <p class="small text-muted mb-2">
-                        Example lead payload:
-                    </p>
-                    <pre class="bg-light border rounded p-2 small mb-3">{"type":"lead","name":"Alex Morgan","email":"alex@example.com","phone":"+15550100000","company":"Northline","notes":"From website"}</pre>
+                    @if ($channel->provider === \App\Enums\Channels\ChannelProvider::FacebookLeadAds)
+                        <p class="small text-muted mb-2">
+                            Meta sends <code>leadgen</code> notifications here. The CRM fetches lead field data from the Graph API using your page access token.
+                        </p>
+                    @else
+                        <p class="small text-muted mb-2">
+                            Example lead payload:
+                        </p>
+                        <pre class="bg-light border rounded p-2 small mb-3">{"type":"lead","name":"Alex Morgan","email":"alex@example.com","phone":"+15550100000","company":"Northline","notes":"From website"}</pre>
+                    @endif
 
                     @can('manage', $channel)
                         <form method="POST" action="{{ route('channels.regenerate-secret', $channel) }}"
