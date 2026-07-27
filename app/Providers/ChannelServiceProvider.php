@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\ChannelConnection;
 use App\Services\Channels\Adapters\FacebookLeadAdsAdapter;
 use App\Services\Channels\Adapters\GenericWebhookAdapter;
+use App\Services\Channels\Adapters\WhatsAppCloudAdapter;
 use App\Services\Channels\ChannelManager;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -20,6 +21,8 @@ class ChannelServiceProvider extends ServiceProvider
             $manager->register($app->make(GenericWebhookAdapter::class));
             // M3: Facebook Lead Ads adapter.
             $manager->register($app->make(FacebookLeadAdsAdapter::class));
+            // WhatsApp Cloud API adapter.
+            $manager->register($app->make(WhatsAppCloudAdapter::class));
 
             return $manager;
         });

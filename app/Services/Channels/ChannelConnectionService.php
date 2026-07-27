@@ -112,6 +112,10 @@ class ChannelConnectionService
             return $this->testFacebookLeadAdsConnection($connection);
         }
 
+        if ($provider === ChannelProvider::WhatsAppCloud) {
+            return $this->testWhatsAppCloudConnection($connection);
+        }
+
         if (! filled($connection->webhook_secret)) {
             $connection->markError('Webhook secret is missing.');
 
@@ -196,6 +200,61 @@ class ChannelConnectionService
         $pageName = filled($page['name'] ?? null) ? ' ('.$page['name'].')' : '';
 
         return ['ok' => true, 'message' => 'Facebook page token is valid'.$pageName.'. Webhook verification uses the verify token shown on this page.'];
+    }
+
+    /**
+     * @return array{ok: bool, message: string}
+     */
+    protected function testWhatsAppCloudConnection(ChannelConnection $connection): array
+    {
+        if (! filled($connection->external_page_id)) {
+            $connection->markError('WhatsApp Phone Number ID is missing.');
+
+            return ['ok' => false, 'message' => 'Add the WhatsApp Phone Number ID before testing this channel.'];
+        }
+
+        if (! filled($connection->access_token)) {
+            $connection->markError('WhatsApp Cloud access token is missing.');
+
+            return ['ok' => false, 'message' => 'Add the WhatsApp Cloud access token before testing this channel.'];
+        }
+
+        if (! filled(config('channels.meta.app_secret')) && ! filled($connection->webhook_secret)) {
+            $connection->markError('Meta app secret is not configured.');
+
+            return ['ok' => false, 'message' => 'Set META_APP_SECRET in the environment or store a webhook secret on this connection.'];
+        }
+
+        try {
+            $phone = $this->graph->fetchPhoneNumber(
+                (string) $connection->external_page_id,
+                (string) $connection->access_token,
+            );
+        } catch (\Throwable $e) {
+            $connection->markError($e->getMessage());
+
+            ActivityLogger::log('channel.connection_tested', $connection, [
+                'provider' => $connection->provider->value,
+                'result' => 'failed',
+            ]);
+
+            return ['ok' => false, 'message' => 'WhatsApp connection test failed: '.$e->getMessage()];
+        }
+
+        $connection->markHealthy();
+
+        ActivityLogger::log('channel.connection_tested', $connection, [
+            'provider' => $connection->provider->value,
+            'result' => 'passed',
+            'display_phone_number' => $phone['display_phone_number'] ?? null,
+            'verified_name' => $phone['verified_name'] ?? null,
+        ]);
+
+        $label = filled($phone['display_phone_number'] ?? null)
+            ? ' ('.$phone['display_phone_number'].')'
+            : (filled($phone['verified_name'] ?? null) ? ' ('.$phone['verified_name'].')' : '');
+
+        return ['ok' => true, 'message' => 'WhatsApp Cloud token is valid'.$label.'. Use the verify token on this page for Meta webhook setup.'];
     }
 
     /**

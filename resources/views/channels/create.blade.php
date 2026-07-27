@@ -27,38 +27,41 @@
                         @error('provider')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         <small class="form-text text-muted">
                             <strong>Generic Webhook</strong> is the quickest way to test the engine.
-                            <strong>Facebook Lead Ads</strong> needs a Page ID, page access token, and Meta app webhook setup.
+                            <strong>Facebook Lead Ads</strong> needs a Page ID + page token.
+                            <strong>WhatsApp Cloud API</strong> needs a Phone Number ID + Cloud API token.
                         </small>
                     </div>
 
                     <div class="form-group">
                         <x-form-label for="name" :required="true">Display name</x-form-label>
                         <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror"
-                               value="{{ old('name') }}" required placeholder="e.g. Website webhook, Main Facebook Page">
+                               value="{{ old('name') }}" required placeholder="e.g. Website webhook, Main WhatsApp">
                         @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
 
-                    <div class="form-group" id="facebook-page-id-group">
-                        <x-form-label for="external_page_id">Facebook Page ID</x-form-label>
+                    <div class="form-group" id="meta-id-group" style="display: none;">
+                        <x-form-label for="external_page_id" id="meta-id-label">Meta ID</x-form-label>
                         <input id="external_page_id" name="external_page_id" type="text"
                                class="form-control @error('external_page_id') is-invalid @enderror"
-                               value="{{ old('external_page_id') }}" placeholder="Required for Facebook Lead Ads">
+                               value="{{ old('external_page_id') }}" placeholder="">
                         @error('external_page_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        <small class="form-text text-muted" id="meta-id-help"></small>
                     </div>
 
                     <div class="form-group">
-                        <x-form-label for="external_account_id">External account ID</x-form-label>
+                        <x-form-label for="external_account_id" id="external-account-label">External account ID</x-form-label>
                         <input id="external_account_id" name="external_account_id" type="text"
                                class="form-control @error('external_account_id') is-invalid @enderror"
                                value="{{ old('external_account_id') }}" placeholder="Optional provider account id">
                         @error('external_account_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        <small class="form-text text-muted" id="external-account-help"></small>
                     </div>
 
                     <div class="form-group">
                         <x-form-label for="access_token">Access token</x-form-label>
                         <textarea id="access_token" name="access_token" rows="2"
                                   class="form-control @error('access_token') is-invalid @enderror"
-                                  placeholder="Page access token for Facebook Lead Ads — stored encrypted">{{ old('access_token') }}</textarea>
+                                  placeholder="Stored encrypted">{{ old('access_token') }}</textarea>
                         @error('access_token')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
 
@@ -69,7 +72,10 @@
                                value="{{ old('webhook_secret') }}"
                                placeholder="Leave blank to auto-generate">
                         @error('webhook_secret')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                        <small class="form-text text-muted">Used to validate inbound webhook signatures. For Facebook, set <code>META_APP_SECRET</code> in the server environment.</small>
+                        <small class="form-text text-muted">
+                            Used for generic HMAC signatures. For Meta (Facebook / WhatsApp), also set
+                            <code>META_APP_SECRET</code> in the server environment.
+                        </small>
                     </div>
                 </x-form-section>
             </div>
@@ -88,19 +94,49 @@
         <script>
             (function () {
                 const provider = document.getElementById('provider');
-                const pageGroup = document.getElementById('facebook-page-id-group');
-                const pageInput = document.getElementById('external_page_id');
+                const metaGroup = document.getElementById('meta-id-group');
+                const metaLabel = document.getElementById('meta-id-label');
+                const metaHelp = document.getElementById('meta-id-help');
+                const metaInput = document.getElementById('external_page_id');
+                const accountHelp = document.getElementById('external-account-help');
+                const accountInput = document.getElementById('external_account_id');
                 const tokenInput = document.getElementById('access_token');
 
-                function syncFacebookFields() {
-                    const isFacebook = provider.value === 'facebook_lead_ads';
-                    pageGroup.style.display = isFacebook ? '' : 'none';
-                    pageInput.required = isFacebook;
-                    tokenInput.required = isFacebook;
+                function syncProviderFields() {
+                    const value = provider.value;
+                    const isFacebook = value === 'facebook_lead_ads';
+                    const isWhatsApp = value === 'whatsapp_cloud';
+                    const needsMetaId = isFacebook || isWhatsApp;
+
+                    metaGroup.style.display = needsMetaId ? '' : 'none';
+                    metaInput.required = needsMetaId;
+                    tokenInput.required = needsMetaId;
+
+                    if (isFacebook) {
+                        metaLabel.textContent = 'Facebook Page ID';
+                        metaInput.placeholder = 'Required for Facebook Lead Ads';
+                        metaHelp.textContent = 'From Meta Business Suite / Page settings.';
+                        accountInput.placeholder = 'Optional Meta account id';
+                        accountHelp.textContent = '';
+                        tokenInput.placeholder = 'Page access token — stored encrypted';
+                    } else if (isWhatsApp) {
+                        metaLabel.textContent = 'WhatsApp Phone Number ID';
+                        metaInput.placeholder = 'Required for WhatsApp Cloud API';
+                        metaHelp.textContent = 'From Meta Developer → WhatsApp → API Setup → Phone number ID.';
+                        accountInput.placeholder = 'Optional WhatsApp Business Account (WABA) ID';
+                        accountHelp.textContent = 'Optional — helps identify the WABA this number belongs to.';
+                        tokenInput.placeholder = 'WhatsApp Cloud API access token — stored encrypted';
+                    } else {
+                        metaInput.placeholder = '';
+                        metaHelp.textContent = '';
+                        accountInput.placeholder = 'Optional provider account id';
+                        accountHelp.textContent = '';
+                        tokenInput.placeholder = 'Optional — stored encrypted';
+                    }
                 }
 
-                provider.addEventListener('change', syncFacebookFields);
-                syncFacebookFields();
+                provider.addEventListener('change', syncProviderFields);
+                syncProviderFields();
             })();
         </script>
     @endpush

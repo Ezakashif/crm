@@ -70,13 +70,19 @@ class ChannelConnectionController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'external_account_id' => ['nullable', 'string', 'max:255'],
             'external_page_id' => [
-                Rule::requiredIf($request->input('provider') === ChannelProvider::FacebookLeadAds->value),
+                Rule::requiredIf(in_array($request->input('provider'), [
+                    ChannelProvider::FacebookLeadAds->value,
+                    ChannelProvider::WhatsAppCloud->value,
+                ], true)),
                 'nullable',
                 'string',
                 'max:255',
             ],
             'access_token' => [
-                Rule::requiredIf($request->input('provider') === ChannelProvider::FacebookLeadAds->value),
+                Rule::requiredIf(in_array($request->input('provider'), [
+                    ChannelProvider::FacebookLeadAds->value,
+                    ChannelProvider::WhatsAppCloud->value,
+                ], true)),
                 'nullable',
                 'string',
                 'max:5000',

@@ -25,7 +25,7 @@ class ChannelWebhookController extends Controller
             return response()->json(['message' => 'Unknown channel connection.'], 404);
         }
 
-        if ($request->isMethod('GET') && $connection->provider === ChannelProvider::FacebookLeadAds) {
+        if ($request->isMethod('GET') && $this->usesMetaVerification($connection->provider)) {
             return $this->verifyMetaSubscription($request, $connection);
         }
 
@@ -69,6 +69,14 @@ class ChannelWebhookController extends Controller
         ], 202);
     }
 
+    protected function usesMetaVerification(ChannelProvider $provider): bool
+    {
+        return in_array($provider, [
+            ChannelProvider::FacebookLeadAds,
+            ChannelProvider::WhatsAppCloud,
+        ], true);
+    }
+
     protected function verifyMetaSubscription(Request $request, ChannelConnection $connection): Response
     {
         $mode = (string) ($request->query('hub_mode') ?? $request->query('hub.mode') ?? '');
@@ -90,30 +98,56 @@ class ChannelWebhookController extends Controller
 
     protected function resolveIdempotencyKey(ChannelProvider $provider, string $payload): ?string
     {
-        if ($provider !== ChannelProvider::FacebookLeadAds) {
-            return null;
-        }
-
         $data = json_decode($payload, true);
 
         if (! is_array($data)) {
             return null;
         }
 
-        foreach ($data['entry'] ?? [] as $entry) {
-            if (! is_array($entry)) {
-                continue;
-            }
-
-            foreach ($entry['changes'] ?? [] as $change) {
-                if (! is_array($change) || ($change['field'] ?? '') !== 'leadgen') {
+        if ($provider === ChannelProvider::FacebookLeadAds) {
+            foreach ($data['entry'] ?? [] as $entry) {
+                if (! is_array($entry)) {
                     continue;
                 }
 
-                $leadgenId = $change['value']['leadgen_id'] ?? null;
+                foreach ($entry['changes'] ?? [] as $change) {
+                    if (! is_array($change) || ($change['field'] ?? '') !== 'leadgen') {
+                        continue;
+                    }
 
-                if (filled($leadgenId)) {
-                    return 'facebook_leadgen_'.(string) $leadgenId;
+                    $leadgenId = $change['value']['leadgen_id'] ?? null;
+
+                    if (filled($leadgenId)) {
+                        return 'facebook_leadgen_'.(string) $leadgenId;
+                    }
+                }
+            }
+        }
+
+        if ($provider === ChannelProvider::WhatsAppCloud) {
+            foreach ($data['entry'] ?? [] as $entry) {
+                if (! is_array($entry)) {
+                    continue;
+                }
+
+                foreach ($entry['changes'] ?? [] as $change) {
+                    if (! is_array($change) || ($change['field'] ?? '') !== 'messages') {
+                        continue;
+                    }
+
+                    $value = is_array($change['value'] ?? null) ? $change['value'] : [];
+
+                    foreach ($value['messages'] ?? [] as $message) {
+                        if (is_array($message) && filled($message['id'] ?? null)) {
+                            return 'whatsapp_message_'.(string) $message['id'];
+                        }
+                    }
+
+                    foreach ($value['statuses'] ?? [] as $status) {
+                        if (is_array($status) && filled($status['id'] ?? null) && filled($status['status'] ?? null)) {
+                            return 'whatsapp_status_'.(string) $status['id'].'_'.(string) $status['status'];
+                        }
+                    }
                 }
             }
         }
@@ -123,6 +157,38 @@ class ChannelWebhookController extends Controller
 
     protected function resolveEventType(ChannelProvider $provider, string $payload, Request $request): string
     {
+        if ($provider === ChannelProvider::WhatsAppCloud) {
+            $data = json_decode($payload, true);
+
+            if (! is_array($data)) {
+                return 'whatsapp';
+            }
+
+            foreach ($data['entry'] ?? [] as $entry) {
+                if (! is_array($entry)) {
+                    continue;
+                }
+
+                foreach ($entry['changes'] ?? [] as $change) {
+                    if (! is_array($change)) {
+                        continue;
+                    }
+
+                    $value = is_array($change['value'] ?? null) ? $change['value'] : [];
+
+                    if (! empty($value['messages'])) {
+                        return 'message';
+                    }
+
+                    if (! empty($value['statuses'])) {
+                        return 'status';
+                    }
+                }
+            }
+
+            return (string) ($data['object'] ?? 'whatsapp');
+        }
+
         if ($provider !== ChannelProvider::FacebookLeadAds) {
             return $request->header('X-Channel-Event', 'inbound');
         }

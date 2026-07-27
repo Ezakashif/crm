@@ -54,6 +54,56 @@ class MetaGraphClient
         return is_array($data) ? $data : [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function fetchPhoneNumber(string $phoneNumberId, string $accessToken): array
+    {
+        $response = Http::timeout(15)->get($this->url($phoneNumberId), [
+            'access_token' => $accessToken,
+            'fields' => 'id,display_phone_number,verified_name,quality_rating',
+        ]);
+
+        try {
+            $response->throw();
+        } catch (RequestException $e) {
+            $message = $e->response?->json('error.message') ?? $e->getMessage();
+
+            throw new RuntimeException("Meta Graph API phone number lookup failed: {$message}", 0, $e);
+        }
+
+        $data = $response->json();
+
+        return is_array($data) ? $data : [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function sendWhatsAppText(string $phoneNumberId, string $accessToken, string $to, string $body): array
+    {
+        $response = Http::timeout(15)
+            ->withToken($accessToken)
+            ->post($this->url($phoneNumberId.'/messages'), [
+                'messaging_product' => 'whatsapp',
+                'to' => $to,
+                'type' => 'text',
+                'text' => ['body' => $body],
+            ]);
+
+        try {
+            $response->throw();
+        } catch (RequestException $e) {
+            $message = $e->response?->json('error.message') ?? $e->getMessage();
+
+            throw new RuntimeException("WhatsApp send failed: {$message}", 0, $e);
+        }
+
+        $data = $response->json();
+
+        return is_array($data) ? $data : [];
+    }
+
     protected function url(string $nodeId): string
     {
         $version = (string) config('channels.meta.graph_version', 'v21.0');

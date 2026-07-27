@@ -77,6 +77,13 @@
                             <dd>{{ $channel->external_page_id ?: '—' }}</dd>
                             <dt class="text-muted">Verify token</dt>
                             <dd><code class="user-select-all">{{ $channel->verify_token ?: '—' }}</code></dd>
+                        @elseif ($channel->provider === \App\Enums\Channels\ChannelProvider::WhatsAppCloud)
+                            <dt class="text-muted">Phone Number ID</dt>
+                            <dd>{{ $channel->external_page_id ?: '—' }}</dd>
+                            <dt class="text-muted">WABA ID</dt>
+                            <dd>{{ $channel->external_account_id ?: '—' }}</dd>
+                            <dt class="text-muted">Verify token</dt>
+                            <dd><code class="user-select-all">{{ $channel->verify_token ?: '—' }}</code></dd>
                         @endif
                         <dt class="text-muted">Token expiry</dt>
                         <dd>{{ $channel->token_expires_at?->toDayDateTimeString() ?? '—' }}</dd>
@@ -140,6 +147,12 @@
                             Use the verify token shown in the connection details. Meta signs POSTs with
                             <code>X-Hub-Signature-256</code> using your app secret (<code>META_APP_SECRET</code>).
                         </p>
+                    @elseif ($channel->provider === \App\Enums\Channels\ChannelProvider::WhatsAppCloud)
+                        <p class="text-muted small mb-2">
+                            In Meta App Dashboard → WhatsApp → Configuration → Webhook, set this callback URL.
+                            Subscribe to <strong>messages</strong>. Use the verify token shown in the connection details.
+                            Meta signs POSTs with <code>X-Hub-Signature-256</code> using <code>META_APP_SECRET</code>.
+                        </p>
                     @else
                         <p class="text-muted small mb-2">
                             Send signed JSON POSTs here. Header: <code>X-Channel-Signature: sha256=&lt;hmac&gt;</code>
@@ -157,6 +170,11 @@
                     @if ($channel->provider === \App\Enums\Channels\ChannelProvider::FacebookLeadAds)
                         <p class="small text-muted mb-2">
                             Meta sends <code>leadgen</code> notifications here. The CRM fetches lead field data from the Graph API using your page access token.
+                        </p>
+                    @elseif ($channel->provider === \App\Enums\Channels\ChannelProvider::WhatsAppCloud)
+                        <p class="small text-muted mb-2">
+                            Inbound WhatsApp messages create/update a lead (source <code>whatsapp</code>) and open a conversation thread.
+                            Delivery status webhooks are acknowledged but ignored for now.
                         </p>
                     @else
                         <p class="small text-muted mb-2">
