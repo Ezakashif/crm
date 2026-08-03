@@ -21,6 +21,7 @@ use App\Http\Controllers\CsvExportController;
 use App\Http\Controllers\WebsiteLeadWebhookController;
 use App\Http\Controllers\ChannelConnectionController;
 use App\Http\Controllers\ChannelWebhookController;
+use App\Http\Controllers\InboxController;
 
 Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'store'])
     ->middleware(['website-lead-webhook', 'throttle:website-leads'])
@@ -125,6 +126,12 @@ Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->grou
         ->name('channels.disconnect');
     Route::post('/channels/{channel}/regenerate-secret', [ChannelConnectionController::class, 'regenerateSecret'])
         ->name('channels.regenerate-secret');
+
+    Route::get('/inbox', [InboxController::class, 'index'])->name('inbox.index');
+    Route::get('/inbox/{conversation}', [InboxController::class, 'show'])->name('inbox.show');
+    Route::post('/inbox/{conversation}/reply', [InboxController::class, 'reply'])->name('inbox.reply');
+    Route::post('/inbox/{conversation}/assign', [InboxController::class, 'assign'])->name('inbox.assign');
+    Route::post('/inbox/{conversation}/status', [InboxController::class, 'updateStatus'])->name('inbox.status');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export/{type}', [ReportController::class, 'export'])

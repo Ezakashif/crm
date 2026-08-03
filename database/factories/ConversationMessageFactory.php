@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Company;
 use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use Illuminate\Database\Eloquent\Factories\Factory;

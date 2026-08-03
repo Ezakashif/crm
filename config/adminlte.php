@@ -332,6 +332,12 @@ return [
             'can' => 'view.leads',
         ],
         [
+            'text' => 'Inbox',
+            'route' => 'inbox.index',
+            'icon' => 'fas fa-fw fa-inbox',
+            'can' => 'view.inbox',
+        ],
+        [
             'text' => 'Tasks',
             'route' => 'tasks.index',
             'icon' => 'fas fa-fw fa-tasks',
