@@ -89,6 +89,15 @@ php artisan queue:work --queue=channels,default
 
 Open `APP_URL` (default `http://localhost:8000`).
 
+### In-app docs viewer
+
+While logged in (tenant CRM or Super Admin), open:
+
+- [`/docs`](/docs) — documentation home  
+- [`/docs/getting-started/installation`](/docs/getting-started/installation) — example page  
+
+Sidebar: **Account → Documentation** (CRM) or **Documentation** (Super Admin).
+
 ---
 
 ## Support notes

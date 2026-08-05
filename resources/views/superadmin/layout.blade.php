@@ -70,6 +70,9 @@
         <a href="{{ route('superadmin.settings.edit') }}" class="sa-nav-link {{ request()->routeIs('superadmin.settings.*') ? 'active' : '' }}">
             <i class="fas fa-cog" aria-hidden="true"></i> Settings
         </a>
+        <a href="{{ route('docs.index') }}" class="sa-nav-link {{ request()->routeIs('docs.*') ? 'active' : '' }}">
+            <i class="fas fa-book" aria-hidden="true"></i> Documentation
+        </a>
         <a href="{{ route('superadmin.search.index') }}" class="sa-nav-link {{ request()->routeIs('superadmin.search.*') ? 'active' : '' }}">
             <i class="fas fa-search" aria-hidden="true"></i> Search
         </a>

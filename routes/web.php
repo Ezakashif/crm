@@ -22,6 +22,7 @@ use App\Http\Controllers\WebsiteLeadWebhookController;
 use App\Http\Controllers\ChannelConnectionController;
 use App\Http\Controllers\ChannelWebhookController;
 use App\Http\Controllers\InboxController;
+use App\Http\Controllers\DocsController;
 
 Route::post('/webhooks/leads/website', [WebsiteLeadWebhookController::class, 'store'])
     ->middleware(['website-lead-webhook', 'throttle:website-leads'])
@@ -36,6 +37,14 @@ require __DIR__.'/marketing.php';
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified.when_required', 'active', 'company'])
     ->name('dashboard');
+
+// Docs are readable by any active authenticated user (tenant or Super Admin).
+Route::middleware(['auth', 'verified.when_required', 'active'])->group(function () {
+    Route::get('/docs', [DocsController::class, 'index'])->name('docs.index');
+    Route::get('/docs/{path}', [DocsController::class, 'show'])
+        ->where('path', '.*')
+        ->name('docs.show');
+});
 
 Route::middleware(['auth', 'verified.when_required', 'active', 'company'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
