@@ -400,6 +400,11 @@ return [
         ],
         ['header' => 'Account'],
         [
+            'text' => 'Documentation',
+            'route' => 'docs.index',
+            'icon' => 'fas fa-fw fa-book',
+        ],
+        [
             'text' => 'Profile',
             'route' => 'profile.edit',
             'icon' => 'fas fa-fw fa-user',
