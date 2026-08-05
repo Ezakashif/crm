@@ -13,11 +13,17 @@
         <div class="card card-outline card-secondary">
             <div class="card-header"><strong>Contents</strong></div>
             <div class="list-group list-group-flush small" style="max-height: 70vh; overflow-y: auto;">
-                @foreach ($nav as $item)
-                    <a href="{{ $item['url'] }}"
-                       class="list-group-item list-group-item-action {{ $path === $item['path'] ? 'active' : '' }}">
-                        {{ $item['title'] }}
-                    </a>
+                @foreach ($nav as $group)
+                    <div class="list-group-item bg-light text-uppercase text-muted font-weight-bold"
+                         style="letter-spacing: .03em; font-size: .72rem;">
+                        {{ $group['section'] }}
+                    </div>
+                    @foreach ($group['items'] as $item)
+                        <a href="{{ $item['url'] }}"
+                           class="list-group-item list-group-item-action {{ $path === $item['path'] ? 'active' : '' }}">
+                            {{ $item['title'] }}
+                        </a>
+                    @endforeach
                 @endforeach
             </div>
         </div>

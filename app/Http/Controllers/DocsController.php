@@ -148,6 +148,13 @@ class DocsController extends Controller
     /**
      * @return list<array{title: string, path: string, url: string}>
      */
+    /**
+     * Build the sidebar navigation grouped by top-level section so each
+     * folder (e.g. "User Manual", "Channels") is clearly labelled instead
+     * of showing a flat list of repeated "Overview" entries.
+     *
+     * @return array<int, array{section: string, items: array<int, array{title: string, path: string, url: string, active_path: string}>}>
+     */
     protected function navigation(): array
     {
         $base = realpath(base_path('docs'));
@@ -162,13 +169,18 @@ class DocsController extends Controller
             ->name('*.md')
             ->sortByName();
 
-        $items = [];
+        $groups = [];
 
         foreach ($finder as $file) {
             $relative = str_replace('\\', '/', $file->getRelativePathname());
             $path = Str::beforeLast($relative, '.md');
-            $items[] = [
-                'title' => $this->titleFromPath($path),
+
+            $section = str_contains($path, '/')
+                ? Str::headline(str_replace(['-', '_'], ' ', Str::before($path, '/')))
+                : 'General';
+
+            $groups[$section][] = [
+                'title' => $this->navTitle($path),
                 'path' => $path,
                 'url' => $path === 'README'
                     ? route('docs.index')
@@ -176,7 +188,48 @@ class DocsController extends Controller
             ];
         }
 
-        return $items;
+        // Keep "General" (top-level pages) first, then the rest alphabetically.
+        uksort($groups, function (string $a, string $b): int {
+            if ($a === 'General') {
+                return -1;
+            }
+
+            if ($b === 'General') {
+                return 1;
+            }
+
+            return strcmp($a, $b);
+        });
+
+        $navigation = [];
+
+        foreach ($groups as $section => $items) {
+            $navigation[] = [
+                'section' => $section,
+                'items' => $items,
+            ];
+        }
+
+        return $navigation;
+    }
+
+    /**
+     * Title for a nav item within its section (the section header already
+     * conveys the folder, so we only need the page name).
+     */
+    protected function navTitle(string $path): string
+    {
+        if ($path === 'README') {
+            return 'Documentation home';
+        }
+
+        $name = Str::afterLast($path, '/');
+
+        if (Str::lower($name) === 'readme') {
+            return 'Overview';
+        }
+
+        return Str::headline(str_replace(['-', '_'], ' ', $name));
     }
 
     protected function titleFromPath(string $path): string
@@ -186,11 +239,16 @@ class DocsController extends Controller
         }
 
         $name = Str::afterLast($path, '/');
+        $section = str_contains($path, '/')
+            ? Str::headline(str_replace(['-', '_'], ' ', Str::before($path, '/')))
+            : null;
 
-        if (Str::lower($name) === 'readme') {
-            return Str::headline(str_replace(['-', '_'], ' ', (string) Str::beforeLast($path, '/')));
+        if (Str::lower($name) === 'readme' || Str::lower($name) === 'overview') {
+            return $section ?? Str::headline(str_replace(['-', '_'], ' ', $name));
         }
 
-        return Str::headline(str_replace(['-', '_'], ' ', $name));
+        $page = Str::headline(str_replace(['-', '_'], ' ', $name));
+
+        return $section ? $section.' · '.$page : $page;
     }
 }

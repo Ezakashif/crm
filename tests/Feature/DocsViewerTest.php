@@ -40,6 +40,17 @@ class DocsViewerTest extends TestCase
             ->assertSee('composer install', false);
     }
 
+    public function test_docs_nav_shows_user_manual_section(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('docs.index'))
+            ->assertOk()
+            ->assertSee('User Manual', false)
+            ->assertSee(route('docs.show', ['path' => 'user-manual/overview'], false), false);
+    }
+
     public function test_docs_rewrite_relative_markdown_links(): void
     {
         $admin = User::factory()->admin()->create();
