@@ -98,6 +98,11 @@ While logged in (tenant CRM or Super Admin), open:
 
 Sidebar: **Account → Documentation** (CRM) or **Documentation** (Super Admin).
 
+On any docs page you can:
+
+- **PDF** — download the current page  
+- **Download all** — download the full documentation as one PDF (`/docs/pdf`)
+
 ---
 
 ## Support notes

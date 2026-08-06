@@ -41,6 +41,11 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 // Docs are readable by any active authenticated user (tenant or Super Admin).
 Route::middleware(['auth', 'verified.when_required', 'active'])->group(function () {
     Route::get('/docs', [DocsController::class, 'index'])->name('docs.index');
+    // PDF routes must be registered before the catch-all show route.
+    Route::get('/docs/pdf', [DocsController::class, 'downloadAll'])->name('docs.pdf');
+    Route::get('/docs/pdf/{path}', [DocsController::class, 'download'])
+        ->where('path', '.*')
+        ->name('docs.pdf.page');
     Route::get('/docs/{path}', [DocsController::class, 'show'])
         ->where('path', '.*')
         ->name('docs.show');

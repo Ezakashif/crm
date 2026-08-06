@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -28,6 +30,58 @@ class DocsController extends Controller
             'html' => $html,
             'nav' => $this->navigation(),
         ]);
+    }
+
+    public function download(string $path): Response
+    {
+        $relative = $this->normalizeDocPath($path);
+        $absolute = $this->resolveDocFile($relative);
+        $title = $this->titleFromPath($relative);
+        $html = $this->renderMarkdownForPdf(File::get($absolute), $relative);
+
+        $pdf = Pdf::loadView('docs.pdf', [
+            'documentTitle' => $title,
+            'scopeLabel' => 'Single page',
+            'generatedAt' => now(),
+            'toc' => [],
+            'sections' => [[
+                'title' => $title,
+                'path' => $relative,
+                'html' => $html,
+            ]],
+        ])->setPaper('a4', 'portrait');
+
+        $slug = Str::slug(str_replace('/', '-', $relative)) ?: 'documentation';
+
+        return $pdf->download('crm-docs-'.$slug.'-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    public function downloadAll(): Response
+    {
+        $nav = $this->navigation();
+        $sections = [];
+
+        foreach ($nav as $group) {
+            foreach ($group['items'] as $item) {
+                $relative = $item['path'];
+                $absolute = $this->resolveDocFile($relative);
+                $sections[] = [
+                    'title' => ($group['section'] === 'General' ? '' : $group['section'].' · ').$item['title'],
+                    'path' => $relative,
+                    'html' => $this->renderMarkdownForPdf(File::get($absolute), $relative),
+                ];
+            }
+        }
+
+        $pdf = Pdf::loadView('docs.pdf', [
+            'documentTitle' => 'CRM Documentation',
+            'scopeLabel' => 'Full documentation',
+            'generatedAt' => now(),
+            'toc' => $nav,
+            'sections' => $sections,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('crm-documentation-'.now()->format('Y-m-d').'.pdf');
     }
 
     protected function viewName(): string
@@ -92,6 +146,41 @@ class DocsController extends Controller
         return $this->rewriteDocLinks($html, $currentRelative);
     }
 
+    /**
+     * Render Markdown for DomPDF: omit Mermaid (JS-only) and keep doc paths readable offline.
+     */
+    protected function renderMarkdownForPdf(string $markdown, string $currentRelative): string
+    {
+        $markdown = (string) preg_replace(
+            '/```mermaid\s*\n.*?```/is',
+            "\n\n*[Diagram omitted in PDF — open this page in the online docs to view it.]*\n\n",
+            $markdown
+        );
+
+        $converter = new GithubFlavoredMarkdownConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+
+        $html = $converter->convert($markdown)->getContent();
+
+        return (string) preg_replace_callback(
+            '/href="([^"]+\.md)(#[^"]*)?"/i',
+            function (array $matches) use ($currentRelative) {
+                $target = str_replace('\\', '/', $matches[1]);
+
+                if (preg_match('#^(https?:)?//#i', $target) || str_starts_with($target, 'mailto:')) {
+                    return $matches[0];
+                }
+
+                $resolved = $this->resolveRelativeMarkdownPath($currentRelative, $target);
+
+                return 'href="#doc-'.e(Str::slug($resolved)).'"';
+            },
+            $html
+        );
+    }
+
     protected function rewriteDocLinks(string $html, string $currentRelative): string
     {
         return (string) preg_replace_callback(
@@ -146,14 +235,11 @@ class DocsController extends Controller
     }
 
     /**
-     * @return list<array{title: string, path: string, url: string}>
-     */
-    /**
      * Build the sidebar navigation grouped by top-level section so each
      * folder (e.g. "User Manual", "Channels") is clearly labelled instead
      * of showing a flat list of repeated "Overview" entries.
      *
-     * @return array<int, array{section: string, items: array<int, array{title: string, path: string, url: string, active_path: string}>}>
+     * @return array<int, array{section: string, items: array<int, array{title: string, path: string, url: string}}}>
      */
     protected function navigation(): array
     {

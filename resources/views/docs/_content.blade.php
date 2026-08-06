@@ -11,7 +11,12 @@
 <div class="row">
     <div class="col-lg-3 mb-3">
         <div class="card card-outline card-secondary">
-            <div class="card-header"><strong>Contents</strong></div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Contents</strong>
+                <a href="{{ route('docs.pdf') }}" class="btn btn-xs btn-outline-primary" title="Download all documentation as PDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+            </div>
             <div class="list-group list-group-flush small" style="max-height: 70vh; overflow-y: auto;">
                 @foreach ($nav as $group)
                     <div class="list-group-item bg-light text-uppercase text-muted font-weight-bold"
@@ -32,7 +37,19 @@
         <div class="card card-outline card-primary">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap: .5rem;">
                 <strong>{{ $title }}</strong>
-                <code class="small text-muted">docs/{{ $path === 'README' ? 'README.md' : $path.'.md' }}</code>
+                <div class="d-flex align-items-center flex-wrap" style="gap: .5rem;">
+                    <code class="small text-muted">docs/{{ $path === 'README' ? 'README.md' : $path.'.md' }}</code>
+                    <a href="{{ route('docs.pdf.page', ['path' => $path === 'README' ? 'README' : $path]) }}"
+                       class="btn btn-sm btn-outline-secondary"
+                       title="Download this page as PDF">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+                    <a href="{{ route('docs.pdf') }}"
+                       class="btn btn-sm btn-outline-primary"
+                       title="Download all documentation as PDF">
+                        <i class="fas fa-download"></i> Download all
+                    </a>
+                </div>
             </div>
             <div class="card-body crm-docs-content">
                 {!! $html !!}

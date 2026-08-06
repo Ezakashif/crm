@@ -92,4 +92,60 @@ class DocsViewerTest extends TestCase
             ->assertOk()
             ->assertSee('Documentation', false);
     }
+
+    public function test_docs_page_shows_pdf_download_links(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('docs.index'))
+            ->assertOk()
+            ->assertSee(route('docs.pdf', [], false), false)
+            ->assertSee(route('docs.pdf.page', ['path' => 'README'], false), false)
+            ->assertSee('Download all', false);
+    }
+
+    public function test_guest_cannot_download_docs_pdf(): void
+    {
+        $this->get(route('docs.pdf'))->assertRedirect(route('login'));
+        $this->get(route('docs.pdf.page', ['path' => 'README']))->assertRedirect(route('login'));
+    }
+
+    public function test_tenant_can_download_single_page_pdf(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)
+            ->get(route('docs.pdf.page', ['path' => 'user-manual/overview']));
+
+        $response->assertOk();
+        $this->assertStringContainsString('application/pdf', (string) $response->headers->get('content-type'));
+        $this->assertStringContainsString(
+            'crm-docs-user-manual-overview-',
+            (string) $response->headers->get('content-disposition')
+        );
+    }
+
+    public function test_tenant_can_download_full_docs_pdf(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->get(route('docs.pdf'));
+
+        $response->assertOk();
+        $this->assertStringContainsString('application/pdf', (string) $response->headers->get('content-type'));
+        $this->assertStringContainsString(
+            'crm-documentation-',
+            (string) $response->headers->get('content-disposition')
+        );
+    }
+
+    public function test_unknown_doc_pdf_returns_not_found(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('docs.pdf.page', ['path' => 'does-not-exist']))
+            ->assertNotFound();
+    }
 }
