@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Railway (and other reverse proxies) terminate TLS upstream.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
