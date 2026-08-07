@@ -3,13 +3,11 @@
 # Docs: https://docs.railway.com/guides/laravel
 
 [build]
-# Vite assets (public/build is gitignored). Composer install is handled by the PHP provider.
-buildCommand = "npm ci && npm run build"
+# Railpack/Nixpacks already installs npm deps; only build Vite assets here.
+buildCommand = "npm run build"
 
 [deploy]
-# Migrations + production caches run before traffic is switched.
 preDeployCommand = "chmod +x ./railway/init-app.sh && ./railway/init-app.sh"
-# PHP provider serves public/ via php-fpm + Caddy/Nginx by default.
 healthcheckPath = "/up"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
