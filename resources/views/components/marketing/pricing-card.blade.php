@@ -14,8 +14,7 @@
 ])
 
 @php
-    $trialRoute = config('marketing.cta.trial_route', 'register');
-    $ctaHref = $ctaHref ?? (Route::has($trialRoute) ? route($trialRoute) : route('login'));
+    $ctaHref = $ctaHref ?? \App\Support\MarketingCta::primaryHref();
     $price = $billing === 'annual' ? $annual : $monthly;
 @endphp
 

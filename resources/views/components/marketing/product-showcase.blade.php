@@ -6,8 +6,7 @@
 ])
 
 @php
-    $trialRoute = config('marketing.cta.trial_route', 'register');
-    $trialHref = $trialHref ?? (Route::has($trialRoute) ? route($trialRoute) : route('login'));
+    $trialHref = $trialHref ?? \App\Support\MarketingCta::primaryHref();
     $priorityIds = ['dashboard', 'leads', 'customers', 'tasks', 'reports'];
     $itemsById = collect($items)->keyBy('id');
     $featuredItems = collect($priorityIds)
@@ -17,6 +16,7 @@
     $additionalItems = collect($items)
         ->reject(fn ($item) => in_array($item['id'], $priorityIds, true))
         ->values();
+    $trialAvailable = \App\Support\MarketingCta::trialAvailable();
 @endphp
 
 <section {{ $attributes->class(['mk-section mk-product-showcase']) }} aria-labelledby="product-showcase-heading">
@@ -57,7 +57,11 @@
                         <p class="mk-showcase-benefit">{{ $item['benefit'] }}</p>
                         <div class="mt-6">
                             <x-marketing.button :href="$trialHref">
-                                <x-marketing.trial-cta-label />
+                                @if ($trialAvailable)
+                                    <x-marketing.trial-cta-label />
+                                @else
+                                    Book demo
+                                @endif
                                 <x-marketing.icon name="arrow-right" size="sm" />
                             </x-marketing.button>
                         </div>
@@ -121,7 +125,11 @@
                                 <p class="mk-showcase-benefit">{{ $item['benefit'] }}</p>
                                 <div class="mt-6">
                                     <x-marketing.button :href="$trialHref">
-                                        <x-marketing.trial-cta-label />
+                                        @if ($trialAvailable)
+                                            <x-marketing.trial-cta-label />
+                                        @else
+                                            Book demo
+                                        @endif
                                         <x-marketing.icon name="arrow-right" size="sm" />
                                     </x-marketing.button>
                                 </div>

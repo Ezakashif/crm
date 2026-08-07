@@ -7,9 +7,9 @@
         ['label' => 'FAQ', 'href' => $homeUrl.'#faq-heading'],
         ['label' => 'Contact', 'href' => $homeUrl.'#contact'],
     ];
-    $trialRoute = config('marketing.cta.trial_route', 'register');
-    $demoRoute = config('marketing.cta.demo_route', 'marketing.contact');
-    $demoQuery = config('marketing.cta.demo_query', []);
+    $trialAvailable = \App\Support\MarketingCta::trialAvailable();
+    $trialHref = \App\Support\MarketingCta::trialHref();
+    $demoHref = \App\Support\MarketingCta::demoHref();
 @endphp
 
 <header class="mk-nav" data-mk-nav x-data="marketingNav" @keydown.escape.window="close()">
@@ -39,15 +39,17 @@
                     Go to app
                 </x-marketing.button>
             @else
-                <a href="{{ route($demoRoute, $demoQuery) }}" class="mk-nav-link">
+                <a href="{{ $demoHref }}" class="mk-nav-link">
                     Book demo
                 </a>
                 <x-marketing.button href="{{ route('login') }}" variant="ghost" size="sm">
                     Log in
                 </x-marketing.button>
-                <x-marketing.button href="{{ Route::has($trialRoute) ? route($trialRoute) : route('login') }}" size="sm">
-                    <x-marketing.trial-cta-label />
-                </x-marketing.button>
+                @if ($trialAvailable)
+                    <x-marketing.button href="{{ $trialHref }}" size="sm">
+                        <x-marketing.trial-cta-label />
+                    </x-marketing.button>
+                @endif
             @endauth
         </div>
 
@@ -93,15 +95,17 @@
                         Go to app
                     </x-marketing.button>
                 @else
-                    <x-marketing.button href="{{ route($demoRoute, $demoQuery) }}" variant="ghost" class="w-full">
+                    <x-marketing.button href="{{ $demoHref }}" variant="ghost" class="w-full">
                         Book demo
                     </x-marketing.button>
                     <x-marketing.button href="{{ route('login') }}" variant="secondary" class="w-full">
                         Log in
                     </x-marketing.button>
-                    <x-marketing.button href="{{ Route::has($trialRoute) ? route($trialRoute) : route('login') }}" class="w-full">
-                        <x-marketing.trial-cta-label />
-                    </x-marketing.button>
+                    @if ($trialAvailable)
+                        <x-marketing.button href="{{ $trialHref }}" class="w-full">
+                            <x-marketing.trial-cta-label />
+                        </x-marketing.button>
+                    @endif
                 @endauth
             </div>
         </nav>

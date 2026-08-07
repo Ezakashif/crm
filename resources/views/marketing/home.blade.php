@@ -1,13 +1,17 @@
 @php
     $brand = config('marketing.name');
     $home = config('marketing.home');
-    $trialRoute = config('marketing.cta.trial_route', 'register');
-    $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
-    $demoHref = route(config('marketing.cta.demo_route'), config('marketing.cta.demo_query', []));
+    $trialAvailable = \App\Support\MarketingCta::trialAvailable();
+    $trialHref = \App\Support\MarketingCta::trialHref();
+    $demoHref = \App\Support\MarketingCta::demoHref();
+    $primaryHref = \App\Support\MarketingCta::primaryHref();
     $showcase = $home['product_showcase'] ?? [];
     $trialDays = $trialDays ?? 14;
     $trialDurationLabel = $trialDays.' '.\Illuminate\Support\Str::plural('day', $trialDays).' free trial';
-    $trustChips = [...($home['trust_chips'] ?? []), $trialDurationLabel];
+    $trustChips = $home['trust_chips'] ?? [];
+    if ($trialAvailable) {
+        $trustChips = [...$trustChips, $trialDurationLabel];
+    }
 @endphp
 
 <x-marketing-layout
@@ -32,15 +36,27 @@
                     {{ $home['subheadline'] }}
                 </p>
                 <div class="mk-hero-actions mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    <x-marketing.button :href="$trialHref" size="lg">
-                        <x-marketing.trial-cta-label />
-                        <x-marketing.icon name="arrow-right" size="sm" />
-                    </x-marketing.button>
-                    <x-marketing.button :href="$demoHref" variant="secondary" size="lg">
-                        Book demo
-                    </x-marketing.button>
+                    @if ($trialAvailable)
+                        <x-marketing.button :href="$trialHref" size="lg">
+                            <x-marketing.trial-cta-label />
+                            <x-marketing.icon name="arrow-right" size="sm" />
+                        </x-marketing.button>
+                        <x-marketing.button :href="$demoHref" variant="secondary" size="lg">
+                            Book demo
+                        </x-marketing.button>
+                    @else
+                        <x-marketing.button :href="$demoHref" size="lg">
+                            Book demo
+                            <x-marketing.icon name="arrow-right" size="sm" />
+                        </x-marketing.button>
+                        <x-marketing.button :href="route('login')" variant="secondary" size="lg">
+                            Log in
+                        </x-marketing.button>
+                    @endif
                 </div>
-                <p class="mk-hero-reassurance mt-3 text-sm text-slate-500">No credit card required</p>
+                @if ($trialAvailable)
+                    <p class="mk-hero-reassurance mt-3 text-sm text-slate-500">No credit card required</p>
+                @endif
                 <div class="mk-hero-trust mt-7" data-mk-reveal aria-label="Platform capabilities">
                     <x-marketing.trust-chips :items="$trustChips" />
                 </div>
@@ -75,10 +91,17 @@
                 <h2 id="trust-heading">The CRM foundation your team can rely on</h2>
                 <p>Clear ownership, controlled access, and the visibility to keep customer work moving.</p>
                 <div class="mt-6">
-                    <x-marketing.button :href="$trialHref">
-                        <x-marketing.trial-cta-label />
-                        <x-marketing.icon name="arrow-right" size="sm" />
-                    </x-marketing.button>
+                    @if ($trialAvailable)
+                        <x-marketing.button :href="$trialHref">
+                            <x-marketing.trial-cta-label />
+                            <x-marketing.icon name="arrow-right" size="sm" />
+                        </x-marketing.button>
+                    @else
+                        <x-marketing.button :href="$demoHref">
+                            Book demo
+                            <x-marketing.icon name="arrow-right" size="sm" />
+                        </x-marketing.button>
+                    @endif
                 </div>
             </div>
             <x-marketing.trust-badges :items="$home['trust_badges'] ?? []" class="mk-trust-strip-badges" />
@@ -91,7 +114,7 @@
             :headline="$showcase['headline'] ?? 'See the CRM in Action'"
             :subheadline="$showcase['subheadline'] ?? null"
             :items="$showcase['items']"
-            :trial-href="$trialHref"
+            :trial-href="$primaryHref"
             class="bg-white"
         />
     @endif
@@ -142,10 +165,17 @@
                     description="Algos keeps the customer journey moving in one shared workspace—without losing context between sales, service, and reporting."
                 />
                 <div class="mt-7">
-                    <x-marketing.button :href="$trialHref">
-                        <x-marketing.trial-cta-label />
-                        <x-marketing.icon name="arrow-right" size="sm" />
-                    </x-marketing.button>
+                    @if ($trialAvailable)
+                        <x-marketing.button :href="$trialHref">
+                            <x-marketing.trial-cta-label />
+                            <x-marketing.icon name="arrow-right" size="sm" />
+                        </x-marketing.button>
+                    @else
+                        <x-marketing.button :href="$demoHref">
+                            Book demo
+                            <x-marketing.icon name="arrow-right" size="sm" />
+                        </x-marketing.button>
+                    @endif
                 </div>
             </div>
             <ol class="mk-workflow">
@@ -225,10 +255,17 @@
                 @endforeach
             </div>
             <div class="mt-10 text-center" data-mk-reveal>
-                <x-marketing.button :href="$trialHref">
-                    <x-marketing.trial-cta-label />
-                    <x-marketing.icon name="arrow-right" size="sm" />
-                </x-marketing.button>
+                @if ($trialAvailable)
+                    <x-marketing.button :href="$trialHref">
+                        <x-marketing.trial-cta-label />
+                        <x-marketing.icon name="arrow-right" size="sm" />
+                    </x-marketing.button>
+                @else
+                    <x-marketing.button :href="$demoHref">
+                        Book demo
+                        <x-marketing.icon name="arrow-right" size="sm" />
+                    </x-marketing.button>
+                @endif
             </div>
         </div>
     </section>
@@ -277,7 +314,8 @@
             <div class="mt-10 grid gap-6 lg:grid-cols-3">
                 @forelse ($plans as $index => $plan)
                     @php
-                        $planCtaHref = $plan->is_free ? $trialHref : $demoHref;
+                        $offerTrial = $plan->is_free && $trialAvailable;
+                        $planCtaHref = $offerTrial ? $trialHref : $demoHref;
                         $features = $plan->features->map(fn ($feature) => $feature->feature_value ?: $feature->feature_name)
                             ->concat($plan->limits->map(fn ($limit) => $limit->limit_name.': '.($limit->isUnlimited() ? 'Unlimited' : trim($limit->limit_value.' '.$limit->unit))))->all();
                     @endphp
@@ -289,12 +327,12 @@
                                 :monthly="$plan->monthly_price"
                                 :annual="$plan->yearly_price"
                                 :features="$features"
-                                :cta="$plan->is_free ? 'Start Free Trial' : 'Contact Sales'"
-                                :cta-type="$plan->is_free ? 'trial' : 'demo'"
+                                :cta="$offerTrial ? 'Start Free Trial' : 'Contact Sales'"
+                                :cta-type="$offerTrial ? 'trial' : 'demo'"
                                 :highlighted="$plan->is_featured"
                                 :cta-href="$planCtaHref"
                                 :currency="$plan->currency"
-                                :trial-days="$plan->trial_days"
+                                :trial-days="$offerTrial ? $plan->trial_days : 0"
                                 billing="monthly"
                             />
                         </div>
@@ -305,12 +343,12 @@
                                 :monthly="$plan->monthly_price"
                                 :annual="$plan->yearly_price"
                                 :features="$features"
-                                :cta="$plan->is_free ? 'Start Free Trial' : 'Contact Sales'"
-                                :cta-type="$plan->is_free ? 'trial' : 'demo'"
+                                :cta="$offerTrial ? 'Start Free Trial' : 'Contact Sales'"
+                                :cta-type="$offerTrial ? 'trial' : 'demo'"
                                 :highlighted="$plan->is_featured"
                                 :cta-href="$planCtaHref"
                                 :currency="$plan->currency"
-                                :trial-days="$plan->trial_days"
+                                :trial-days="$offerTrial ? $plan->trial_days : 0"
                                 billing="annual"
                             />
                         </div>
@@ -365,7 +403,5 @@
     <x-marketing.cta
         id="contact"
         title="Ready to organize your sales pipeline?"
-        description="Start your free trial today. No credit card required—or book a demo and we’ll walk you through the workspace."
-        note="No credit card required"
     />
 </x-marketing-layout>

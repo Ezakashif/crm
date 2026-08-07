@@ -1,8 +1,8 @@
 @php
     $pricing = config('marketing.pricing');
-    $trialRoute = config('marketing.cta.trial_route', 'register');
-    $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
-    $demoHref = route(config('marketing.cta.demo_route'), config('marketing.cta.demo_query', []));
+    $trialAvailable = \App\Support\MarketingCta::trialAvailable();
+    $trialHref = \App\Support\MarketingCta::trialHref();
+    $demoHref = \App\Support\MarketingCta::demoHref();
 @endphp
 
 <x-marketing-layout
@@ -23,7 +23,9 @@
                     {{ $pricing['subheadline'] }}
                 </p>
                 <p class="mt-3 text-sm font-medium text-slate-500">
-                    {{ $pricing['trial_note'] ?? 'No credit card required · Cancel anytime during trial' }}
+                    {{ $trialAvailable
+                        ? ($pricing['trial_note'] ?? 'No credit card required · Cancel anytime during trial')
+                        : 'Talk with our team to get started' }}
                 </p>
             </div>
         </div>
@@ -61,7 +63,8 @@
             <div class="mt-10 grid gap-6 lg:grid-cols-3">
                 @forelse ($plans as $index => $plan)
                     @php
-                        $planCtaHref = $plan->is_free ? $trialHref : $demoHref;
+                        $offerTrial = $plan->is_free && $trialAvailable;
+                        $planCtaHref = $offerTrial ? $trialHref : $demoHref;
                         $features = $plan->features->map(fn ($feature) => $feature->feature_value ?: $feature->feature_name)
                             ->concat($plan->limits->map(fn ($limit) => $limit->limit_name.': '.($limit->isUnlimited() ? 'Unlimited' : trim($limit->limit_value.' '.$limit->unit))))->all();
                     @endphp
@@ -73,12 +76,12 @@
                                 :monthly="$plan->monthly_price"
                                 :annual="$plan->yearly_price"
                                 :features="$features"
-                                :cta="$plan->is_free ? 'Start Free Trial' : 'Contact Sales'"
-                                :cta-type="$plan->is_free ? 'trial' : 'demo'"
+                                :cta="$offerTrial ? 'Start Free Trial' : 'Contact Sales'"
+                                :cta-type="$offerTrial ? 'trial' : 'demo'"
                                 :highlighted="$plan->is_featured"
                                 :cta-href="$planCtaHref"
                                 :currency="$plan->currency"
-                                :trial-days="$plan->trial_days"
+                                :trial-days="$offerTrial ? $plan->trial_days : 0"
                                 billing="monthly"
                             />
                         </div>
@@ -89,12 +92,12 @@
                                 :monthly="$plan->monthly_price"
                                 :annual="$plan->yearly_price"
                                 :features="$features"
-                                :cta="$plan->is_free ? 'Start Free Trial' : 'Contact Sales'"
-                                :cta-type="$plan->is_free ? 'trial' : 'demo'"
+                                :cta="$offerTrial ? 'Start Free Trial' : 'Contact Sales'"
+                                :cta-type="$offerTrial ? 'trial' : 'demo'"
                                 :highlighted="$plan->is_featured"
                                 :cta-href="$planCtaHref"
                                 :currency="$plan->currency"
-                                :trial-days="$plan->trial_days"
+                                :trial-days="$offerTrial ? $plan->trial_days : 0"
                                 billing="annual"
                             />
                         </div>
@@ -163,7 +166,5 @@
     {{-- CTA --}}
     <x-marketing.cta
         title="Ready to organize your sales pipeline?"
-        description="Start your free trial today. No credit card required—or talk with us about Enterprise."
-        note="No credit card required"
     />
 </x-marketing-layout>
