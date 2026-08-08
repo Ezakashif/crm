@@ -63,7 +63,7 @@
             <div class="mt-10 grid gap-6 lg:grid-cols-3">
                 @forelse ($plans as $index => $plan)
                     @php
-                        $offerTrial = $plan->is_free && $trialAvailable;
+                        $offerTrial = $plan->trial_days > 0 && $trialAvailable;
                         $planCtaHref = $offerTrial ? $trialHref : $demoHref;
                         $features = $plan->features->map(fn ($feature) => $feature->feature_value ?: $feature->feature_name)
                             ->concat($plan->limits->map(fn ($limit) => $limit->limit_name.': '.($limit->isUnlimited() ? 'Unlimited' : trim($limit->limit_value.' '.$limit->unit))))->all();

@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(RbacSeeder::class);
         $this->call(EmailTemplateSeeder::class);
+        $this->call(PlanSeeder::class);
 
         $company = Company::query()->firstOrCreate(
             ['slug' => Company::DEFAULT_SLUG],
