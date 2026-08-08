@@ -63,11 +63,17 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'dashboard_tour_completed_at' => 'datetime',
             'locked_until' => 'datetime',
             'password' => 'hashed',
             'is_super_admin' => 'boolean',
             'failed_login_attempts' => 'integer',
         ];
+    }
+
+    public function hasCompletedDashboardTour(): bool
+    {
+        return $this->dashboard_tour_completed_at !== null;
     }
 
     public function ownedCompanies(): HasMany
