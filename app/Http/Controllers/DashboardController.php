@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\DashboardService;
+use App\Support\DashboardTour;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -13,6 +14,14 @@ class DashboardController extends Controller
 
     public function index(): View
     {
-        return view('dashboard', $this->dashboard->forUser(auth()->user()));
+        $user = auth()->user();
+
+        return view('dashboard', array_merge(
+            $this->dashboard->forUser($user),
+            [
+                'shouldStartDashboardTour' => ! $user->hasCompletedDashboardTour(),
+                'dashboardTourSteps' => DashboardTour::stepsFor($user),
+            ],
+        ));
     }
 }

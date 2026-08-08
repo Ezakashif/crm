@@ -1,16 +1,7 @@
-# Railway configuration for the primary App (HTTP) service.
-# Worker and Cron services override the start command in the Railway dashboard.
-# Docs: https://docs.railway.com/guides/laravel
-
-[build]
-# Vite assets (public/build is gitignored). Composer install is handled by the PHP provider.
-buildCommand = "npm ci && npm run build"
+# Railway configuration shared by App/Worker/Cron from this repo.
+# HTTP healthcheck is configured on the App service in Railway (not here),
+# so Worker/Cron queue processes are not probed on /up.
 
 [deploy]
-# Migrations + production caches run before traffic is switched.
-preDeployCommand = "chmod +x ./railway/init-app.sh && ./railway/init-app.sh"
-# PHP provider serves public/ via php-fpm + Caddy/Nginx by default.
-healthcheckPath = "/up"
-healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10

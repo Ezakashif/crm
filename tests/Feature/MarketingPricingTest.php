@@ -54,4 +54,28 @@ class MarketingPricingTest extends TestCase
             ->assertSee('No credit card required', false)
             ->assertSee('Recommended', false);
     }
+
+    public function test_pricing_page_uses_platform_trial_duration_for_free_plans(): void
+    {
+        Plan::withTrashed()->forceDelete();
+
+        app(\App\Services\SuperAdmin\PlatformSettingsService::class)->setMany([
+            'registration_enabled' => true,
+            'trial_duration_days' => 30,
+        ]);
+
+        Plan::factory()->public()->create([
+            'name' => 'Starter',
+            'slug' => 'starter',
+            'is_free' => true,
+            'trial_days' => 7,
+            'is_featured' => true,
+        ]);
+
+        $this->get(route('marketing.pricing'))
+            ->assertOk()
+            ->assertSee('Start 30 days free trial', false)
+            ->assertSee('30 days free trial', false)
+            ->assertDontSee('Start 7 days free trial', false);
+    }
 }

@@ -1,8 +1,9 @@
 @php
     $page = config('marketing.features_page');
-    $trialRoute = config('marketing.cta.trial_route', 'register');
-    $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
-    $demoHref = route(config('marketing.cta.demo_route'), config('marketing.cta.demo_query', []));
+    $trialAvailable = \App\Support\MarketingCta::trialAvailable();
+    $trialHref = \App\Support\MarketingCta::trialHref();
+    $demoHref = \App\Support\MarketingCta::demoHref();
+    $primaryHref = \App\Support\MarketingCta::primaryHref();
 @endphp
 
 <x-marketing-layout
@@ -23,13 +24,20 @@
                     {{ $page['subheadline'] }}
                 </p>
                 <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    <x-marketing.button :href="$trialHref" size="lg">
-                        <x-marketing.trial-cta-label />
-                        <x-marketing.icon name="arrow-right" size="sm" />
-                    </x-marketing.button>
-                    <x-marketing.button :href="$demoHref" variant="secondary" size="lg">
-                        Book demo
-                    </x-marketing.button>
+                    @if ($trialAvailable)
+                        <x-marketing.button :href="$trialHref" size="lg">
+                            <x-marketing.trial-cta-label />
+                            <x-marketing.icon name="arrow-right" size="sm" />
+                        </x-marketing.button>
+                        <x-marketing.button :href="$demoHref" variant="secondary" size="lg">
+                            Book demo
+                        </x-marketing.button>
+                    @else
+                        <x-marketing.button :href="$demoHref" size="lg">
+                            Book demo
+                            <x-marketing.icon name="arrow-right" size="sm" />
+                        </x-marketing.button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -71,6 +79,5 @@
     {{-- Closing CTA --}}
     <x-marketing.cta
         title="See Algos in your workflow"
-        description="Start a free trial or book a demo and we’ll walk through the modules that matter to your team."
     />
 </x-marketing-layout>

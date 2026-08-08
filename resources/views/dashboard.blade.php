@@ -9,14 +9,23 @@
             ]"
         >
             <x-slot:actions>
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        data-tour="tour-replay"
+                        title="Replay the dashboard product tour">
+                    <i class="fas fa-route" aria-hidden="true"></i>
+                    Replay tour
+                </button>
                 @if (! empty($quickActions))
-                    @foreach ($quickActions as $index => $action)
-                        <a href="{{ $action['route'] }}"
-                           class="btn btn-sm {{ $index === 0 ? 'btn-primary' : 'btn-outline-secondary' }}">
-                            <i class="{{ $action['icon'] }}" aria-hidden="true"></i>
-                            {{ $action['label'] }}
-                        </a>
-                    @endforeach
+                    <span class="crm-header-actions__group" data-tour="quick-actions">
+                        @foreach ($quickActions as $index => $action)
+                            <a href="{{ $action['route'] }}"
+                               class="btn btn-sm {{ $index === 0 ? 'btn-primary' : 'btn-outline-secondary' }}">
+                                <i class="{{ $action['icon'] }}" aria-hidden="true"></i>
+                                {{ $action['label'] }}
+                            </a>
+                        @endforeach
+                    </span>
                 @endif
             </x-slot:actions>
         </x-page-header>
@@ -221,7 +230,7 @@
             {{-- Insights column --}}
             <div class="col-lg-4">
                 @if ($canViewLeads)
-                    <x-dashboard.section-card title="Lead pipeline" :padded="true">
+                    <x-dashboard.section-card title="Lead pipeline" :padded="true" data-tour="lead-pipeline">
                         <div class="crm-insight-grid">
                             <a href="{{ route('leads.index', ['status' => 'new']) }}" class="crm-insight">
                                 <div class="crm-insight__label">New leads</div>
@@ -240,7 +249,7 @@
                 @endif
 
                 @if ($canViewCustomers || $canViewLeads || $canViewTasks)
-                    <x-dashboard.section-card title="Workspace totals" :padded="true">
+                    <x-dashboard.section-card title="Workspace totals" :padded="true" data-tour="workspace-totals">
                         <div class="crm-totals">
                             @if ($canViewCustomers)
                                 <a href="{{ route('customers.index') }}" class="crm-total-row crm-total-row--link">
@@ -265,7 +274,7 @@
                 @endif
 
                 @if ($canViewLeads)
-                    <x-dashboard.section-card title="Lead source distribution" :padded="true">
+                    <x-dashboard.section-card title="Lead source distribution" :padded="true" data-tour="dashboard-charts">
                         <div id="lead-source-shell" class="crm-chart-shell crm-chart-shell--sm is-loading" aria-busy="true">
                             <div class="crm-chart-skeleton" aria-hidden="true"></div>
                             <canvas id="leadSourceChart" aria-label="Lead source distribution chart"></canvas>
@@ -404,4 +413,26 @@
             @include('partials.dashboard.chart-scripts')
         @endpush
     @endif
+
+    @push('css')
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.5/dist/driver.css">
+        <link rel="stylesheet" href="{{ asset('css/dashboard-tour.css') }}">
+    @endpush
+
+    @push('js')
+        @php
+            $dashboardTourBoot = [
+                'autoStart' => (bool) ($shouldStartDashboardTour ?? false),
+                'steps' => $dashboardTourSteps ?? [],
+                'completeUrl' => route('dashboard.tour.complete'),
+                'restartUrl' => route('dashboard.tour.restart'),
+                'csrf' => csrf_token(),
+            ];
+        @endphp
+        <script>
+            window.DashboardTourBoot = @json($dashboardTourBoot);
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.5/dist/driver.js.iife.js"></script>
+        <script src="{{ asset('js/dashboard-tour.js') }}"></script>
+    @endpush
 </x-app-layout>

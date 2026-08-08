@@ -82,7 +82,7 @@
                         <a href="{{ route('marketing.contact') }}" class="text-sm text-slate-400 transition hover:text-white">Help Center</a>
                     </li>
                     <li>
-                        <a href="{{ route('marketing.features') }}" class="text-sm text-slate-400 transition hover:text-white">Documentation</a>
+                        <a href="{{ route('marketing.documentation') }}" class="text-sm text-slate-400 transition hover:text-white">Documentation</a>
                     </li>
                 </ul>
             </div>

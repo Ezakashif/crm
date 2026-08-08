@@ -148,6 +148,7 @@ class PlatformMarketingContactDetailsTest extends TestCase
             'marketing.home',
             'marketing.features',
             'marketing.pricing',
+            'marketing.documentation',
             'marketing.about',
             'marketing.contact',
         ] as $route) {

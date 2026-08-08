@@ -103,6 +103,8 @@ class SettingsController extends Controller
 
         $this->settings->setEncrypted('smtp_password', $validated['smtp_password'] ?? null);
 
+        $this->syncTrialDaysOnTrialPlans((int) $validated['trial_duration_days']);
+
         $this->settings->applyBranding();
 
         ActivityLogger::log('platform.settings_updated', null, [
@@ -130,6 +132,18 @@ class SettingsController extends Controller
         ]);
 
         return back()->with('success', 'Announcement updated.');
+    }
+
+    private function syncTrialDaysOnTrialPlans(int $trialDays): void
+    {
+        $trialDays = max(0, $trialDays);
+
+        Plan::query()
+            ->where(function ($query) {
+                $query->where('is_free', true)
+                    ->orWhere('trial_days', '>', 0);
+            })
+            ->update(['trial_days' => $trialDays]);
     }
 
     private function deleteLogo(): void

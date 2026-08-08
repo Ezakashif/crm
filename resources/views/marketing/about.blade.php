@@ -120,6 +120,5 @@
 
     <x-marketing.cta
         title="Want to see Algos in action?"
-        description="Start a free trial or book a demo—we’ll show you the workspace your team will actually use."
     />
 </x-marketing-layout>

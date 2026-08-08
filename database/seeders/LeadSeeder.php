@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Lead;
+use App\Models\Scopes\CompanyScope;
 use App\Models\User;
+use App\Support\CurrentCompany;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -26,16 +28,22 @@ class LeadSeeder extends Seeder
 
     public function run(): void
     {
-        $admin = User::query()->where('email', 'admin@example.com')->first()
-            ?? User::query()->whereHas('roles', fn ($q) => $q->where('slug', 'admin'))->first();
+        config(['tenancy.fail_closed_without_context' => false]);
 
-        $sales = User::query()->where('email', 'sales@example.com')->first()
-            ?? User::query()->whereHas('roles', fn ($q) => $q->where('slug', 'sales'))->first();
+        $admin = User::withoutGlobalScope(CompanyScope::class)->where('email', 'admin@example.com')->first()
+            ?? User::withoutGlobalScope(CompanyScope::class)->whereHas('roles', fn ($q) => $q->where('slug', 'admin'))->first();
+
+        $sales = User::withoutGlobalScope(CompanyScope::class)->where('email', 'sales@example.com')->first()
+            ?? User::withoutGlobalScope(CompanyScope::class)->whereHas('roles', fn ($q) => $q->where('slug', 'sales'))->first();
 
         if (! $admin) {
             $this->command?->warn('LeadSeeder skipped: no admin user found. Run DatabaseSeeder first.');
 
             return;
+        }
+
+        if ($admin->company_id) {
+            app(CurrentCompany::class)->set($admin->company_id);
         }
 
         $assignees = collect([$admin, $sales])->filter()->unique('id')->values();
@@ -69,7 +77,6 @@ class LeadSeeder extends Seeder
                     fake()->numberBetween($monthStart->timestamp, max($monthStart->timestamp, $monthEnd->timestamp))
                 );
 
-                // Older leads lean toward terminal statuses; recent months keep more open pipeline.
                 if ($offset <= -3 && fake()->boolean(35)) {
                     $status = fake()->randomElement(['won', 'lost', 'proposal_sent']);
                 } elseif ($offset >= -1 && fake()->boolean(40)) {
@@ -83,6 +90,7 @@ class LeadSeeder extends Seeder
                 Lead::factory()
                     ->status($status, $sortOrders[$status]++)
                     ->state([
+                        'company_id' => $admin->company_id,
                         'created_by' => $admin->id,
                         'assigned_to' => $assignee?->id,
                         'follow_up_date' => $this->followUpFor($status, $createdAt),

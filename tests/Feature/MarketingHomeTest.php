@@ -15,6 +15,7 @@ class MarketingHomeTest extends TestCase
     {
         app(PlatformSettingsService::class)->setMany([
             'trial_duration_days' => 14,
+            'registration_enabled' => true,
         ]);
 
         $this->get(route('marketing.home'))
@@ -39,10 +40,27 @@ class MarketingHomeTest extends TestCase
             ->assertSee('Ready to organize your sales pipeline?', false);
     }
 
+    public function test_home_hides_free_trial_ctas_when_registration_is_disabled(): void
+    {
+        app(PlatformSettingsService::class)->setMany([
+            'registration_enabled' => false,
+            'trial_duration_days' => 14,
+        ]);
+
+        $this->get(route('marketing.home'))
+            ->assertOk()
+            ->assertDontSee('Start 14 days free trial', false)
+            ->assertDontSee('Start Free Trial', false)
+            ->assertDontSee('href="'.route('register').'"', false)
+            ->assertSee('Book demo', false)
+            ->assertSee(route('marketing.contact', ['intent' => 'demo']), false);
+    }
+
     public function test_home_uses_the_super_admin_trial_duration_in_trust_cta(): void
     {
         app(PlatformSettingsService::class)->setMany([
             'trial_duration_days' => 21,
+            'registration_enabled' => true,
         ]);
 
         $this->get(route('marketing.home'))
@@ -57,6 +75,7 @@ class MarketingHomeTest extends TestCase
     {
         app(PlatformSettingsService::class)->setMany([
             'trial_duration_days' => 1,
+            'registration_enabled' => true,
         ]);
 
         $this->get(route('marketing.home'))

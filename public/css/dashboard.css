@@ -41,6 +41,13 @@
     background: var(--crm-surface);
 }
 
+.crm-dashboard .crm-header-actions__group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+
 .crm-dashboard .crm-header-actions .btn-outline-secondary:hover {
     background: var(--crm-surface-muted);
     color: var(--crm-text);

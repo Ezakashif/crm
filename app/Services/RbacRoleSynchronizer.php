@@ -124,7 +124,9 @@ class RbacRoleSynchronizer
         $permissionsBySlug = Permission::query()->pluck('id', 'slug');
 
         foreach (RbacSeeder::ROLES as $slug => $attributes) {
-            $role = Role::query()->updateOrCreate(
+            // Ignore CompanyScope so historical migrations can upsert by slug
+            // before tenant rows exist (avoids duplicate slug inserts).
+            $role = Role::withoutCompanyScope()->updateOrCreate(
                 ['slug' => $slug],
                 $attributes,
             );
@@ -132,7 +134,7 @@ class RbacRoleSynchronizer
             $this->syncRolePermissions($role, RbacSeeder::ROLE_PERMISSIONS[$slug], $permissionsBySlug);
         }
 
-        Role::query()
+        Role::withoutCompanyScope()
             ->where('slug', '!=', 'admin')
             ->where('is_system', true)
             ->update(['is_system' => false]);
@@ -140,13 +142,13 @@ class RbacRoleSynchronizer
 
     private function removeManagerRoleWithoutTenancy(): void
     {
-        $managerRole = Role::query()->where('slug', 'manager')->first();
+        $managerRole = Role::withoutCompanyScope()->where('slug', 'manager')->first();
 
         if (! $managerRole) {
             return;
         }
 
-        $salesRole = Role::query()->updateOrCreate(
+        $salesRole = Role::withoutCompanyScope()->updateOrCreate(
             ['slug' => 'sales'],
             RbacSeeder::ROLES['sales'],
         );

@@ -16,6 +16,10 @@ php artisan storage:link --force
 
 php artisan migrate --force
 
+# Fix accidental branding from an earlier Railway APP_NAME mistake.
+# Platform name is stored in DB and overrides config('app.name') at runtime.
+php artisan tinker --execute="\\Illuminate\\Support\\Facades\\DB::table('platform_settings')->where('key', 'platform_name')->where('value', 'Hotel Compete CRM')->update(['value' => 'Algos CRM', 'updated_at' => now()]); \\Illuminate\\Support\\Facades\\Cache::forget(\\App\\Services\\SuperAdmin\\PlatformSettingsService::CACHE_KEY);"
+
 php artisan optimize:clear
 
 php artisan config:cache

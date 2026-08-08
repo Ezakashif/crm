@@ -1,7 +1,7 @@
 @props([
     'title' => 'Ready to organize your sales pipeline?',
-    'description' => 'Start your free trial today. No credit card required.',
-    'note' => 'No credit card required',
+    'description' => null,
+    'note' => null,
     'primaryLabel' => null,
     'primaryHref' => null,
     'secondaryLabel' => 'Book demo',
@@ -9,12 +9,24 @@
 ])
 
 @php
-    $trialRoute = config('marketing.cta.trial_route', 'register');
-    $demoRoute = config('marketing.cta.demo_route', 'marketing.contact');
-    $demoQuery = config('marketing.cta.demo_query', []);
+    $trialAvailable = \App\Support\MarketingCta::trialAvailable();
+    $demoHref = \App\Support\MarketingCta::demoHref();
 
-    $primaryHref = $primaryHref ?? (Route::has($trialRoute) ? route($trialRoute) : route('login'));
-    $secondaryHref = $secondaryHref ?? route($demoRoute, $demoQuery);
+    $primaryHref = $primaryHref ?? \App\Support\MarketingCta::primaryHref();
+    $secondaryHref = $secondaryHref ?? $demoHref;
+
+    if ($description === null) {
+        $description = $trialAvailable
+            ? 'Start your free trial today. No credit card required.'
+            : 'Book a demo and we’ll walk you through the workspace.';
+    }
+
+    if ($note === null) {
+        $note = $trialAvailable ? 'No credit card required' : null;
+    }
+
+    // When registration is closed, avoid duplicating "Book demo" as both buttons.
+    $showSecondary = $trialAvailable || ($secondaryHref !== $primaryHref);
 @endphp
 
 <section {{ $attributes->class(['mk-section']) }}>
@@ -39,14 +51,18 @@
                     <x-marketing.button :href="$primaryHref" size="lg">
                         @if ($primaryLabel)
                             {{ $primaryLabel }}
-                        @else
+                        @elseif ($trialAvailable)
                             <x-marketing.trial-cta-label />
+                        @else
+                            Book demo
                         @endif
                         <x-marketing.icon name="arrow-right" size="sm" />
                     </x-marketing.button>
-                    <x-marketing.button :href="$secondaryHref" variant="on-dark" size="lg">
-                        {{ $secondaryLabel }}
-                    </x-marketing.button>
+                    @if ($showSecondary)
+                        <x-marketing.button :href="$secondaryHref" variant="on-dark" size="lg">
+                            {{ $secondaryLabel }}
+                        </x-marketing.button>
+                    @endif
                 </div>
                 @if ($note)
                     <p class="mt-4 text-sm font-medium text-slate-400">{{ $note }}</p>

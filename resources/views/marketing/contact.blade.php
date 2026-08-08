@@ -2,8 +2,9 @@
     $contact = config('marketing.contact');
     $social = config('marketing.social');
     $brand = config('marketing.name');
-    $trialRoute = config('marketing.cta.trial_route', 'register');
-    $trialHref = Route::has($trialRoute) ? route($trialRoute) : route('login');
+    $trialAvailable = \App\Support\MarketingCta::trialAvailable();
+    $trialHref = \App\Support\MarketingCta::trialHref();
+    $primaryHref = \App\Support\MarketingCta::primaryHref();
     $isDemo = ($intent ?? null) === 'demo';
     $defaultMessage = $isDemo
         ? 'Hi—I’d like to book a demo of '.$brand.' for our team.'
@@ -230,8 +231,12 @@
                 <x-marketing.faq-accordion :items="$faqs" open="trial" class="mk-faq-surface" />
             </div>
             <div class="mt-10 text-center" data-mk-reveal>
-                <x-marketing.button :href="$trialHref">
-                    <x-marketing.trial-cta-label />
+                <x-marketing.button :href="$primaryHref">
+                    @if ($trialAvailable)
+                        <x-marketing.trial-cta-label />
+                    @else
+                        Book demo
+                    @endif
                     <x-marketing.icon name="arrow-right" size="sm" />
                 </x-marketing.button>
             </div>
@@ -240,7 +245,7 @@
 
     <x-marketing.cta
         title="Prefer to explore on your own?"
-        description="Start a free trial and invite your team when you’re ready."
+        :description="$trialAvailable ? 'Start a free trial and invite your team when you’re ready.' : 'Book a demo and we’ll walk you through the workspace.'"
         secondary-label="View pricing"
         :secondary-href="route('marketing.pricing')"
     />

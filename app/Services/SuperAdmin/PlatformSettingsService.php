@@ -208,7 +208,14 @@ class PlatformSettingsService
         }
 
         $smtpHost = $this->get('smtp_host');
-        if (filled($smtpHost)) {
+        // Env API/dev mailers win so platform SMTP cannot override Resend/etc.
+        // or hang auth on unreachable SMTP hosts in deploy environments.
+        $envMailer = strtolower((string) config('mail.default'));
+        $envForcesNonSmtp = in_array($envMailer, [
+            'log', 'array', 'resend', 'postmark', 'ses', 'ses-v2', 'mailgun',
+        ], true);
+
+        if (filled($smtpHost) && ! $envForcesNonSmtp) {
             $smtpHost = $this->normalizeSmtpHost((string) $smtpHost);
             $smtpEncryption = $this->get('smtp_encryption');
             config([
@@ -218,6 +225,8 @@ class PlatformSettingsService
                 'mail.mailers.smtp.username' => $this->get('smtp_username'),
                 'mail.mailers.smtp.password' => $this->getDecrypted('smtp_password'),
                 'mail.mailers.smtp.scheme' => $smtpEncryption === 'ssl' ? 'smtps' : null,
+                // Fail fast instead of hitting max_execution_time (uncaught FatalError).
+                'mail.mailers.smtp.timeout' => 5,
             ]);
         }
 
