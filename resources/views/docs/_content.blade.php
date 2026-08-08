@@ -8,12 +8,21 @@
     .crm-docs-content blockquote { border-left: 4px solid #17a2b8; padding-left: .75rem; color: #555; }
 </style>
 
+@php
+    $docsRoutes = $docsRoutes ?? [
+        'index' => 'docs.index',
+        'show' => 'docs.show',
+        'pdf' => 'docs.pdf',
+        'pdfPage' => 'docs.pdf.page',
+    ];
+@endphp
+
 <div class="row">
     <div class="col-lg-3 mb-3">
         <div class="card card-outline card-secondary">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>Contents</strong>
-                <a href="{{ route('docs.pdf') }}" class="btn btn-xs btn-outline-primary" title="Download all documentation as PDF">
+                <a href="{{ route($docsRoutes['pdf']) }}" class="btn btn-xs btn-outline-primary" title="Download all documentation as PDF">
                     <i class="fas fa-file-pdf"></i> PDF
                 </a>
             </div>
@@ -39,12 +48,12 @@
                 <strong>{{ $title }}</strong>
                 <div class="d-flex align-items-center flex-wrap" style="gap: .5rem;">
                     <code class="small text-muted">docs/{{ $path === 'README' ? 'README.md' : $path.'.md' }}</code>
-                    <a href="{{ route('docs.pdf.page', ['path' => $path === 'README' ? 'README' : $path]) }}"
+                    <a href="{{ route($docsRoutes['pdfPage'], ['path' => $path === 'README' ? 'README' : $path]) }}"
                        class="btn btn-sm btn-outline-secondary"
                        title="Download this page as PDF">
                         <i class="fas fa-file-pdf"></i> PDF
                     </a>
-                    <a href="{{ route('docs.pdf') }}"
+                    <a href="{{ route($docsRoutes['pdf']) }}"
                        class="btn btn-sm btn-outline-primary"
                        title="Download all documentation as PDF">
                         <i class="fas fa-download"></i> Download all

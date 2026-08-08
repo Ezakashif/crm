@@ -6,15 +6,23 @@ use Tests\TestCase;
 
 class MarketingDocumentationTest extends TestCase
 {
-    public function test_guest_can_view_documentation_page(): void
+    public function test_guest_can_view_documentation_home(): void
     {
         $this->get(route('marketing.documentation'))
             ->assertOk()
-            ->assertSee(config('marketing.documentation.headline'), false)
-            ->assertSee(config('marketing.documentation.subheadline'), false)
+            ->assertSee('CRM Documentation', false)
+            ->assertSee('Contents', false)
             ->assertSee('Getting started', false)
-            ->assertSee('Full product docs (signed in)', false)
-            ->assertSee(route('login'), false);
+            ->assertSee(route('marketing.documentation.show', ['path' => 'getting-started/installation'], false), false);
+    }
+
+    public function test_guest_can_view_nested_documentation_page(): void
+    {
+        $this->get(route('marketing.documentation.show', ['path' => 'getting-started/installation']))
+            ->assertOk()
+            ->assertSee('Installation', false)
+            ->assertSee('composer install', false)
+            ->assertSee(route('marketing.documentation.show', ['path' => 'getting-started/configuration'], false), false);
     }
 
     public function test_documentation_links_appear_on_home_pricing_and_footer(): void
@@ -32,5 +40,12 @@ class MarketingDocumentationTest extends TestCase
         $this->get(route('marketing.about'))
             ->assertOk()
             ->assertSee($docsUrl, false);
+    }
+
+    public function test_guest_can_download_documentation_pdf(): void
+    {
+        $this->get(route('marketing.documentation.pdf.page', ['path' => 'README']))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
     }
 }

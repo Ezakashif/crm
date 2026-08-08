@@ -14,6 +14,13 @@ Route::get('/', [HomeController::class, 'index'])->name('marketing.home');
 Route::get('/features', [FeaturesController::class, 'index'])->name('marketing.features');
 Route::get('/pricing', [PricingController::class, 'index'])->name('marketing.pricing');
 Route::get('/documentation', [DocumentationController::class, 'index'])->name('marketing.documentation');
+Route::get('/documentation/pdf', [DocumentationController::class, 'downloadAll'])->name('marketing.documentation.pdf');
+Route::get('/documentation/pdf/{path}', [DocumentationController::class, 'download'])
+    ->where('path', '.*')
+    ->name('marketing.documentation.pdf.page');
+Route::get('/documentation/{path}', [DocumentationController::class, 'show'])
+    ->where('path', '.*')
+    ->name('marketing.documentation.show');
 Route::get('/about', [AboutController::class, 'index'])->name('marketing.about');
 Route::get('/contact', [ContactController::class, 'create'])->name('marketing.contact');
 Route::post('/contact', [ContactController::class, 'store'])

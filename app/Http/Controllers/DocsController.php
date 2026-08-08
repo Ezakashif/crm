@@ -29,6 +29,7 @@ class DocsController extends Controller
             'path' => $relative,
             'html' => $html,
             'nav' => $this->navigation(),
+            'docsRoutes' => $this->docsRoutes(),
         ]);
     }
 
@@ -82,6 +83,19 @@ class DocsController extends Controller
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download('crm-documentation-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    /**
+     * @return array{index: string, show: string, pdf: string, pdfPage: string}
+     */
+    protected function docsRoutes(): array
+    {
+        return [
+            'index' => 'docs.index',
+            'show' => 'docs.show',
+            'pdf' => 'docs.pdf',
+            'pdfPage' => 'docs.pdf.page',
+        ];
     }
 
     protected function viewName(): string
@@ -183,9 +197,11 @@ class DocsController extends Controller
 
     protected function rewriteDocLinks(string $html, string $currentRelative): string
     {
+        $routes = $this->docsRoutes();
+
         return (string) preg_replace_callback(
             '/href="([^"]+\.md)(#[^"]*)?"/i',
-            function (array $matches) use ($currentRelative) {
+            function (array $matches) use ($currentRelative, $routes) {
                 $target = str_replace('\\', '/', $matches[1]);
                 $hash = $matches[2] ?? '';
 
@@ -195,8 +211,8 @@ class DocsController extends Controller
 
                 $resolved = $this->resolveRelativeMarkdownPath($currentRelative, $target);
                 $url = ($resolved === '' || $resolved === 'README')
-                    ? route('docs.index')
-                    : route('docs.show', ['path' => $resolved]);
+                    ? route($routes['index'])
+                    : route($routes['show'], ['path' => $resolved]);
 
                 return 'href="'.e($url.$hash).'"';
             },
@@ -256,6 +272,7 @@ class DocsController extends Controller
             ->sortByName();
 
         $groups = [];
+        $routes = $this->docsRoutes();
 
         foreach ($finder as $file) {
             $relative = str_replace('\\', '/', $file->getRelativePathname());
@@ -269,8 +286,8 @@ class DocsController extends Controller
                 'title' => $this->navTitle($path),
                 'path' => $path,
                 'url' => $path === 'README'
-                    ? route('docs.index')
-                    : route('docs.show', ['path' => $path]),
+                    ? route($routes['index'])
+                    : route($routes['show'], ['path' => $path]),
             ];
         }
 
