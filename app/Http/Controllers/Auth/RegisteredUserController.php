@@ -85,7 +85,11 @@ class RegisteredUserController extends Controller
             return $redirect;
         }
 
-        $admin->notify(new WelcomeNotification($result['company']->name));
+        try {
+            $admin->notify(new WelcomeNotification($result['company']->name));
+        } catch (Throwable $e) {
+            report($e);
+        }
 
         return redirect()
             ->route('dashboard')
