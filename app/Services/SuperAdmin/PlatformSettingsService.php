@@ -208,10 +208,12 @@ class PlatformSettingsService
         }
 
         $smtpHost = $this->get('smtp_host');
-        // Env mailers like "log" / "array" win so broken Super Admin SMTP cannot
-        // hang auth requests (PHP fatal on SocketStream) in deploy environments.
-        $envMailer = (string) config('mail.default');
-        $envForcesNonSmtp = in_array(strtolower($envMailer), ['log', 'array'], true);
+        // Env API/dev mailers win so platform SMTP cannot override Resend/etc.
+        // or hang auth on unreachable SMTP hosts in deploy environments.
+        $envMailer = strtolower((string) config('mail.default'));
+        $envForcesNonSmtp = in_array($envMailer, [
+            'log', 'array', 'resend', 'postmark', 'ses', 'ses-v2', 'mailgun',
+        ], true);
 
         if (filled($smtpHost) && ! $envForcesNonSmtp) {
             $smtpHost = $this->normalizeSmtpHost((string) $smtpHost);

@@ -137,6 +137,19 @@ class PlatformSettingsEnforcementTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_resend_mailer_is_not_overridden_by_platform_smtp_settings(): void
+    {
+        config(['mail.default' => 'resend']);
+
+        app(PlatformSettingsService::class)->setMany([
+            'smtp_host' => 'smtp.example.com',
+            'smtp_port' => 587,
+        ]);
+        app(PlatformSettingsService::class)->applyBranding();
+
+        $this->assertSame('resend', config('mail.default'));
+    }
+
     public function test_log_mailer_is_not_overridden_by_platform_smtp_settings(): void
     {
         config(['mail.default' => 'log']);
