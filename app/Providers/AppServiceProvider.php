@@ -40,15 +40,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Password::defaults(function () {
-            // Company admin provisioning, user invites, register/reset all share this.
-            $rule = Password::min(10)
+            // Shared by register, invites, resets, and admin provisioning.
+            return Password::min(10)
                 ->mixedCase()
-                ->numbers()
                 ->symbols();
-
-            return $this->app->isProduction()
-                ? $rule->uncompromised()
-                : $rule;
         });
 
         Auth::provider('tenant-eloquent', function ($app, array $config) {
