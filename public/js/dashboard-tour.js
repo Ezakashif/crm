@@ -17,6 +17,9 @@
         return;
     }
 
+    var activeDriver = null;
+    var completedPosted = false;
+
     function availableSteps() {
         return boot.steps.filter(function (step) {
             try {
@@ -51,8 +54,6 @@
         });
     }
 
-    var completedPosted = false;
-
     function markComplete() {
         if (completedPosted || !boot.completeUrl) {
             return;
@@ -63,10 +64,28 @@
         });
     }
 
+    function scrubOverlayDom() {
+        document.querySelectorAll('.driver-overlay, .driver-popover, #driver-dummy-element').forEach(function (node) {
+            node.remove();
+        });
+        document.querySelectorAll('.driver-active-element').forEach(function (node) {
+            node.classList.remove('driver-active-element');
+        });
+        document.body.classList.remove('driver-active', 'driver-fade', 'driver-simple');
+    }
+
     function startTour() {
         var createDriver = driverFactory();
         if (!createDriver) {
             return;
+        }
+
+        if (activeDriver) {
+            try {
+                activeDriver.destroy();
+            } catch (e) {}
+            activeDriver = null;
+            scrubOverlayDom();
         }
 
         var steps = availableSteps().map(function (step) {
@@ -90,6 +109,7 @@
             showProgress: true,
             animate: true,
             allowClose: true,
+            overlayClickBehavior: 'close',
             overlayOpacity: 0.55,
             stagePadding: 8,
             stageRadius: 8,
@@ -98,14 +118,18 @@
             prevBtnText: 'Back',
             doneBtnText: 'Done',
             progressText: '{{current}} of {{total}}',
-            onDestroyStarted: function () {
+            // When onCloseClick is set, Driver.js will not close by itself — we must destroy().
+            onCloseClick: function () {
+                driverObj.destroy();
+            },
+            onDestroyed: function () {
+                activeDriver = null;
+                scrubOverlayDom();
                 markComplete();
-                if (driverObj) {
-                    driverObj.destroy();
-                }
             },
         });
 
+        activeDriver = driverObj;
         driverObj.setSteps(steps);
         driverObj.drive();
     }
@@ -119,6 +143,7 @@
         button.addEventListener('click', function (event) {
             event.preventDefault();
             if (!boot.restartUrl) {
+                completedPosted = false;
                 startTour();
                 return;
             }
@@ -130,6 +155,7 @@
                     startTour();
                 })
                 .catch(function () {
+                    completedPosted = false;
                     startTour();
                 })
                 .finally(function () {
@@ -149,7 +175,6 @@
     ready(function () {
         bindReplay();
         if (boot.autoStart) {
-            // Allow AdminLTE sidebar/search to paint first.
             window.setTimeout(startTour, 400);
         }
     });
