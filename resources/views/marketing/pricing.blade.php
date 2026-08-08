@@ -63,7 +63,8 @@
             <div class="mt-10 grid gap-6 lg:grid-cols-3">
                 @forelse ($plans as $index => $plan)
                     @php
-                        $offerTrial = $plan->trial_days > 0 && $trialAvailable;
+                        $offerTrial = \App\Support\MarketingCta::planOffersTrial($plan) && $trialAvailable;
+                        $planTrialDays = $offerTrial ? \App\Support\MarketingCta::trialDurationDays() : 0;
                         $planCtaHref = $offerTrial ? $trialHref : $demoHref;
                         $features = $plan->features->map(fn ($feature) => $feature->feature_value ?: $feature->feature_name)
                             ->concat($plan->limits->map(fn ($limit) => $limit->limit_name.': '.($limit->isUnlimited() ? 'Unlimited' : trim($limit->limit_value.' '.$limit->unit))))->all();
@@ -81,7 +82,7 @@
                                 :highlighted="$plan->is_featured"
                                 :cta-href="$planCtaHref"
                                 :currency="$plan->currency"
-                                :trial-days="$offerTrial ? $plan->trial_days : 0"
+                                :trial-days="$planTrialDays"
                                 billing="monthly"
                             />
                         </div>
@@ -97,7 +98,7 @@
                                 :highlighted="$plan->is_featured"
                                 :cta-href="$planCtaHref"
                                 :currency="$plan->currency"
-                                :trial-days="$offerTrial ? $plan->trial_days : 0"
+                                :trial-days="$planTrialDays"
                                 billing="annual"
                             />
                         </div>

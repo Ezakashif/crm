@@ -26,6 +26,26 @@ class MarketingCta
         return self::registrationEnabled() && Route::has($route);
     }
 
+    /**
+     * Platform-wide free-trial length from Super Admin settings.
+     */
+    public static function trialDurationDays(): int
+    {
+        try {
+            return max(1, app(PlatformSettingsService::class)->getInt('trial_duration_days', 14));
+        } catch (\Throwable) {
+            return 14;
+        }
+    }
+
+    /**
+     * Whether a public plan should advertise the free trial CTA.
+     */
+    public static function planOffersTrial(object $plan): bool
+    {
+        return (bool) ($plan->is_free ?? false) || (int) ($plan->trial_days ?? 0) > 0;
+    }
+
     public static function trialHref(): ?string
     {
         if (! self::trialAvailable()) {

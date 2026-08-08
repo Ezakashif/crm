@@ -188,6 +188,30 @@ class SuperAdminDashboardUpgradeTest extends TestCase
         $this->assertSame('21', PlatformSetting::query()->where('key', 'trial_duration_days')->value('value'));
     }
 
+    public function test_updating_trial_duration_syncs_trial_plans(): void
+    {
+        $superAdmin = User::factory()->superAdmin()->create();
+        $free = Plan::factory()->create(['slug' => 'free-trial', 'is_free' => true, 'trial_days' => 7]);
+        $paidTrial = Plan::factory()->create(['slug' => 'pro-trial', 'is_free' => false, 'trial_days' => 14]);
+        $enterprise = Plan::factory()->create(['slug' => 'no-trial', 'is_free' => false, 'trial_days' => 0]);
+
+        $this->actingAs($superAdmin)
+            ->put(route('superadmin.settings.update'), [
+                'platform_name' => 'Algos CRM',
+                'default_timezone' => 'UTC',
+                'default_currency' => 'USD',
+                'trial_duration_days' => 30,
+                'default_company_status' => 'active',
+                'registration_enabled' => '1',
+                'maintenance_mode' => '0',
+            ])
+            ->assertRedirect();
+
+        $this->assertSame(30, $free->fresh()->trial_days);
+        $this->assertSame(30, $paidTrial->fresh()->trial_days);
+        $this->assertSame(0, $enterprise->fresh()->trial_days);
+    }
+
     public function test_platform_logo_is_applied_to_login_and_crm_branding(): void
     {
         $superAdmin = User::factory()->superAdmin()->create();
