@@ -26,16 +26,20 @@ class LeadSeeder extends Seeder
 
     public function run(): void
     {
-        $admin = User::query()->where('email', 'admin@example.com')->first()
-            ?? User::query()->whereHas('roles', fn ($q) => $q->where('slug', 'admin'))->first();
+        $admin = User::withoutCompanyScope()->where('email', 'admin@example.com')->first()
+            ?? User::withoutCompanyScope()->whereHas('roles', fn ($q) => $q->where('slug', 'admin'))->first();
 
-        $sales = User::query()->where('email', 'sales@example.com')->first()
-            ?? User::query()->whereHas('roles', fn ($q) => $q->where('slug', 'sales'))->first();
+        $sales = User::withoutCompanyScope()->where('email', 'sales@example.com')->first()
+            ?? User::withoutCompanyScope()->whereHas('roles', fn ($q) => $q->where('slug', 'sales'))->first();
 
         if (! $admin) {
             $this->command?->warn('LeadSeeder skipped: no admin user found. Run DatabaseSeeder first.');
 
             return;
+        }
+
+        if ($admin->company_id) {
+            app(\App\Support\CurrentCompany::class)->set($admin->company_id);
         }
 
         $assignees = collect([$admin, $sales])->filter()->unique('id')->values();

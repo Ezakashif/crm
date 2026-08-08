@@ -15,23 +15,29 @@ class TaskSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::query()->where('email', 'admin@example.com')->first()
-            ?? User::query()->whereHas('roles', fn ($q) => $q->where('slug', 'admin'))->first()
-            ?? User::factory()->admin()->create([
-                'name' => 'Admin User',
-                'email' => 'admin@example.com',
-            ]);
+        $admin = User::withoutCompanyScope()->where('email', 'admin@example.com')->first()
+            ?? User::withoutCompanyScope()->whereHas('roles', fn ($q) => $q->where('slug', 'admin'))->first();
 
-        $sales = User::query()->where('email', 'sales@example.com')->first()
-            ?? User::query()->whereHas('roles', fn ($q) => $q->where('slug', 'sales'))->first()
-            ?? User::factory()->create([
-                'name' => 'Sales Rep',
-                'email' => 'sales@example.com',
-            ]);
+        $sales = User::withoutCompanyScope()->where('email', 'sales@example.com')->first()
+            ?? User::withoutCompanyScope()->whereHas('roles', fn ($q) => $q->where('slug', 'sales'))->first();
+
+        if (! $admin) {
+            $this->command?->warn('TaskSeeder skipped: no admin user found. Run DatabaseSeeder first.');
+
+            return;
+        }
+
+        if ($admin->company_id) {
+            app(\App\Support\CurrentCompany::class)->set($admin->company_id);
+        }
 
         $assignees = collect([$admin, $sales])->filter()->unique('id')->values();
-        $customers = Customer::query()->get();
-        $leads = Lead::query()->get();
+        $customers = Customer::withoutCompanyScope()
+            ->when($admin->company_id, fn ($q) => $q->where('company_id', $admin->company_id))
+            ->get();
+        $leads = Lead::withoutCompanyScope()
+            ->when($admin->company_id, fn ($q) => $q->where('company_id', $admin->company_id))
+            ->get();
 
         $samples = [
             ['title' => 'Call new website lead', 'status' => 'pending', 'priority' => 'high', 'due' => now()->subDays(2)],
