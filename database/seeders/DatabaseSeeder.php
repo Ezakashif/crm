@@ -53,5 +53,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call(LeadSeeder::class);
         $this->call(TaskSeeder::class);
+
+    $this->call([
+        PlanSeeder::class,
+    ]);
     }
 }
