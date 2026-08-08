@@ -25,6 +25,7 @@ class MarketingSeoTest extends TestCase
             ->assertSee(route('marketing.home'), false)
             ->assertSee(route('marketing.features'), false)
             ->assertSee(route('marketing.pricing'), false)
+            ->assertSee(route('marketing.documentation'), false)
             ->assertSee(route('marketing.about'), false)
             ->assertSee(route('marketing.contact'), false);
     }

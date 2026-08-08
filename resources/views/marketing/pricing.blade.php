@@ -145,7 +145,7 @@
                     <p class="font-semibold text-slate-900">Need a little more help?</p>
                     <p>Explore the product, talk to support, or book a walkthrough with our team.</p>
                     <div class="mk-faq-actions">
-                        <x-marketing.button :href="route('marketing.features')" variant="secondary" size="sm">
+                        <x-marketing.button :href="route('marketing.documentation')" variant="secondary" size="sm">
                             Documentation
                         </x-marketing.button>
                         <x-marketing.button :href="route('marketing.contact', ['intent' => 'support'])" variant="secondary" size="sm">
