@@ -4,8 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Customer;
 use App\Models\Lead;
+use App\Models\Scopes\CompanyScope;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\CurrentCompany;
 use Illuminate\Database\Seeder;
 
 class TaskSeeder extends Seeder
@@ -15,11 +17,13 @@ class TaskSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::withoutCompanyScope()->where('email', 'admin@example.com')->first()
-            ?? User::withoutCompanyScope()->whereHas('roles', fn ($q) => $q->where('slug', 'admin'))->first();
+        config(['tenancy.fail_closed_without_context' => false]);
 
-        $sales = User::withoutCompanyScope()->where('email', 'sales@example.com')->first()
-            ?? User::withoutCompanyScope()->whereHas('roles', fn ($q) => $q->where('slug', 'sales'))->first();
+        $admin = User::withoutGlobalScope(CompanyScope::class)->where('email', 'admin@example.com')->first()
+            ?? User::withoutGlobalScope(CompanyScope::class)->whereHas('roles', fn ($q) => $q->where('slug', 'admin'))->first();
+
+        $sales = User::withoutGlobalScope(CompanyScope::class)->where('email', 'sales@example.com')->first()
+            ?? User::withoutGlobalScope(CompanyScope::class)->whereHas('roles', fn ($q) => $q->where('slug', 'sales'))->first();
 
         if (! $admin) {
             $this->command?->warn('TaskSeeder skipped: no admin user found. Run DatabaseSeeder first.');
@@ -28,14 +32,14 @@ class TaskSeeder extends Seeder
         }
 
         if ($admin->company_id) {
-            app(\App\Support\CurrentCompany::class)->set($admin->company_id);
+            app(CurrentCompany::class)->set($admin->company_id);
         }
 
         $assignees = collect([$admin, $sales])->filter()->unique('id')->values();
-        $customers = Customer::withoutCompanyScope()
+        $customers = Customer::withoutGlobalScope(CompanyScope::class)
             ->when($admin->company_id, fn ($q) => $q->where('company_id', $admin->company_id))
             ->get();
-        $leads = Lead::withoutCompanyScope()
+        $leads = Lead::withoutGlobalScope(CompanyScope::class)
             ->when($admin->company_id, fn ($q) => $q->where('company_id', $admin->company_id))
             ->get();
 
@@ -61,6 +65,7 @@ class TaskSeeder extends Seeder
                 ->status($sample['status'], $index)
                 ->assignedTo($assignee)
                 ->create([
+                    'company_id' => $admin->company_id,
                     'created_by' => $admin->id,
                     'title' => $sample['title'],
                     'priority' => $sample['priority'],

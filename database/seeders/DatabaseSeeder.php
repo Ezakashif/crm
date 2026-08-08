@@ -4,10 +4,12 @@ namespace Database\Seeders;
 
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Scopes\CompanyScope;
 use App\Models\User;
 use App\Support\CurrentCompany;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,10 +21,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Allow unscoped lookups while seeding in production.
+        config(['tenancy.fail_closed_without_context' => false]);
+
+        $this->command?->info('Running production-safe DatabaseSeeder v2');
+
         $this->call(RbacSeeder::class);
         $this->call(EmailTemplateSeeder::class);
 
-        // Production CompanyScope is fail-closed without tenant context.
         $company = Company::query()->firstOrCreate(
             ['slug' => Company::DEFAULT_SLUG],
             [
@@ -32,7 +38,7 @@ class DatabaseSeeder extends Seeder
         );
         app(CurrentCompany::class)->set($company);
 
-        User::withoutCompanyScope()->firstOrCreate(
+        User::withoutGlobalScope(CompanyScope::class)->firstOrCreate(
             ['email' => 'superadmin@example.com'],
             [
                 'name' => 'Super Admin',
@@ -45,7 +51,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        $admin = User::withoutCompanyScope()->firstOrCreate(
+        $admin = User::withoutGlobalScope(CompanyScope::class)->firstOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin User',
@@ -58,7 +64,7 @@ class DatabaseSeeder extends Seeder
         );
         $admin->syncRolesFromLegacyColumn();
 
-        $sales = User::withoutCompanyScope()->firstOrCreate(
+        $sales = User::withoutGlobalScope(CompanyScope::class)->firstOrCreate(
             ['email' => 'sales@example.com'],
             [
                 'name' => 'Sales Rep',
@@ -71,8 +77,7 @@ class DatabaseSeeder extends Seeder
         );
         $sales->syncRolesFromLegacyColumn();
 
-        // Spread customers across recent months so reports charts stay realistic.
-        if (Customer::withoutCompanyScope()->doesntExist()) {
+        if ($this->tenantQuery(Customer::query(), $company->id)->doesntExist()) {
             foreach (range(0, 19) as $index) {
                 $createdAt = Carbon::now()
                     ->subMonths(fake()->numberBetween(0, 5))
@@ -92,5 +97,12 @@ class DatabaseSeeder extends Seeder
 
         $this->call(LeadSeeder::class);
         $this->call(TaskSeeder::class);
+    }
+
+    private function tenantQuery(Builder $query, int $companyId): Builder
+    {
+        return $query
+            ->withoutGlobalScope(CompanyScope::class)
+            ->where($query->getModel()->getTable().'.company_id', $companyId);
     }
 }
