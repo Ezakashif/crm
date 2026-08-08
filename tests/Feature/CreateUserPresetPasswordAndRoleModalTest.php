@@ -100,6 +100,52 @@ class CreateUserPresetPasswordAndRoleModalTest extends TestCase
         Notification::assertNotSentTo($user, UserCredentialsNotification::class);
     }
 
+    public function test_creating_user_succeeds_when_credentials_email_fails(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $salesRoleId = Role::query()
+            ->where('company_id', $admin->company_id)
+            ->where('slug', 'sales')
+            ->value('id');
+
+        Notification::swap(new class
+        {
+            public function send($notifiables, $notification): void
+            {
+                throw new \RuntimeException('SMTP unavailable');
+            }
+
+            public function sendNow($notifiables, $notification, ?array $channels = null): void
+            {
+                throw new \RuntimeException('SMTP unavailable');
+            }
+
+            public function locale($locale): self
+            {
+                return $this;
+            }
+        });
+
+        $response = $this->actingAs($admin)->post(route('users.store'), [
+            'name' => 'Mail Fail User',
+            'email' => 'mailfail@example.com',
+            'password' => 'SecurePass1!',
+            'password_confirmation' => 'SecurePass1!',
+            'email_credentials' => '1',
+            'roles' => [$salesRoleId],
+            'status' => 'active',
+        ]);
+
+        $response->assertRedirect(route('users.index'))
+            ->assertSessionHas('success')
+            ->assertSessionHas('warning');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'mailfail@example.com',
+            'company_id' => $admin->company_id,
+        ]);
+    }
+
     public function test_admin_can_create_role_via_json_from_create_user_modal(): void
     {
         $admin = User::factory()->admin()->create();

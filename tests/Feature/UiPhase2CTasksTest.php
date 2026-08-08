@@ -29,7 +29,8 @@ class UiPhase2CTasksTest extends TestCase
             ->assertSee('crm-page-header', false)
             ->assertSee('No tasks yet')
             ->assertSee('Add task')
-            ->assertSee('crm-kanban', false);
+            ->assertSee('crm-kanban', false)
+            ->assertSee('crm-kanban-stages', false);
     }
 
     public function test_tasks_create_edit_show_use_shared_patterns(): void

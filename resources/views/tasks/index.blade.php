@@ -99,6 +99,16 @@
         />
     @endif
 
+    <nav class="crm-kanban-stages d-lg-none" aria-label="Task stages">
+        @foreach ($statuses as $statusKey => $statusTitle)
+            @php $columnTasks = $tasks->where('status', $statusKey); @endphp
+            <button type="button" class="crm-kanban-stage" data-status="{{ $statusKey }}">
+                <span>{{ $statusTitle }}</span>
+                <span class="badge">{{ $columnTasks->count() }}</span>
+            </button>
+        @endforeach
+    </nav>
+
     <div class="row crm-kanban" aria-label="Task board">
         @foreach ($statuses as $statusKey => $statusTitle)
             @php $columnTasks = $tasks->where('status', $statusKey); @endphp
@@ -142,7 +152,19 @@
                                             {{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('d M') : '—' }}
                                         </span>
                                     </div>
-                                    <div class="task-card__actions">
+                                    @if ($canChangeStatus)
+                                        <label class="sr-only" for="task-status-{{ $task->id }}">Move {{ $task->title }}</label>
+                                        <select
+                                            id="task-status-{{ $task->id }}"
+                                            class="form-control form-control-sm crm-kanban-status"
+                                            data-current="{{ $task->status }}"
+                                        >
+                                            @foreach ($statuses as $optionKey => $optionLabel)
+                                                <option value="{{ $optionKey }}" @selected($optionKey === $task->status)>{{ $optionLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                    @endif
+                                    <div class="task-card__actions mt-2">
                                         @can('view', $task)
                                             <a href="{{ route('tasks.show', $task) }}"
                                                class="btn btn-xs btn-primary"
@@ -191,16 +213,19 @@
     </div>
 
     @push('js')
+        <script src="{{ asset('js/crm-kanban.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
         @if ($canDragTasks)
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
+                    var board = document.querySelector('.crm-kanban');
+                    var CrmKanban = window.CrmKanban || {};
                     var csrfMeta = document.querySelector('meta[name="csrf-token"]');
                     var csrfToken = csrfMeta ? csrfMeta.content : @json(csrf_token());
 
                     function notify(type, message) {
-                        if (window.CrmUi && typeof window.CrmUi[type] === 'function') {
-                            window.CrmUi[type](message);
+                        if (CrmKanban.notify) {
+                            CrmKanban.notify(type, message);
                             return;
                         }
                         window.alert(message);
@@ -216,23 +241,39 @@
                                 badge.setAttribute('aria-label', count + ' tasks');
                             }
 
-                            var empty = column.querySelector('.crm-kanban-empty');
-                            if (column.querySelectorAll('.task-card').length === 0) {
-                                if (!empty) {
-                                    empty = document.createElement('div');
-                                    empty.className = 'crm-kanban-empty';
-                                    empty.setAttribute('aria-hidden', 'true');
-                                    empty.textContent = 'Drop tasks here';
-                                    column.appendChild(empty);
-                                }
-                            } else if (empty) {
-                                empty.remove();
+                            if (CrmKanban.refreshEmptyState) {
+                                CrmKanban.refreshEmptyState(column, 'Drop tasks here');
+                            }
+
+                            var stage = document.querySelector('.crm-kanban-stage[data-status="' + column.dataset.status + '"] .badge');
+                            if (stage) {
+                                stage.textContent = column.querySelectorAll('.task-card').length;
                             }
                         });
                     }
 
+                    if (CrmKanban.initStageNav) {
+                        CrmKanban.initStageNav(board);
+                    }
+
+                    if (CrmKanban.bindStatusSelects) {
+                        CrmKanban.bindStatusSelects({
+                            board: board,
+                            updateUrl: @json(route('tasks.board.update')),
+                            idAttr: 'data-task-id',
+                            payloadKey: 'task_id',
+                            cardSelector: '.task-card',
+                            columnSelector: '.task-column',
+                            emptyLabel: 'Drop tasks here',
+                            successMessage: 'Task moved.',
+                            refreshCounts: refreshColumnCounts,
+                        });
+                    }
+
+                    var touchOptions = CrmKanban.touchSortableOptions ? CrmKanban.touchSortableOptions() : {};
+
                     document.querySelectorAll('.task-column').forEach(function (column) {
-                        new Sortable(column, {
+                        new Sortable(column, Object.assign({}, touchOptions, {
                             group: 'tasks-kanban',
                             animation: 180,
                             draggable: '.task-card[data-draggable="1"]',
@@ -269,6 +310,12 @@
                                 refreshColumnCounts();
                                 evt.item.classList.add('is-saving');
 
+                                var statusSelect = evt.item.querySelector('.crm-kanban-status');
+                                if (statusSelect) {
+                                    statusSelect.value = evt.to.dataset.status;
+                                    statusSelect.setAttribute('data-current', evt.to.dataset.status);
+                                }
+
                                 fetch(@json(route('tasks.board.update')), {
                                     method: 'POST',
                                     headers: {
@@ -292,6 +339,10 @@
                                     evt.item.classList.remove('is-saving');
                                     if (! result.ok || ! result.data || ! result.data.success) {
                                         evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                                        if (statusSelect) {
+                                            statusSelect.value = evt.from.dataset.status;
+                                            statusSelect.setAttribute('data-current', evt.from.dataset.status);
+                                        }
                                         refreshColumnCounts();
                                         notify('error', (result.data && result.data.message) || 'Unable to update task status.');
                                         return;
@@ -305,8 +356,16 @@
                                     notify('error', 'Something went wrong while updating the task.');
                                 });
                             }
-                        });
+                        }));
                     });
+                });
+            </script>
+        @else
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    if (window.CrmKanban && window.CrmKanban.initStageNav) {
+                        window.CrmKanban.initStageNav(document.querySelector('.crm-kanban'));
+                    }
                 });
             </script>
         @endif

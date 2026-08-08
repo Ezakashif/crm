@@ -31,7 +31,26 @@ class UiPhase2CLeadsTest extends TestCase
         $response->assertSee('No leads yet');
         $response->assertSee('Add lead');
         $response->assertSee('crm-kanban', false);
+        $response->assertSee('crm-kanban-stages', false);
         $response->assertDontSee('alert-success', false);
+    }
+
+    public function test_leads_board_shows_mobile_status_control_for_cards(): void
+    {
+        $user = User::factory()->admin()->create();
+        Lead::factory()->create([
+            'company_id' => $user->company_id,
+            'assigned_to' => $user->id,
+            'created_by' => $user->id,
+            'status' => 'new',
+            'name' => 'Mobile Board Lead',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('leads.index'))
+            ->assertOk()
+            ->assertSee('crm-kanban-status', false)
+            ->assertSee('Mobile Board Lead');
     }
 
     public function test_leads_create_and_show_use_form_sections_and_confirm(): void

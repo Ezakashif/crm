@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Throwable;
 
 class UserController extends Controller
 {
@@ -112,21 +113,36 @@ class UserController extends Controller
             'credentials_emailed' => $emailCredentials,
         ]);
 
+        $credentialsMailFailed = false;
+
         if ($emailCredentials) {
-            $companyName = $actor->company?->name ?? config('app.name');
-            $user->notify(new UserCredentialsNotification(
-                temporaryPassword: $plainPassword,
-                companyName: $companyName,
-                roleNames: $user->roleNames(),
-            ));
+            try {
+                $companyName = $actor->company?->name ?? config('app.name');
+                $user->notify(new UserCredentialsNotification(
+                    temporaryPassword: $plainPassword,
+                    companyName: $companyName,
+                    roleNames: $user->roleNames(),
+                ));
+            } catch (Throwable $e) {
+                // User is already saved; don't fail the request if outbound mail is broken.
+                report($e);
+                $credentialsMailFailed = true;
+            }
+        }
+
+        $redirect = redirect()->route('users.index');
+
+        if ($credentialsMailFailed) {
+            return $redirect
+                ->with('success', 'User created successfully.')
+                ->with('warning', 'Login credentials could not be emailed. Check mail configuration or share the password manually.');
         }
 
         $message = $emailCredentials
             ? 'User created successfully. Login credentials were emailed to them.'
             : 'User created successfully.';
 
-        return redirect()->route('users.index')
-            ->with('success', $message);
+        return $redirect->with('success', $message);
     }
 
     public function edit(User $user)
@@ -262,6 +278,10 @@ class UserController extends Controller
 
     protected function notifyStatusChange(User $user, string $oldStatus, string $newStatus): void
     {
-        $user->notify(new UserStatusChanged($oldStatus, $newStatus, auth()->user()));
+        try {
+            $user->notify(new UserStatusChanged($oldStatus, $newStatus, auth()->user()));
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }

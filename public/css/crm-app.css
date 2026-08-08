@@ -1340,21 +1340,131 @@ body.crm-app .crm-kanban-column > .card-header {
     body.crm-app .crm-kanban {
         flex-wrap: nowrap;
         overflow-x: auto;
-        padding-bottom: 0.5rem;
-        scroll-snap-type: x proximity;
+        overflow-y: hidden;
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0 0.25rem 0.75rem;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 0.75rem;
         -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        scrollbar-width: thin;
     }
 
     body.crm-app .crm-kanban > [class*="col-"] {
-        flex: 0 0 85%;
-        max-width: 85%;
-        scroll-snap-align: start;
+        flex: 0 0 min(92vw, 22rem);
+        max-width: min(92vw, 22rem);
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
     }
 
     body.crm-app .crm-kanban-column {
-        max-height: calc(100vh - 11rem);
+        max-height: calc(100vh - 14.5rem);
+        min-height: 18rem;
+    }
+
+    body.crm-app .lead-column,
+    body.crm-app .task-column {
+        min-height: 12rem;
+        padding-bottom: 2.5rem !important;
+    }
+
+    body.crm-app .crm-kanban-stages {
+        display: flex;
+        gap: 0.45rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0.15rem 0.15rem 0.65rem;
+        margin: 0 0 0.35rem;
+        scrollbar-width: none;
+        position: sticky;
+        top: 0;
+        z-index: 4;
+        background: linear-gradient(to bottom, var(--crm-bg, #f4f6f9) 70%, transparent);
+    }
+
+    body.crm-app .crm-kanban-stages::-webkit-scrollbar {
+        display: none;
+    }
+
+    body.crm-app .crm-kanban-stage {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border: 1px solid var(--crm-border);
+        background: var(--crm-surface);
+        color: var(--crm-text);
+        border-radius: 999px;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        line-height: 1.1;
+        white-space: nowrap;
+        min-height: 2.5rem;
+        box-shadow: none;
+    }
+
+    body.crm-app .crm-kanban-stage.is-active {
+        border-color: var(--crm-accent);
+        background: var(--crm-accent-soft, rgba(37, 99, 235, 0.12));
+        color: var(--crm-accent);
+    }
+
+    body.crm-app .crm-kanban-stage .badge {
+        background: rgba(15, 23, 42, 0.08);
+        color: inherit;
+        font-weight: 700;
+    }
+
+    body.crm-app .crm-kanban-status {
+        display: block;
+        width: 100%;
+        margin-top: 0.35rem;
+        min-height: 2.5rem;
+        font-size: 0.875rem;
+    }
+
+    body.crm-app .lead-card__actions .btn,
+    body.crm-app .task-card__actions .btn {
+        min-height: 2.35rem;
+        min-width: 2.35rem;
+        padding: 0.4rem 0.65rem;
+        font-size: 0.8125rem;
+    }
+
+    body.crm-app .task-card__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    body.crm-app .lead-card,
+    body.crm-app .task-card {
+        touch-action: manipulation;
+    }
+
+    body.crm-app .lead-card .card-body,
+    body.crm-app .task-card .card-body {
+        padding: 0.75rem !important;
+    }
+
+    body.crm-app .sortable-fallback {
+        transform: rotate(1.5deg);
+        box-shadow: var(--crm-shadow-lg) !important;
+        opacity: 0.95;
     }
 }
+
+@media (min-width: 992px) {
+    body.crm-app .crm-kanban-stages,
+    body.crm-app .crm-kanban-status {
+        display: none !important;
+    }
+}
+
 
 /* Toast stack */
 .crm-toast-stack {

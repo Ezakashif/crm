@@ -101,6 +101,7 @@
         ];
         $hasFilters = collect($filters ?? [])->filter(fn ($value) => filled($value))->isNotEmpty();
         $canCreateLead = auth()->user()->can('create', App\Models\Lead::class);
+        $canUpdateLeads = auth()->user()->hasPermission('update.leads');
     @endphp
 
     @if ($leads->isEmpty())
@@ -115,6 +116,16 @@
             :action-label="$hasFilters ? 'Clear filters' : ($canCreateLead ? 'Add lead' : null)"
         />
     @endif
+
+    <nav class="crm-kanban-stages d-lg-none" aria-label="Pipeline stages">
+        @foreach ($statuses as $statusKey => $statusTitle)
+            @php $columnLeads = $leads->where('status', $statusKey); @endphp
+            <button type="button" class="crm-kanban-stage" data-status="{{ $statusKey }}">
+                <span>{{ $statusTitle }}</span>
+                <span class="badge">{{ $columnLeads->count() }}</span>
+            </button>
+        @endforeach
+    </nav>
 
     <div class="row crm-kanban" aria-label="Lead pipeline board">
         @foreach ($statuses as $statusKey => $statusTitle)
@@ -139,7 +150,7 @@
                             <article
                                 class="card card-sm mb-2 lead-card"
                                 data-lead-id="{{ $lead->id }}"
-                                @can('update.leads') style="cursor: grab;" @else style="cursor: default;" @endcan
+                                style="cursor: {{ $canUpdateLeads ? 'grab' : 'default' }};"
                             >
                                 <div class="card-body p-2">
                                     <h6 class="mb-1 lead-card__title">
@@ -163,8 +174,20 @@
                                         <i class="fas fa-user" aria-hidden="true"></i>
                                         {{ optional($lead->assignee)->name ?? 'Unassigned' }}
                                     </div>
+                                    @if ($canUpdateLeads && $lead->status !== 'won')
+                                        <label class="sr-only" for="lead-status-{{ $lead->id }}">Move {{ $lead->name }}</label>
+                                        <select
+                                            id="lead-status-{{ $lead->id }}"
+                                            class="form-control form-control-sm crm-kanban-status"
+                                            data-current="{{ $lead->status }}"
+                                        >
+                                            @foreach (\App\Models\Lead::manuallyAssignableStatuses($lead->status) as $optionKey => $optionLabel)
+                                                <option value="{{ $optionKey }}" @selected($optionKey === $lead->status)>{{ $optionLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                    @endif
                                     @if (auth()->user()->can('view', $lead) || auth()->user()->can('update', $lead) || auth()->user()->can('convert', $lead))
-                                        <div class="btn-group btn-group-xs lead-card__actions">
+                                        <div class="btn-group btn-group-xs lead-card__actions mt-2">
                                             @can('view', $lead)
                                                 <a href="{{ route('leads.show', $lead) }}" class="btn btn-primary btn-xs">View</a>
                                             @endcan
@@ -204,13 +227,17 @@
     </div>
 
     @push('js')
+        <script src="{{ asset('js/crm-kanban.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-        @can('update.leads')
+        @if ($canUpdateLeads)
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
+                    var board = document.querySelector('.crm-kanban');
+                    var CrmKanban = window.CrmKanban || {};
+
                     function notify(type, message) {
-                        if (window.CrmUi && typeof window.CrmUi[type] === 'function') {
-                            window.CrmUi[type](message);
+                        if (CrmKanban.notify) {
+                            CrmKanban.notify(type, message);
                             return;
                         }
                         window.alert(message);
@@ -226,23 +253,47 @@
                                 badge.setAttribute('aria-label', count + ' leads');
                             }
 
-                            var empty = column.querySelector('.crm-kanban-empty');
-                            if (column.querySelectorAll('.lead-card').length === 0) {
-                                if (!empty) {
-                                    empty = document.createElement('div');
-                                    empty.className = 'crm-kanban-empty';
-                                    empty.setAttribute('aria-hidden', 'true');
-                                    empty.textContent = 'Drop leads here';
-                                    column.appendChild(empty);
-                                }
-                            } else if (empty) {
-                                empty.remove();
+                            if (CrmKanban.refreshEmptyState) {
+                                CrmKanban.refreshEmptyState(column, 'Drop leads here');
+                            }
+
+                            var stage = document.querySelector('.crm-kanban-stage[data-status="' + column.dataset.status + '"] .badge');
+                            if (stage) {
+                                stage.textContent = column.querySelectorAll('.lead-card').length;
                             }
                         });
                     }
 
+                    if (CrmKanban.initStageNav) {
+                        CrmKanban.initStageNav(board);
+                    }
+
+                    if (CrmKanban.bindStatusSelects) {
+                        CrmKanban.bindStatusSelects({
+                            board: board,
+                            updateUrl: @json(route('leads.board.update')),
+                            idAttr: 'data-lead-id',
+                            payloadKey: 'lead_id',
+                            cardSelector: '.lead-card',
+                            columnSelector: '.lead-column',
+                            emptyLabel: 'Drop leads here',
+                            successMessage: 'Lead moved.',
+                            refreshCounts: refreshColumnCounts,
+                            beforeMove: function (card, nextStatus) {
+                                var target = document.querySelector('.lead-column[data-status="' + nextStatus + '"]');
+                                if (target && target.dataset.convertOnly === '1') {
+                                    notify('warning', 'Mark a lead as won by converting it to a customer.');
+                                    return false;
+                                }
+                                return true;
+                            },
+                        });
+                    }
+
+                    var touchOptions = CrmKanban.touchSortableOptions ? CrmKanban.touchSortableOptions() : {};
+
                     document.querySelectorAll('.lead-column').forEach(function (column) {
-                        new Sortable(column, {
+                        new Sortable(column, Object.assign({}, touchOptions, {
                             group: 'leads-kanban',
                             animation: 180,
                             draggable: '.lead-card',
@@ -289,7 +340,13 @@
                                 refreshColumnCounts();
                                 evt.item.classList.add('is-saving');
 
-                                fetch("{{ route('leads.board.update') }}", {
+                                var statusSelect = evt.item.querySelector('.crm-kanban-status');
+                                if (statusSelect) {
+                                    statusSelect.value = targetStatus;
+                                    statusSelect.setAttribute('data-current', targetStatus);
+                                }
+
+                                fetch(@json(route('leads.board.update')), {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
@@ -311,6 +368,10 @@
                                         if (typeof evt.from.insertBefore === 'function') {
                                             evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
                                         }
+                                        if (statusSelect) {
+                                            statusSelect.value = evt.from.dataset.status;
+                                            statusSelect.setAttribute('data-current', evt.from.dataset.status);
+                                        }
                                         refreshColumnCounts();
                                         notify('error', result.data.message || 'Unable to update lead.');
                                         return;
@@ -325,7 +386,7 @@
                                     notify('error', 'Something went wrong.');
                                 });
                             }
-                        });
+                        }));
                     });
                 });
             </script>
@@ -335,8 +396,11 @@
                     document.querySelectorAll('.lead-card').forEach(function (card) {
                         card.style.cursor = 'default';
                     });
+                    if (window.CrmKanban && window.CrmKanban.initStageNav) {
+                        window.CrmKanban.initStageNav(document.querySelector('.crm-kanban'));
+                    }
                 });
             </script>
-        @endcan
+        @endif
     @endpush
 </x-app-layout>
