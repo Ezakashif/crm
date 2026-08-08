@@ -137,6 +137,38 @@ class PlatformSettingsEnforcementTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_log_mailer_is_not_overridden_by_platform_smtp_settings(): void
+    {
+        config(['mail.default' => 'log']);
+
+        app(PlatformSettingsService::class)->setMany([
+            'smtp_host' => 'smtp.example.com',
+            'smtp_port' => 587,
+            'smtp_username' => 'mailer@example.com',
+            'smtp_encryption' => 'tls',
+        ]);
+        app(PlatformSettingsService::class)->applyBranding();
+
+        $this->assertSame('log', config('mail.default'));
+    }
+
+    public function test_platform_smtp_settings_apply_when_mailer_is_smtp(): void
+    {
+        config(['mail.default' => 'smtp']);
+
+        app(PlatformSettingsService::class)->setMany([
+            'smtp_host' => 'smtp.example.com',
+            'smtp_port' => 587,
+            'smtp_username' => 'mailer@example.com',
+            'smtp_encryption' => 'tls',
+        ]);
+        app(PlatformSettingsService::class)->applyBranding();
+
+        $this->assertSame('smtp', config('mail.default'));
+        $this->assertSame('smtp.example.com', config('mail.mailers.smtp.host'));
+        $this->assertSame(5, config('mail.mailers.smtp.timeout'));
+    }
+
     public function test_super_admin_can_enable_and_disable_maintenance_mode(): void
     {
         $superAdmin = User::factory()->superAdmin()->create();

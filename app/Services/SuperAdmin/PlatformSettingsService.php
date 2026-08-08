@@ -208,7 +208,12 @@ class PlatformSettingsService
         }
 
         $smtpHost = $this->get('smtp_host');
-        if (filled($smtpHost)) {
+        // Env mailers like "log" / "array" win so broken Super Admin SMTP cannot
+        // hang auth requests (PHP fatal on SocketStream) in deploy environments.
+        $envMailer = (string) config('mail.default');
+        $envForcesNonSmtp = in_array(strtolower($envMailer), ['log', 'array'], true);
+
+        if (filled($smtpHost) && ! $envForcesNonSmtp) {
             $smtpHost = $this->normalizeSmtpHost((string) $smtpHost);
             $smtpEncryption = $this->get('smtp_encryption');
             config([
@@ -218,6 +223,8 @@ class PlatformSettingsService
                 'mail.mailers.smtp.username' => $this->get('smtp_username'),
                 'mail.mailers.smtp.password' => $this->getDecrypted('smtp_password'),
                 'mail.mailers.smtp.scheme' => $smtpEncryption === 'ssl' ? 'smtps' : null,
+                // Fail fast instead of hitting max_execution_time (uncaught FatalError).
+                'mail.mailers.smtp.timeout' => 5,
             ]);
         }
 
